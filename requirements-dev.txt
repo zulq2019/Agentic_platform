@@ -1,0 +1,7 @@
+# Dependencies
+
+```
+jsonschema>=4.23.0
+```
+
+Used by `scripts/validate_contract.py` for contract validation in CI.

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentic-engineering-platform/contracts/common-tool-responses.schema.json",
+  "title": "Common Tool Response Shapes",
+  "description": "Normalised response shapes agents consume regardless of underlying vendor. Reference: RA Section 7, ADR-007.",
+  "$defs": {
+    "pull_request": {
+      "type": "object",
+      "required": ["pr_id", "pr_url", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "pr_id": { "type": "string" },
+        "pr_url": { "type": "string", "format": "uri" },
+        "status": { "type": "string", "enum": ["open", "merged", "closed"] },
+        "branch": { "type": "string" }
+      }
+    },
+    "issue": {
+      "type": "object",
+      "required": ["issue_id", "issue_url", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "issue_id": { "type": "string" },
+        "issue_url": { "type": "string", "format": "uri" },
+        "status": { "type": "string" }
+      }
+    },
+    "test_report": {
+      "type": "object",
+      "required": ["passed", "total", "coverage_percent"],
+      "additionalProperties": false,
+      "properties": {
+        "passed": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "total": { "type": "integer", "minimum": 0 },
+        "coverage_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "report_url": { "type": "string", "format": "uri" }
+      }
+    },
+    "scan_findings": {
+      "type": "object",
+      "required": ["finding_count", "severity_summary"],
+      "additionalProperties": false,
+      "properties": {
+        "finding_count": { "type": "integer", "minimum": 0 },
+        "severity_summary": {
+          "type": "object",
+          "properties": {
+            "critical": { "type": "integer", "minimum": 0 },
+            "high": { "type": "integer", "minimum": 0 },
+            "medium": { "type": "integer", "minimum": 0 },
+            "low": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "report_url": { "type": "string", "format": "uri" }
+      }
+    }
+  }
+}

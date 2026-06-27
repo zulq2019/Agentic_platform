@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentic-engineering-platform/contracts/memory-schema.schema.json",
+  "title": "Memory Schema",
+  "description": "Long-term memory entry schema. Retrieval is never blind similarity search. Reference: RA Section 9.",
+  "type": "object",
+  "required": [
+    "memory_id",
+    "embedding",
+    "source_type",
+    "tenant_id",
+    "recency_weight",
+    "provenance",
+    "content"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "memory_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Stable identity for this memory entry."
+    },
+    "embedding": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 1,
+      "description": "Vector used for semantic similarity retrieval."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["standard", "adr", "incident", "codebase"],
+      "description": "Filter for retrieval by memory kind."
+    },
+    "tenant_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Enforces multi-tenancy isolation at the memory layer."
+    },
+    "recency_weight": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Lets newer decisions outrank stale ones without deleting history."
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["workflow_run_id", "task_id", "written_by"],
+      "additionalProperties": false,
+      "properties": {
+        "workflow_run_id": { "type": "string", "format": "uuid" },
+        "task_id": { "type": "string", "format": "uuid" },
+        "written_by": {
+          "type": "string",
+          "description": "agent_id or human identity that authored the write."
+        },
+        "written_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "content": {
+      "type": "string",
+      "description": "Human-readable memory content."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Structured metadata for filtered retrieval."
+    }
+  }
+}

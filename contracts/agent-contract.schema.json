@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentic-engineering-platform/contracts/agent-contract.schema.json",
+  "title": "Agent Contract",
+  "description": "Every specialist agent implements this contract shape. Uniformity enables plug-in extensibility without orchestrator changes. Reference: RA Section 6.",
+  "type": "object",
+  "required": [
+    "agent_id",
+    "capabilities",
+    "input_schema",
+    "output_schema",
+    "required_tools",
+    "cost_class",
+    "approval_required",
+    "idempotency_key_strategy",
+    "contract_version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Stable identity used in registry lookups and audit records.",
+      "examples": ["coding-agent-v2", "requirement-agent-v1"]
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+        "description": "Capability tags matched by Agent Selector."
+      },
+      "examples": [["generates-unit-tests", "runs-tests"]]
+    },
+    "input_schema": {
+      "type": "string",
+      "format": "uri-reference",
+      "description": "Reference to the JSON Schema for the context packet this agent expects (Task Schema context field)."
+    },
+    "output_schema": {
+      "type": "string",
+      "format": "uri-reference",
+      "description": "Reference to the JSON Schema for the result this agent publishes to the Event Bus."
+    },
+    "required_tools": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+        "description": "Tool capability tags resolved via Tool Registry before execution."
+      },
+      "examples": [["create-pull-request", "read-repository"]]
+    },
+    "cost_class": {
+      "type": "string",
+      "enum": ["low", "medium", "high"],
+      "description": "Default hint to the Model Router. Overridable per task."
+    },
+    "approval_required": {
+      "type": "boolean",
+      "description": "Whether this agent's output must pass a Human Approval Checkpoint before the next state transition."
+    },
+    "idempotency_key_strategy": {
+      "type": "string",
+      "enum": [
+        "task_id",
+        "task_id+branch_name",
+        "task_id+workflow_run_id",
+        "custom"
+      ],
+      "description": "Strategy for ensuring retried invocations do not duplicate side effects."
+    },
+    "contract_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Platform Agent Contract version this agent was built against.",
+      "examples": ["1.0.0"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description for registry display."
+    },
+    "certification": {
+      "type": "object",
+      "description": "Partner agent certification metadata (GA phase).",
+      "properties": {
+        "certified": { "type": "boolean" },
+        "certified_by": { "type": "string" },
+        "certified_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

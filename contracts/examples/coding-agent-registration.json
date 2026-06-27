@@ -1,0 +1,12 @@
+{
+  "agent_id": "coding-agent-v1",
+  "capabilities": ["generates-code", "creates-pull-request"],
+  "input_schema": "schemas/agents/coding-agent-input.schema.json",
+  "output_schema": "schemas/agents/coding-agent-output.schema.json",
+  "required_tools": ["create-pull-request", "read-repository"],
+  "cost_class": "medium",
+  "approval_required": false,
+  "idempotency_key_strategy": "task_id+branch_name",
+  "contract_version": "1.0.0",
+  "description": "Generates code from architecture artifacts and creates pull requests."
+}

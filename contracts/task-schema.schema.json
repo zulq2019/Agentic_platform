@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentic-engineering-platform/contracts/task-schema.schema.json",
+  "title": "Task Schema",
+  "description": "Unit of work passed between the orchestrator and any specialist agent. Reference: RA Section 8.",
+  "type": "object",
+  "required": [
+    "task_id",
+    "workflow_run_id",
+    "workflow_type",
+    "workflow_template_version",
+    "tenant_id",
+    "context",
+    "assigned_agent_id",
+    "state",
+    "retry_count",
+    "approval_record"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Correlates this task across events, logs, and audit records."
+    },
+    "workflow_run_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "End-to-end workflow instance this task belongs to."
+    },
+    "workflow_type": {
+      "type": "string",
+      "enum": [
+        "greenfield-product-development",
+        "brownfield-modernization",
+        "production-defect-resolution",
+        "feature-enhancement",
+        "security-remediation",
+        "technical-debt-reduction",
+        "legacy-migration",
+        "release-management"
+      ],
+      "description": "Selects the state machine template."
+    },
+    "workflow_template_version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$",
+      "description": "Version of the workflow template loaded at workflow start.",
+      "examples": ["v1.0.0"]
+    },
+    "tenant_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Tenant isolation boundary."
+    },
+    "context": {
+      "type": "object",
+      "description": "Working-context packet assembled by the Context Assembler.",
+      "additionalProperties": true
+    },
+    "assigned_agent_id": {
+      "type": "string",
+      "description": "Resolved by Agent Selector against the Agent Registry."
+    },
+    "state": {
+      "type": "string",
+      "description": "Current position in the workflow state machine."
+    },
+    "retry_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Drives Retry and Compensation Manager escalation."
+    },
+    "approval_record": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/approval_record" }
+      ],
+      "description": "Populated only once a Human Approval Checkpoint has been satisfied."
+    },
+    "model_tier": {
+      "type": "string",
+      "enum": ["low", "medium", "high"],
+      "description": "Model tier assigned by Cost-Aware Dispatcher for this task."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "approval_record": {
+      "type": "object",
+      "required": ["approver", "timestamp", "decision", "reviewed"],
+      "additionalProperties": false,
+      "properties": {
+        "approver": {
+          "type": "string",
+          "format": "email",
+          "description": "Named approver. Anonymous or system values are forbidden."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "decision": {
+          "type": "string",
+          "enum": ["granted", "denied"]
+        },
+        "reviewed": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Artifacts the approver reviewed."
+        },
+        "feedback": {
+          "type": "string",
+          "description": "Denial feedback used for revision task context."
+        },
+        "gate_id": {
+          "type": "string",
+          "description": "Identifier of the gate that was satisfied."
+        }
+      }
+    }
+  }
+}

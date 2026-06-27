@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentic-engineering-platform/contracts/tool-contract.schema.json",
+  "title": "Tool Contract",
+  "description": "Every external system integration is wrapped identically via this contract. Reference: RA Section 7.",
+  "type": "object",
+  "required": [
+    "tool_id",
+    "capability_tags",
+    "auth_strategy",
+    "scope",
+    "rate_limit_policy",
+    "response_normaliser",
+    "contract_version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "tool_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Stable identity, e.g. github-prod or azure-devops-tenant-a.",
+      "examples": ["github-prod", "jira-tenant-a"]
+    },
+    "capability_tags": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+        "description": "What an agent requests; resolved to this concrete tool."
+      },
+      "examples": [["create-pull-request", "read-repository"]]
+    },
+    "auth_strategy": {
+      "type": "string",
+      "enum": ["oauth", "pat", "managed-identity"],
+      "description": "How the Secrets Vault issues a scoped, short-lived credential."
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["read", "write", "admin"],
+      "description": "Least-privilege ceiling enforced regardless of underlying credential capability."
+    },
+    "rate_limit_policy": {
+      "type": "object",
+      "required": ["max_requests", "window_seconds", "scope"],
+      "additionalProperties": false,
+      "properties": {
+        "max_requests": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum requests allowed in the window."
+        },
+        "window_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Time window in seconds."
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["per-tenant", "per-tool", "global"],
+          "description": "Rate limit scope."
+        }
+      }
+    },
+    "response_normaliser": {
+      "type": "string",
+      "description": "Identifier for the function that maps vendor-specific responses to a common shape."
+    },
+    "contract_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "examples": ["1.0.0"]
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant this tool instance is configured for, if tenant-specific."
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}

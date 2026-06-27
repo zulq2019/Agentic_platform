@@ -1,0 +1,79 @@
+{
+  "workflow_type": "greenfield-product-development",
+  "version": "v1.0.0",
+  "description": "Greenfield product development workflow. Gates protect decisions before work is built on them. Reference: RA Section 11.1.",
+  "initial_state": "Scoped",
+  "terminal_states": ["Released", "Failed", "Cancelled"],
+  "states": [
+    {
+      "name": "Scoped",
+      "required_capability": "generates-requirements",
+      "gate": {
+        "id": "scope-approval",
+        "name": "Product Owner approves scope",
+        "strategy": "open-ended",
+        "required_role": "product-owner"
+      },
+      "transitions_to": "Architected"
+    },
+    {
+      "name": "Architected",
+      "required_capability": "designs-architecture",
+      "gate": {
+        "id": "architecture-approval",
+        "name": "Tech Lead approves architecture",
+        "strategy": "open-ended",
+        "required_role": "tech-lead"
+      },
+      "transitions_to": "Implemented"
+    },
+    {
+      "name": "Implemented",
+      "required_capability": "generates-code",
+      "transitions_to": "Tested"
+    },
+    {
+      "name": "Tested",
+      "required_capability": "generates-unit-tests",
+      "transitions_to": "Scanned"
+    },
+    {
+      "name": "Scanned",
+      "required_capability": "scans-dependencies",
+      "gate": {
+        "id": "merge-approval",
+        "name": "Senior Engineer merges (exceptions only)",
+        "strategy": "open-ended",
+        "required_role": "senior-engineer"
+      },
+      "transitions_to": "Merged"
+    },
+    {
+      "name": "Merged",
+      "required_capability": "prepares-release",
+      "gate": {
+        "id": "release-approval",
+        "name": "Release Manager final sign-off",
+        "strategy": "open-ended",
+        "required_role": "release-manager"
+      },
+      "transitions_to": "Released"
+    }
+  ],
+  "context_handoff": {
+    "Scoped": ["stories", "acceptance_criteria"],
+    "Architected": ["adrs", "api_contracts"],
+    "Implemented": ["diff", "pr_url"],
+    "Tested": ["coverage_report"],
+    "Scanned": ["scan_findings"]
+  },
+  "rollback_strategy": {
+    "pre_merge": "discard_branch",
+    "post_release": "ci_cd_rollback_to_prior_artifact"
+  },
+  "success_criteria": [
+    "cycle_time_scope_to_release_candidate",
+    "prs_merged_without_human_found_defects",
+    "zero_unreviewed_code_in_production"
+  ]
+}

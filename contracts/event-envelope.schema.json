@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentic-engineering-platform/contracts/event-envelope.schema.json",
+  "title": "Event Envelope",
+  "description": "Every event on the bus follows this envelope shape. Reference: RA Section 10.",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_type",
+    "timestamp",
+    "task_id",
+    "workflow_run_id",
+    "tenant_id",
+    "emitted_by",
+    "payload"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "TaskCreated",
+        "AgentStarted",
+        "AgentCompleted",
+        "AgentFailed",
+        "ApprovalRequested",
+        "ApprovalGranted",
+        "ApprovalDenied",
+        "StateTransitioned",
+        "RollbackTriggered"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "task_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "workflow_run_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "tenant_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "emitted_by": {
+      "type": "string",
+      "minLength": 1,
+      "description": "agent_id or service name. Always attributable, never anonymous."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Event-type-specific body."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "event_type": { "const": "StateTransitioned" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["from_state", "to_state"],
+            "properties": {
+              "from_state": { "type": "string" },
+              "to_state": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "event_type": { "const": "AgentFailed" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["error_code", "error_message", "retry_count"],
+            "properties": {
+              "error_code": { "type": "string" },
+              "error_message": { "type": "string" },
+              "retry_count": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "event_type": { "const": "RollbackTriggered" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["reason", "revert_target"],
+            "properties": {
+              "reason": { "type": "string" },
+              "revert_target": { "type": "string" },
+              "automatic": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "event_type": { "const": "ApprovalDenied" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["approver", "feedback"],
+            "properties": {
+              "approver": { "type": "string", "format": "email" },
+              "feedback": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
