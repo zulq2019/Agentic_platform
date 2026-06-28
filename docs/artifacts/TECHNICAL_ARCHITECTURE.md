@@ -1594,6 +1594,103 @@ flowchart TB
 
 ---
 
+## 26. Tools & Pricing
+
+### Free / Open Source (Self-Hosted)
+
+| Tool | Use in Platform | License |
+|------|----------------|---------|
+| **Apache Kafka** | Event bus — sole inter-service communication channel | Apache 2.0 |
+| **PostgreSQL 16** | OLTP database — all transactional data + RLS | PostgreSQL License |
+| **pgvector** | Long-term memory / vector similarity search | MIT |
+| **Redis** | Working context cache + distributed locks + quota counters | BSD-3 |
+| **HashiCorp Vault** (OSS) | Secrets management — self-hosted | BUSL 1.1 (free self-hosted) |
+| **Kubernetes** | Container orchestration | Apache 2.0 |
+| **Helm** | Kubernetes package manager | Apache 2.0 |
+| **Terraform** | Infrastructure as code — multi-cloud | BUSL 1.1 (free self-hosted) |
+| **Prometheus** | Metrics collection + alerting | Apache 2.0 |
+| **Grafana** | Dashboards (5 audience views) | AGPL-3.0 |
+| **Grafana Loki** | Log aggregation | AGPL-3.0 |
+| **Grafana Tempo** | Distributed tracing | AGPL-3.0 |
+| **OpenTelemetry** | Observability SDK — auto-instrumentation | Apache 2.0 |
+| **OPA (Open Policy Agent)** | Policy engine — agent action governance | Apache 2.0 |
+| **Istio** | Service mesh — mTLS east-west traffic | Apache 2.0 |
+| **NGINX** | Kubernetes ingress controller | BSD-2 |
+| **Kong** (OSS) | API gateway — rate limiting, routing, auth | Apache 2.0 |
+| **ClickHouse** (self-hosted) | Append-only audit log + analytics | Apache 2.0 |
+| **React** | Frontend dashboard | MIT |
+| **FastAPI** | Python microservices framework | MIT |
+| **Go / Echo** | API gateway service | MIT |
+| **Langfuse** (self-hosted) | LLM observability — token cost tracking | MIT |
+
+---
+
+### Paid / Has a Cost
+
+| Tool | Use in Platform | Pricing Model | Est. Monthly (MVP) |
+|------|----------------|---------------|-------------------|
+| **Claude API (Anthropic)** | LLM powering all 15 agents | Per token — $3–$15 per 1M tokens | $200–$2,000+ |
+| **GitHub** | Source control + GitHub Actions CI | Free public; $4–$21/user/month private | $20–$100 |
+| **Azure AKS / AWS EKS** | Managed Kubernetes cluster | VMs + ~$0.10/hour cluster fee | $200–$500 |
+| **Aurora PostgreSQL** | Managed HA database (Multi-AZ) | ~$0.10–$0.30/hour per instance | $100–$300 |
+| **Redis Enterprise** | Managed Redis cluster (HA) | ~$0.088/hour+ | $60–$200 |
+| **AWS MSK / Azure Event Hubs** | Managed Kafka | ~$0.015/hour + data transfer | $100–$300 |
+| **HashiCorp Vault (HCP)** | Managed Vault HA — optional upgrade | ~$0.03/secret/month | $50–$150 |
+| **ClickHouse Cloud** | Managed audit store — optional upgrade | Pay-per-compute + storage | $50–$200 |
+| **Langfuse** (cloud) | LLM observability — cloud option | Free tier; paid from $20/month | $0–$50 |
+| **Jira / Confluence** | Issue tracker + documentation tool | $7.75–$15.25/user/month | $100–$500 |
+| **Snyk** | Security scanning — tool connector | Free tier; paid from $25/month | $0–$100 |
+| **SonarQube** (cloud) | Code quality — tool connector | Free OSS; paid private repos | $0–$150 |
+| **Datadog / Dynatrace** | Optional observability backend | $15–$30/host/month | Optional |
+| **CloudFlare / Azure Front Door** | Edge WAF + CDN + DDoS protection | $20/month+ | $20–$100 |
+
+---
+
+### Cost by Deployment Phase
+
+| Phase | Infrastructure Approach | Estimated Monthly Cost |
+|-------|------------------------|----------------------|
+| **Development / MVP** | All self-hosted on Minikube or k3s, OSS Vault, self-hosted Kafka, no managed services | ~$50–$200 (VMs only) |
+| **Alpha** (5 tenants) | Move to managed PostgreSQL + Redis; self-hosted Kafka; 3-node cluster | ~$500–$1,000 |
+| **Beta** (20 tenants) | Add managed Kafka (MSK / Event Hubs), ClickHouse Cloud, HCP Vault | ~$2,000–$5,000 |
+| **Enterprise GA** (100+ tenants) | Full managed stack, multi-region, dedicated node pools | ~$15,000–$50,000 |
+
+> **Dominant cost driver:** The **Claude API** is the single largest ongoing expense and scales directly with workflow volume. Every other line item is infrastructure. Optimise model tier routing (Section 24) to route routine tasks to lower-cost tiers — this can reduce LLM spend by 40–60%.
+
+---
+
+### Cost Minimisation Strategy
+
+```mermaid
+flowchart LR
+    subgraph low [Low Tier - cheapest model]
+        L1[Test scaffolding]
+        L2[Documentation generation]
+        L3[Code formatting checks]
+        L4[Dependency analysis]
+    end
+
+    subgraph med [Medium Tier]
+        M1[Feature development]
+        M2[Code review]
+        M3[Regression testing]
+        M4[Migration planning]
+    end
+
+    subgraph high [High Tier - most capable model]
+        H1[Architecture design]
+        H2[Security-critical analysis]
+        H3[Incident root cause]
+        H4[Release gate decisions]
+    end
+
+    ROUTER[model-router\nroutes by cost_class\n+ task complexity] --> low & med & high
+```
+
+All tool and infrastructure costs above are estimates as of mid-2026. Check vendor pricing pages for current rates before budgeting.
+
+---
+
 ## Document Relationships
 
 | Document | Role |
