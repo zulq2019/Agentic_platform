@@ -1,7 +1,7 @@
 # implement-story.md
 
 **Command:** `implement-story`  
-**Version:** 2.0  
+**Version:** 3.0  
 **Library:** `.ai/commands/`  
 **Applies to:** All PIs, all sprints
 
@@ -11,244 +11,332 @@
 
 Use this command to implement a single User Story from specification to production-ready code.
 
-Read the required context. Verify dependencies. Plan. Code. Self-check. Stop.
+This command is the standard implementation workflow for every engineer and every AI coding agent working on the Agentic Engineering Platform. It is capability-driven, infrastructure-aware, and implementation-focused.
 
-Review, security review, performance review, and release activities are separate commands with their own entry points. This command does not invoke them.
+Execute every phase in order. Do not skip phases. Do not combine phases.
 
 One execution = one User Story. Never more.
 
 ---
 
-## Inputs
+## Phase 1 — Read Context
 
-Read all of the following before writing a single line of code. Do not proceed if any mandatory input is missing.
+Read every item in this list before doing anything else. Stop and report what is missing if any mandatory input cannot be found.
 
 | Input | Location | Required |
 |-------|----------|----------|
 | Constitution | `CONSTITUTION.md` | Mandatory |
 | Architecture | `ARCHITECTURE.md` | Mandatory |
+| AI implementation rules | `CLAUDE.md` | Mandatory |
 | PI README | `docs/04-program/{PI}/README.md` | Mandatory |
-| Capabilities | `docs/04-program/{PI}/CAPABILITIES.md` — capability for this story | Mandatory |
-| User Story | `docs/04-program/{PI}/USER_STORIES.md` — target story only | Mandatory |
-| Acceptance Criteria | `docs/04-program/{PI}/ACCEPTANCE_CRITERIA.md` — target story only | Mandatory |
+| Capabilities | `docs/04-program/{PI}/CAPABILITIES.md` | Mandatory |
+| User Stories | `docs/04-program/{PI}/USER_STORIES.md` | Mandatory |
+| Acceptance Criteria | `docs/04-program/{PI}/ACCEPTANCE_CRITERIA.md` | Mandatory |
 | Implementation Guide | `docs/04-program/{PI}/IMPLEMENTATION.md` | Mandatory |
-| Contract Schemas | `contracts/` — schemas relevant to this story | If story produces/consumes events or registers an agent or tool |
-| ADRs | `DECISIONS.md` — decisions applicable to this story | If available |
+| Prompt Mapping | `docs/04-program/{PI}/PROMPT_MAPPING.md` | Mandatory |
+| Contract schemas | `contracts/` — schemas relevant to this story | If story produces or consumes events, registers an agent or tool |
+| Existing implementation | `src/{target_folder}/` — code already written for this service | If the service has been started in a prior story |
 
-**Substitutions required:**
+**Substitutions required before executing:**
 
 ```
-{PI}            = e.g. PI-01-Platform-Spine
-{story_id}      = e.g. US-01.03
-{service_name}  = e.g. orchestrator-service
-{target_folder} = e.g. src/platform/orchestrator/
+{PI}            = e.g. PI-02-Agent-Runtime
+{story_id}      = e.g. US-02.03
+{service_name}  = e.g. agent-registry-service
+{target_folder} = e.g. src/platform/registry/
 ```
+
+**Stop condition:** If any mandatory input is missing, report exactly which document is missing and why it is needed. Do not proceed.
 
 ---
 
-## Preconditions
+## Phase 2 — Understand the Story
 
-Verify these before proceeding:
+Extract and state the following before any planning or coding begins:
 
-- [ ] The PI this story belongs to has status `IN PROGRESS`
-- [ ] All stories this story depends on are marked complete in `SPRINT_PLAN.md`
-- [ ] The target folder exists in `src/`
-- [ ] No other story is in progress in this session
+```
+Story ID:           {story_id}
+Story title:        {story_title}
+Capability:         {CAP-XX} — {capability_name}
+Sprint:             Sprint {N}
+PI:                 {PI}
+
+Dependencies:
+  Stories:          {list of story IDs that must be complete first, or NONE}
+  Infrastructure:   {list of infrastructure components this story assumes exist}
+
+Acceptance Criteria:
+  AC-{n}: {Given / When / Then}
+  AC-{n}: ...
+
+Definition of Done:
+  → docs/04-program/{PI}/DEFINITION_OF_DONE.md — Story-Level Gate
+```
+
+**Confirm:** Only one User Story is being implemented. If the scope covers more than one story, stop and state which story to implement first.
+
+**Verify dependencies:** Check `SPRINT_PLAN.md`. If any story listed as a dependency is not complete, stop and report the blocking dependency.
 
 ---
 
-## Execution Steps
+## Phase 3 — Infrastructure Assessment
 
-Execute in this exact order. Do not skip. Do not reorder.
+Before writing any code, determine which infrastructure components are required by this story specifically. Write the result to `docs/04-program/{PI}/INFRASTRUCTURE.md` under a section for `{story_id}`.
 
-### Step 1 — Read and identify constitutional constraints
+### Assessment table
 
-Read `CONSTITUTION.md`. List every principle that applies to this story before touching code.
+Evaluate each component:
 
-Common constraints to check:
+| Component | Required for this story | Already Exists | Action |
+|-----------|------------------------|----------------|--------|
+| Docker Compose | Yes / No | Yes / No / N/A | Use existing / Configure / Add service / Defer |
+| PostgreSQL | Yes / No | Yes / No / N/A | Use existing / Add migration / Defer |
+| Kafka | Yes / No | Yes / No / N/A | Use existing / Add topic / Defer |
+| Redis | Yes / No | Yes / No / N/A | Use existing / Add key schema / Defer |
+| OpenTelemetry | Yes / No | Yes / No / N/A | Use existing / Wire to service / Defer |
+| Prometheus | Yes / No | Yes / No / N/A | Use existing / Add scrape config / Defer |
+| Grafana | Yes / No | Yes / No / N/A | Use existing / Add dashboard / Defer |
+| GitHub Actions | Yes / No | Yes / No / N/A | Use existing / Add step / Defer |
+| Vault | Yes / No | Yes / No / N/A | Use existing / Register secret / Defer |
+| Kubernetes | Yes / No | Yes / No / N/A | Use existing / Add manifest / Defer |
 
-| Principle | Rule |
-|-----------|------|
-| A1 | Agents never call agents directly |
-| A2 | Orchestrator plans only — no specialist logic |
-| A4 | Event bus is the only inter-container communication path |
-| S1 | RBAC, Policy, Secrets are three separate services |
-| SR1 | No credentials in code — always environment variables |
-| SR3 | Tenant ID in every data query |
-| H2 | No gate bypass mechanism |
+### Infrastructure rules
 
-### Step 2 — Read architecture and locate the service boundary
+- **Only provision or configure infrastructure required for the current story.** If a component is not needed to satisfy the acceptance criteria, mark it Defer.
+- **Do not introduce infrastructure because it may be needed later.** Future stories will assess their own infrastructure needs.
+- **Do not remove existing infrastructure.** Mark it as already existing and used, or note it is not needed for this story.
+- If a required component does not yet exist, add only the minimum configuration needed for this story to pass its acceptance criteria.
 
-Read `ARCHITECTURE.md`. Confirm:
-- Which service owns this story
-- Which Kafka topics this service produces and consumes
-- Which registries this service calls (agent registry, tool registry — lookup only, no direct business calls)
+**Stop condition:** If the required infrastructure cannot be determined from the story's acceptance criteria and capability definition, clarify before proceeding.
 
-### Step 3 — Read the capability
+---
 
-Read the capability section in `CAPABILITIES.md` that this story belongs to. The capability defines the technical contracts, schemas, and sequences the implementation must satisfy.
+## Phase 4 — Implementation Plan
 
-### Step 4 — Read the acceptance criteria
-
-Read the acceptance criteria for `{story_id}` in `ACCEPTANCE_CRITERIA.md`. Write out each Given/When/Then criterion. Every criterion needs a corresponding test.
-
-### Step 5 — Read the implementation guide
-
-Read `IMPLEMENTATION.md`. Use the patterns it defines exactly — directory layout, dependency injection, error handling, logging, configuration. Do not invent new patterns.
-
-### Step 6 — Produce a short implementation plan
-
-Before writing code, state:
+Produce a short, focused plan. Do not over-design. Every item in the plan must be traceable to a specific acceptance criterion or infrastructure requirement.
 
 ```
-Story:          {story_id} — {story_title}
-Service:        {service_name}
-Target folder:  {target_folder}
+## Implementation Plan: {story_id} — {story_title}
 
-Files to create:
-  - {path}: {purpose}
+### Files to create
+- {path}: {purpose and which AC it serves}
 
-Files to modify:
-  - {path}: {what changes}
+### Files to modify
+- {path}: {what changes and why}
 
-Constitutional constraints that apply:
-  - {principle_id}: {how it is enforced}
+### Package structure
+{only if new packages or modules are introduced}
 
-Acceptance criteria to satisfy:
-  - AC-{n}: {how the implementation satisfies it}
-  - AC-{n}: ...
+### APIs
+{list any new HTTP endpoints — method, path, purpose}
+{NONE if story produces no endpoints}
+
+### Events
+{list any new Kafka topics or event types — topic name, producer, consumer}
+{NONE if story produces no events}
+
+### Infrastructure changes
+{reference the Infrastructure Assessment table — what is being added or configured}
+
+### External dependencies
+{any new pyproject.toml or go.mod entries required}
+
+### Constitutional constraints that apply
+- {principle_id}: {how compliance is enforced in this implementation}
 ```
 
-Do not proceed to Step 7 until this plan is confirmed correct.
+Do not proceed to Phase 5 until this plan is confirmed correct.
 
-### Step 7 — Implement
+---
 
-Write production code in `{target_folder}` following the patterns from `IMPLEMENTATION.md`.
+## Phase 5 — Production Implementation
 
-Non-negotiable rules:
+Implement exactly what is in the approved plan. Nothing more.
 
+### Code standards (non-negotiable)
+
+**Architecture:**
+- All inter-service communication via Kafka using `aep_common.kafka` — no direct HTTP calls between services
+- All database queries include `tenant_id` — RLS enforced at the storage layer
+- No vendor SDK imports in agent or tool code — all external tools accessed via Tool Registry
+
+**Configuration:**
 - All configuration from environment variables via Pydantic Settings
-- All inter-service communication via Kafka using `aep_common.kafka`
-- All database queries include `tenant_id`
-- All log lines include `task_id`, `workflow_run_id`, `tenant_id` via `aep_common.logging`
-- No vendor SDK imports in agent or tool code
-- No hardcoded strings that should be configuration
-- No silent exception handling — all errors typed and logged
+- No hardcoded values — credentials, URLs, tenant IDs, topic names
+
+**Error handling:**
+- All exceptions are typed — no bare `except:` or `except Exception: pass`
+- All errors are logged with structured context before re-raising or returning
+- Agent and tool failures publish `AgentFailed` or `ToolFailed` events — no silent failures
+
+**Logging:**
+- All log lines use `aep_common.logging`
+- Every log line in task context includes `task_id`, `workflow_run_id`, `tenant_id`
+- No `print()` statements in production code
+
+**Observability:**
+- Every new public method in `domain/` is wrapped in an OTEL trace span:
+  ```python
+  from aep_common.tracing import get_tracer
+  tracer = get_tracer(__name__)
+
+  with tracer.start_as_current_span("method_name") as span:
+      span.set_attribute("task_id", str(task_id))
+      span.set_attribute("tenant_id", tenant_id)
+  ```
+- Every new service exposes: request count counter, request duration histogram, error rate counter
+
+**Code quality:**
 - Type hints on every function signature
-- Docstrings on public methods explain intent, not mechanics
+- Docstrings on public methods describe intent — not mechanics
+- No `TODO`, `FIXME`, or `HACK` in production code paths
+- No placeholder implementations
 
-Wire observability on every new public domain method:
+### Tests
 
-```python
-from aep_common.tracing import get_tracer
-tracer = get_tracer(__name__)
+Write tests alongside the implementation:
 
-with tracer.start_as_current_span("method_name") as span:
-    span.set_attribute("task_id", str(task_id))
-    span.set_attribute("tenant_id", tenant_id)
-```
+- **Unit tests** — one test file per `domain/` module, happy path and at least two edge cases per method
+- **Integration test** — end-to-end test for the primary flow through this story
+- **Acceptance tests** — one test per Given/When/Then criterion, named `test_ac_{criterion_id}_{description}`
+- **Isolation test** — cross-tenant query returns 0 rows, if the story touches data
 
-Every new service emits at minimum: request count counter, request duration histogram, error rate counter.
+Every test must fail when the code it tests is removed. No vacuous assertions.
 
-### Step 8 — Write tests
+---
 
-Write tests alongside the implementation — not after:
+## Phase 6 — Self Validation
 
-- Unit test for every public method in `domain/` — happy path and at least two edge cases
-- Integration test for the primary event flow
-- One acceptance test per Given/When/Then criterion — test name must reference the criterion ID
-- Cross-tenant isolation test if the story touches data
+Work through each validation category before declaring the story complete.
 
-Tests must actually fail when the code they test is removed. No vacuous assertions.
+### Acceptance criteria
 
-### Step 9 — Self-check against acceptance criteria
-
-For each acceptance criterion defined in Step 4:
+For each criterion defined in Phase 2:
 
 ```
 AC-{n}: {criterion text}
-  Implementation: {which file/method satisfies it}
-  Test:           {which test file and test name covers it}
-  Status:         SATISFIED | NOT SATISFIED
+  Satisfied by: {file and method}
+  Tested by:    {test file and test function name}
+  Status:       SATISFIED | NOT SATISFIED
 ```
 
-If any criterion is NOT SATISFIED, return to Step 7. Do not mark the story complete.
+If any criterion is NOT SATISFIED, return to Phase 5.
 
-**Stop here.** The story is complete when all acceptance criteria are satisfied and all tests pass.
+### Definition of Done — Story-Level Gate
+
+Work through every item in the Story-Level Gate section of `docs/04-program/{PI}/DEFINITION_OF_DONE.md`:
+
+```
+[ ] Architecture — no direct HTTP calls between services
+[ ] Architecture — config from environment variables only
+[ ] Architecture — no hardcoded credentials
+[ ] Database — tenant_id in every query (if applicable)
+[ ] Database — RLS policy on every new table (if applicable)
+[ ] Database — migration has downgrade() (if applicable)
+[ ] Kafka — offset committed after successful processing (if applicable)
+[ ] Kafka — failed messages routed to DLQ (if applicable)
+[ ] Code quality — ruff check exits 0
+[ ] Code quality — black --check exits 0
+[ ] Code quality — mypy --strict exits 0
+[ ] Code quality — no TODO/FIXME in production paths
+[ ] Testing — unit coverage >= 80% on new code
+[ ] Testing — acceptance test for every AC criterion
+[ ] Security — detect-secrets finds zero new secrets
+[ ] Security — non-root user in Dockerfile (if applicable)
+[ ] Documentation — .env.example updated for new variables
+```
+
+### Contract compliance
+
+If the story produces or consumes events:
+- [ ] Every published message validates against `contracts/event-envelope.schema.json`
+- [ ] Event type follows PascalCase convention
+- [ ] Topic name follows `aep.{domain}.{event-type-kebab}` convention
+
+If the story registers an agent or tool:
+- [ ] Registration validates against the relevant contract schema in `contracts/`
+
+### Architecture compliance
+
+- [ ] No agent calls another agent directly (Constitution A1)
+- [ ] No specialist logic added to `orchestrator-service` (Constitution A2)
+- [ ] No gate bypass mechanism introduced (Constitution H2)
+- [ ] `tenant_id` present in all data queries and Kafka messages (Constitution SR3)
+
+**Stop condition:** Report every unmet criterion with the specific file and line that needs to change. Do not declare complete with unmet criteria.
 
 ---
 
-## Expected Outputs
+## Phase 7 — Handoff
 
-| Artifact | Location |
-|----------|----------|
-| Production code | `src/{target_folder}/` |
-| Unit tests | `src/tests/unit/{service_name}/` |
-| Integration test | `src/tests/integration/{service_name}/` |
-| Acceptance tests | `src/tests/integration/{service_name}/` |
-| Updated `.env.example` | Service root — any new environment variables |
+Produce this summary when all Phase 6 checks pass:
+
+```
+## Implementation Summary: {story_id} — {story_title}
+
+### Files created
+- {path}: {one-line description}
+
+### Files modified
+- {path}: {what changed}
+
+### Infrastructure added
+- {component}: {what was configured and why}
+
+### Infrastructure deferred
+- {component}: {why it was not needed for this story}
+
+### Commands to run
+  # Install / build
+  {command}
+
+  # Run migrations (if applicable)
+  {command}
+
+  # Run tests
+  pytest src/tests/unit/{service_name}/ -v --cov={target_folder}
+  pytest src/tests/integration/{service_name}/ -v
+
+  # Lint and type check
+  ruff check src/{target_folder}/
+  black --check src/{target_folder}/
+  mypy --strict src/{target_folder}/
+
+### Known limitations
+{anything the implementation does not cover that a reviewer should know}
+{NONE if there are no limitations}
+
+### Recommended next story
+{story_id from SPRINT_PLAN.md that logically follows this one}
+```
 
 ---
 
-## Quality Gates
+## Engineering Rules
 
-Before declaring the story complete, verify:
-
-**Constitutional:**
-- [ ] No agent calls another agent directly
-- [ ] No business logic added to the orchestrator
-- [ ] No credentials hardcoded
-- [ ] All database queries include `tenant_id`
-- [ ] No gate bypass mechanism introduced
-- [ ] All Kafka messages validate against `contracts/event-envelope.schema.json`
-
-**Code:**
-- [ ] `ruff check src/` exits 0
-- [ ] `black --check src/` exits 0
-- [ ] `mypy --strict src/{target_folder}/` exits 0
-- [ ] No `TODO`, `FIXME`, or `print()` in production code
-
-**Tests:**
-- [ ] Every acceptance criterion has a corresponding test
-- [ ] Unit test coverage ≥ 80% on new code
-- [ ] Cross-tenant isolation test present if story touches data
-
-**Observability:**
-- [ ] OTEL trace spans on new domain methods
-- [ ] Prometheus metrics emitted
-- [ ] Structured logs include `task_id`, `workflow_run_id`, `tenant_id`
-
----
-
-## Completion Checklist
-
-```
-[ ] Constitution read — applicable principles listed
-[ ] Architecture read — service boundary confirmed
-[ ] Capability read — technical contracts understood
-[ ] Acceptance criteria read — all criteria documented
-[ ] Implementation guide read — patterns understood
-[ ] Implementation plan produced and confirmed
-[ ] Production code written
-[ ] Observability wired
-[ ] Tests written — unit, integration, acceptance
-[ ] Self-check complete — all AC criteria satisfied
-[ ] No unrelated files modified
-```
+- Never redesign the architecture
+- Never modify `CONSTITUTION.md`, `ARCHITECTURE.md`, `CLAUDE.md`, or any PI document
+- Never introduce new platform capabilities not defined in `CAPABILITIES.md`
+- Never implement more than one story per execution
+- Never provision infrastructure not required by the current story's acceptance criteria
+- Never generate placeholder code or leave `TODO` comments in production paths
+- Always produce production-ready code — assume Principal Engineer review
+- Always optimise for maintainability over speed
+- Always stop and report when a required input is missing or a dependency is unmet
 
 ---
 
 ## Forbidden Actions
 
-- Implement more than one User Story per execution
-- Redesign the architecture or change service boundaries
-- Modify `CONSTITUTION.md`, `ARCHITECTURE.md`, `CLAUDE.md`, or any PI documentation
-- Add a bypass mechanism for any human gate
+- Implement more than one User Story
+- Skip any phase
+- Proceed past a Stop condition without resolving it
+- Add infrastructure "for later" — every infrastructure decision must trace to an acceptance criterion
 - Import vendor SDKs in agent or tool code
-- Hardcode credentials, URLs, or tenant IDs
-- Generate placeholder code or `# TODO: implement` in production paths
-- Silently catch exceptions
-- Skip tests
-- Add a new inter-service HTTP call
-- Modify a contract schema without creating an ADR
-- Invoke `review-story.md`, `security-review.md`, `performance-review.md`, or `release-story.md` — those are separate commands
+- Hardcode credentials, URLs, topic names, or tenant IDs
+- Silent exception handling
+- Placeholder implementations or stubs
+- Add a new direct HTTP call between services
+- Modify a contract schema without an ADR
+- Omit type hints or use `any` in TypeScript
+- Invoke `review-story.md`, `security-review.md`, `performance-review.md`, or `release-story.md` — those are separate commands run after this one completes
