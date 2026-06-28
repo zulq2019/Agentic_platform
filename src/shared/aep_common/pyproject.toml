@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aep-common"
+version = "0.1.0"
+description = "Shared utilities for Agentic Engineering Platform services"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.110.0",
+    "prometheus-client>=0.20.0",
+    "pydantic>=2.6.0",
+    "pydantic-settings>=2.2.0",
+    "structlog>=24.1.0",
+]
+
+[project.optional-dependencies]
+health = [
+    "asyncpg>=0.29.0",
+    "redis>=5.0.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["aep_common"]
