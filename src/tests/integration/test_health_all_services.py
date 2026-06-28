@@ -37,7 +37,9 @@ def test_ac_01_01_health_live_returns_200(service_name, port, requires_stack):
 @pytest.mark.story_us_01_01
 @pytest.mark.integration
 @pytest.mark.parametrize("service_name,port", ALL_SERVICES)
-def test_health_ready_returns_checks_map_when_infra_up(service_name, port, requires_stack):
+def test_health_ready_returns_checks_map_when_infra_up(
+    service_name, port, requires_stack
+):
     """Readiness must expose database, kafka, and redis check results."""
     status, body = _get_json(f"http://localhost:{port}/health/ready")
     assert status == 200, f"{service_name} ready check failed with {status}: {body}"
@@ -52,7 +54,9 @@ def test_health_ready_returns_checks_map_when_infra_up(service_name, port, requi
 @pytest.mark.parametrize("service_name,port", ALL_SERVICES)
 def test_metrics_endpoint_available(service_name, port, requires_stack):
     try:
-        with urllib.request.urlopen(f"http://localhost:{port}/metrics", timeout=5) as response:
+        with urllib.request.urlopen(
+            f"http://localhost:{port}/metrics", timeout=5
+        ) as response:
             text = response.read().decode()
     except urllib.error.URLError as exc:
         pytest.fail(f"{service_name} metrics unavailable: {exc}")

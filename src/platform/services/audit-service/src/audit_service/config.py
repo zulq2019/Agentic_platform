@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8012
     log_level: str = "INFO"
-    postgres_dsn: str = "postgresql://aep:aep@postgres:5432/aep"
+    postgres_dsn: str = ""
     kafka_bootstrap_servers: str = "kafka:9092"
     redis_url: str = "redis://redis:6379/0"
     otel_exporter_otlp_endpoint: str = "http://otel-collector:4317"

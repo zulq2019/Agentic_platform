@@ -35,15 +35,17 @@ async def test_ac_01_01_health_live_returns_200(auth_app):
 
 @pytest.mark.story_us_01_01
 @pytest.mark.asyncio
-async def test_ac_01_02_health_ready_returns_503_with_failing_check_identified(auth_app):
+async def test_ac_01_02_health_ready_returns_503_with_failing_check_identified(
+    auth_app,
+):
     """
     AC-01.01: When a dependency is down, /health/ready returns 503 and names the
     failing check in the response body.
     """
     with (
-        patch("auth_service.main.check_postgres", new=AsyncMock(return_value="error")),
-        patch("auth_service.main.check_kafka", new=AsyncMock(return_value="ok")),
-        patch("auth_service.main.check_redis", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_postgres", new=AsyncMock(return_value="error")),
+        patch("aep_common.app.check_kafka", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_redis", new=AsyncMock(return_value="ok")),
     ):
         transport = ASGITransport(app=auth_app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:

@@ -68,7 +68,7 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = {port}
     log_level: str = "INFO"
-    postgres_dsn: str = "postgresql://aep:aep@postgres:5432/aep"
+    postgres_dsn: str = ""
     kafka_bootstrap_servers: str = "kafka:9092"
     redis_url: str = "redis://redis:6379/0"
     otel_exporter_otlp_endpoint: str = "http://otel-collector:4317"
@@ -77,72 +77,16 @@ class Settings(BaseSettings):
 """
 
 MAIN_PY = """\
-from contextlib import asynccontextmanager
-from typing import AsyncIterator
-
-from aep_common.dependencies import check_kafka, check_postgres, check_redis
-from aep_common.health import create_health_router
-from aep_common.logging import get_logger
-from aep_common.metrics import create_service_metrics, metrics_endpoint
-from fastapi import FastAPI, Request
-from starlette.responses import JSONResponse
-import time
+from aep_common.app import create_platform_app
+from fastapi import FastAPI
 
 from {package_name}.config import Settings
 
 settings = Settings()
-logger = get_logger(settings.service_name)
-requests_total, request_duration = create_service_metrics(settings.service_name)
-
-
-@asynccontextmanager
-async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    logger.info("service_starting", service=settings.service_name)
-    yield
-    logger.info("service_stopped", service=settings.service_name)
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title=settings.service_name, version=settings.service_version, lifespan=lifespan)
-
-    health_router = create_health_router(
-        {
-            "database": lambda: check_postgres(settings.postgres_dsn),
-            "kafka": lambda: check_kafka(settings.kafka_bootstrap_servers),
-            "redis": lambda: check_redis(settings.redis_url),
-        }
-    )
-    app.include_router(health_router)
-
-    @app.get("/metrics")
-    async def metrics(request: Request):
-        return await metrics_endpoint(request)
-
-    @app.get("/info")
-    async def info() -> dict[str, str]:
-        return {
-            "service": settings.service_name,
-            "version": settings.service_version,
-            "contract_version": settings.contract_version,
-            "environment": settings.environment,
-        }
-
-    @app.middleware("http")
-    async def record_metrics(request: Request, call_next):
-        if request.url.path.startswith("/health"):
-            return await call_next(request)
-        start = time.perf_counter()
-        response = await call_next(request)
-        duration = time.perf_counter() - start
-        requests_total.labels(
-            service=settings.service_name,
-            method=request.method,
-            status=str(response.status_code),
-        ).inc()
-        request_duration.labels(service=settings.service_name, method=request.method).observe(duration)
-        return response
-
-    return app
+    return create_platform_app(settings)
 
 
 app = create_app()
@@ -151,7 +95,7 @@ app = create_app()
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host=settings.host, port=settings.port, reload=False)
+    uvicorn.run("{package_name}.main:app", host=settings.host, port=settings.port, reload=False)
 """
 
 TEST_HEALTH = """\
@@ -180,9 +124,9 @@ async def test_health_live_returns_200(app):
 @pytest.mark.asyncio
 async def test_health_ready_returns_200_when_dependencies_ok(app):
     with (
-        patch("{package_name}.main.check_postgres", new=AsyncMock(return_value="ok")),
-        patch("{package_name}.main.check_kafka", new=AsyncMock(return_value="ok")),
-        patch("{package_name}.main.check_redis", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_postgres", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_kafka", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_redis", new=AsyncMock(return_value="ok")),
     ):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -196,9 +140,9 @@ async def test_health_ready_returns_200_when_dependencies_ok(app):
 @pytest.mark.asyncio
 async def test_health_ready_returns_503_when_database_down(app):
     with (
-        patch("{package_name}.main.check_postgres", new=AsyncMock(return_value="error")),
-        patch("{package_name}.main.check_kafka", new=AsyncMock(return_value="ok")),
-        patch("{package_name}.main.check_redis", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_postgres", new=AsyncMock(return_value="error")),
+        patch("aep_common.app.check_kafka", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_redis", new=AsyncMock(return_value="ok")),
     ):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -230,14 +174,19 @@ async def test_info_endpoint_returns_metadata(app):
 """
 
 DOCKERFILE = """\
-FROM python:3.12-slim
+FROM python:3.12-slim AS builder
+
+WORKDIR /build
+COPY src/shared/aep_common /build/aep-common
+RUN pip install --no-cache-dir --prefix=/install \\
+    "/build/aep-common[health]" "fastapi>=0.110.0" "uvicorn[standard]>=0.27.0"
+
+FROM python:3.12-slim AS runtime
 
 RUN groupadd --gid 1000 aep && useradd --uid 1000 --gid aep --create-home aep
 
 WORKDIR /app
-COPY src/shared/aep_common /tmp/aep-common
-RUN pip install --no-cache-dir "/tmp/aep-common[health]" "fastapi>=0.110.0" "uvicorn[standard]>=0.27.0"
-
+COPY --from=builder /install /usr/local
 COPY {service_path}/src /app/src
 ENV PYTHONPATH=/app/src
 ENV PORT={port}
@@ -257,7 +206,7 @@ ENVIRONMENT=dev
 HOST=0.0.0.0
 PORT={port}
 LOG_LEVEL=INFO
-POSTGRES_DSN=postgresql://aep:aep@localhost:5432/aep
+POSTGRES_DSN=postgresql://USER:PASSWORD@localhost:5432/aep
 KAFKA_BOOTSTRAP_SERVERS=localhost:9092
 REDIS_URL=redis://localhost:6379/0
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
@@ -278,7 +227,9 @@ def write_service(service_name: str, rel_path: str, port: int) -> None:
     for sub in ("domain", "infrastructure"):
         sub_dir = src_dir / sub
         sub_dir.mkdir(parents=True, exist_ok=True)
-        (sub_dir / "__init__.py").write_text('"""Placeholder for future implementation."""\n', encoding="utf-8")
+        (sub_dir / "__init__.py").write_text(
+            '"""Placeholder for future implementation."""\n', encoding="utf-8"
+        )
 
     (src_dir / "__init__.py").write_text('"""Service package."""\n', encoding="utf-8")
     (src_dir / "config.py").write_text(
@@ -290,11 +241,15 @@ def write_service(service_name: str, rel_path: str, port: int) -> None:
         encoding="utf-8",
     )
     (tests_dir / "test_health.py").write_text(
-        TEST_HEALTH.replace("{package_name}", pkg).replace("{service_name}", service_name),
+        TEST_HEALTH.replace("{package_name}", pkg).replace(
+            "{service_name}", service_name
+        ),
         encoding="utf-8",
     )
     (base / "pyproject.toml").write_text(
-        PYPROJECT.replace("{service_name}", service_name).replace("{package_name}", pkg),
+        PYPROJECT.replace("{service_name}", service_name).replace(
+            "{package_name}", pkg
+        ),
         encoding="utf-8",
     )
     (base / "Dockerfile").write_text(
@@ -304,7 +259,9 @@ def write_service(service_name: str, rel_path: str, port: int) -> None:
         encoding="utf-8",
     )
     (base / ".env.example").write_text(
-        ENV_EXAMPLE.replace("{service_name}", service_name).replace("{port}", str(port)),
+        ENV_EXAMPLE.replace("{service_name}", service_name).replace(
+            "{port}", str(port)
+        ),
         encoding="utf-8",
     )
 

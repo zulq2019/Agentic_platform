@@ -22,9 +22,9 @@ async def test_ac_01_02_multiple_dependencies_down_all_identified(auth_app):
     the first failure. Operators need full visibility to diagnose outages.
     """
     with (
-        patch("auth_service.main.check_postgres", new=AsyncMock(return_value="error")),
-        patch("auth_service.main.check_kafka", new=AsyncMock(return_value="error")),
-        patch("auth_service.main.check_redis", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_postgres", new=AsyncMock(return_value="error")),
+        patch("aep_common.app.check_kafka", new=AsyncMock(return_value="error")),
+        patch("aep_common.app.check_redis", new=AsyncMock(return_value="ok")),
     ):
         transport = ASGITransport(app=auth_app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -41,9 +41,9 @@ async def test_ac_01_02_multiple_dependencies_down_all_identified(auth_app):
 @pytest.mark.asyncio
 async def test_ac_01_02_redis_failure_identified_in_ready_response(auth_app):
     with (
-        patch("auth_service.main.check_postgres", new=AsyncMock(return_value="ok")),
-        patch("auth_service.main.check_kafka", new=AsyncMock(return_value="ok")),
-        patch("auth_service.main.check_redis", new=AsyncMock(return_value="error")),
+        patch("aep_common.app.check_postgres", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_kafka", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_redis", new=AsyncMock(return_value="error")),
     ):
         transport = ASGITransport(app=auth_app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:

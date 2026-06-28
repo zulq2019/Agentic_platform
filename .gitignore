@@ -18,10 +18,13 @@ venv/
 # Node (if added later)
 node_modules/
 
-# Secrets — never commit
+# Secrets — never commit (allow .env.example for documentation)
 *.pem
 *.key
-.env.*
+.env
+.env.local
+.env.*.local
+!.env.example
 credentials.json
 
 # Build artifacts

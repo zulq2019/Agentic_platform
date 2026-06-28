@@ -33,7 +33,9 @@ def load_json(path: Path) -> dict:
 def validate(contract_type: str, document_path: Path) -> None:
     schema_file = SCHEMA_MAP.get(contract_type)
     if not schema_file:
-        raise SystemExit(f"Unknown contract type: {contract_type}. Use one of: {', '.join(SCHEMA_MAP)}")
+        raise SystemExit(
+            f"Unknown contract type: {contract_type}. Use one of: {', '.join(SCHEMA_MAP)}"
+        )
 
     schema = load_json(CONTRACTS / schema_file)
     document = load_json(document_path)
@@ -44,7 +46,9 @@ def validate(contract_type: str, document_path: Path) -> None:
 
 def main() -> None:
     if len(sys.argv) != 3:
-        raise SystemExit(f"Usage: {sys.argv[0]} <agent|tool|task|memory|event> <document.json>")
+        raise SystemExit(
+            f"Usage: {sys.argv[0]} <agent|tool|task|memory|event> <document.json>"
+        )
 
     validate(sys.argv[1], Path(sys.argv[2]))
 

@@ -20,7 +20,9 @@ async def test_check_postgres_returns_ok_when_select_succeeds():
     mock_conn.fetchval = AsyncMock(return_value=1)
     mock_conn.close = AsyncMock()
 
-    with patch("aep_common.dependencies.asyncpg.connect", new=AsyncMock(return_value=mock_conn)):
+    with patch(
+        "aep_common.dependencies.asyncpg.connect", new=AsyncMock(return_value=mock_conn)
+    ):
         result = await check_postgres("postgresql://aep:aep@localhost:5432/aep")
 
     assert result == "ok"
@@ -48,7 +50,9 @@ async def test_check_kafka_returns_error_when_bootstrap_servers_empty():
 @pytest.mark.story_us_01_01
 @pytest.mark.asyncio
 async def test_check_kafka_returns_ok_when_tcp_connects():
-    with patch("aep_common.dependencies.asyncio.to_thread", new=AsyncMock(return_value=None)):
+    with patch(
+        "aep_common.dependencies.asyncio.to_thread", new=AsyncMock(return_value=None)
+    ):
         result = await check_kafka("kafka:9092")
 
     assert result == "ok"

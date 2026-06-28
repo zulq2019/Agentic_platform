@@ -23,7 +23,13 @@ def main() -> int:
     env = os.environ.copy()
     env["PYTHONPATH"] = str(ROOT / "src/platform/services/auth-service/src")
     return run(
-        [sys.executable, "-m", "pytest", "src/platform/services/auth-service/tests", "-v"],
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "src/platform/services/auth-service/tests",
+            "-v",
+        ],
         env=env,
     )
 

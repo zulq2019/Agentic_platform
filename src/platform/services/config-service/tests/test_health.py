@@ -23,9 +23,9 @@ async def test_health_live_returns_200(app):
 @pytest.mark.asyncio
 async def test_health_ready_returns_200_when_dependencies_ok(app):
     with (
-        patch("config_service.main.check_postgres", new=AsyncMock(return_value="ok")),
-        patch("config_service.main.check_kafka", new=AsyncMock(return_value="ok")),
-        patch("config_service.main.check_redis", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_postgres", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_kafka", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_redis", new=AsyncMock(return_value="ok")),
     ):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -39,9 +39,9 @@ async def test_health_ready_returns_200_when_dependencies_ok(app):
 @pytest.mark.asyncio
 async def test_health_ready_returns_503_when_database_down(app):
     with (
-        patch("config_service.main.check_postgres", new=AsyncMock(return_value="error")),
-        patch("config_service.main.check_kafka", new=AsyncMock(return_value="ok")),
-        patch("config_service.main.check_redis", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_postgres", new=AsyncMock(return_value="error")),
+        patch("aep_common.app.check_kafka", new=AsyncMock(return_value="ok")),
+        patch("aep_common.app.check_redis", new=AsyncMock(return_value="ok")),
     ):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
