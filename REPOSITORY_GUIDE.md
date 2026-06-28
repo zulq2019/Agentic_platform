@@ -150,7 +150,9 @@ These live at the root because they apply to the entire repository:
 
 | I am writing... | Goes in |
 |----------------|---------|
-| Sprint plan, implementation guide, AI prompts for a PI | `docs/04-program/PI-XX-*/` |
+| Sprint plan, implementation guide for a PI | `docs/04-program/PI-XX-*/` |
+| AI prompt mapping for a PI | `docs/04-program/PI-XX-.../PROMPT_MAPPING.md` |
+| Reusable AI prompt commands | `.ai/commands/` |
 | Design for a future component not yet built | `docs/05-blueprints/{component}/BLUEPRINT.md` |
 | Architecture diagram | `docs/artifacts/TECHNICAL_ARCHITECTURE.md` |
 | Architectural decision record | `DECISIONS.md` |
@@ -161,14 +163,20 @@ These live at the root because they apply to the entire repository:
 
 ## 3. AI Engineering Assets — `.ai/`
 
-**Rule: All AI assistant assets — prompts, templates, checklists, reviewer configurations — live in `.ai/`. Never scattered across the repo.**
+**Rule: `.ai/` is the single source of truth for all reusable AI prompts, templates, checklists, and reviewer configurations. Never scatter AI assets across the repo.**
+
+**PI folders do not own prompts.** Each PI contains `PROMPT_MAPPING.md` — a reference index that maps each User Story to the reusable commands stored in `.ai/commands/`.
 
 ```
 .ai/
-├── commands/       ← Reusable AI prompt commands (slash commands, macros)
-│                       Example: /implement-agent, /write-migration, /review-pr
+├── commands/       ← Reusable AI prompt commands — the single prompt library
+│                       One file per operation, referenced by every PI
+│                       Example: implement-story.md, review-story.md,
+│                                generate-tests.md, security-review.md,
+│                                performance-review.md, update-documentation.md,
+│                                release-story.md
 │
-├── templates/      ← Code and document templates for AI to use as starting points
+├── templates/      ← Starting-point code and document templates for AI scaffolding
 │                       Example: agent-template.py, service-scaffold.py,
 │                                migration-template.py, test-template.py
 │
@@ -181,7 +189,13 @@ These live at the root because they apply to the entire repository:
                                  constitution-reviewer.md
 ```
 
-`.ai/` is populated progressively during PI-01 and PI-02. Do not create files there without a clear prompt or checklist to put in them.
+See `.ai/README.md` for the full prompt lifecycle, naming convention, and how engineers use the library.
+
+### How PI folders reference prompts
+
+Each PI contains `PROMPT_MAPPING.md` — not prompts themselves. The mapping file lists each User Story and links it to the relevant `.ai/commands/` files with PI-specific context.
+
+One change to `.ai/commands/implement-story.md` improves all ten PIs simultaneously.
 
 ---
 
@@ -275,7 +289,7 @@ Before writing your first line of code:
 | How does the system work? | `ARCHITECTURE.md` |
 | What am I building this sprint? | `docs/04-program/PI-0X-.../SPRINT_PLAN.md` |
 | How do I implement X? | `docs/04-program/PI-0X-.../IMPLEMENTATION.md` |
-| What AI prompts should I use? | `docs/04-program/PI-0X-.../PROMPTS.md` and `.ai/commands/` |
+| What AI prompts should I use? | `.ai/commands/` (prompt library) and the current PI's `PROMPT_MAPPING.md` |
 | What does a future component look like? | `docs/05-blueprints/{component}/BLUEPRINT.md` |
 | Why was this decision made? | `DECISIONS.md` |
 | What is the full architecture diagram? | `docs/artifacts/TECHNICAL_ARCHITECTURE.md` |
