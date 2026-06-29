@@ -16,3 +16,10 @@ All notable changes to the Agentic Engineering Platform are documented here.
 - Python service Dockerfiles use multi-stage builds with non-root runtime user
 - Service config defaults no longer embed database credentials; use `POSTGRES_DSN` env var
 - Logging includes correlation ID context vars (`task_id`, `workflow_run_id`, `tenant_id`)
+
+### Added (US-01.02)
+
+- Observability stack in docker-compose: OTEL Collector, Prometheus, Grafana
+- PostgreSQL image upgraded to `pgvector/pgvector:pg16`
+- `scripts/verify_dev_environment.py` and `scripts/generate_prometheus_config.py`
+- README local development onboarding (clone → `make dev-up`)

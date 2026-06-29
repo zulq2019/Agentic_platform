@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: AEP Platform
+    orgId: 1
+    folder: PI-01
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

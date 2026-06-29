@@ -63,6 +63,34 @@ agentic-engineering-platform/
 
 ## Quick Start
 
+### Local development (PI-01)
+
+Prerequisites: **Git**, **Docker Desktop**, **Python 3.12+**
+
+```bash
+git clone https://github.com/zulq2019/Agentic_platform.git
+cd Agentic_platform
+pip install -e "src/shared/aep_common[health]" pytest pytest-asyncio httpx
+make dev-up
+```
+
+`make dev-up` starts all 16 platform services plus Postgres (pgvector), Redis, Kafka, OTEL Collector, Prometheus, and Grafana. It then verifies:
+
+- All 16 `/health/live` endpoints return HTTP 200 within 60 seconds
+- Prometheus (`http://localhost:9090`), Grafana (`http://localhost:3001`), and OTEL Collector are healthy
+
+| URL | Purpose |
+|-----|---------|
+| http://localhost:8080/health/live | API Gateway |
+| http://localhost:8001–8015/health/live | Platform services |
+| http://localhost:9090 | Prometheus metrics |
+| http://localhost:3001 | Grafana (admin / admin — local dev only) |
+| http://localhost:4317 | OTEL Collector (gRPC) |
+
+Stop the stack: `make dev-down`  
+Tail logs: `make dev-logs`  
+Re-check health: `make dev-status`
+
 ### Validate a contract
 
 ```bash

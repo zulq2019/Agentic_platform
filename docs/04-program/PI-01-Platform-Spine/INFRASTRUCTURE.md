@@ -13,3 +13,17 @@
 | Grafana | No | No | Defer to US-01.07 |
 | Vault | No | No | Defer to PI-08 |
 | Kubernetes | No | No | Defer to deployment PI |
+
+## US-01.02
+
+| Component | Required for this story | Already Exists | Action |
+|-----------|------------------------|----------------|--------|
+| Docker Compose | Yes | Partial (US-01.01) | Extend with observability stack |
+| PostgreSQL | Yes | Yes | Switch to pgvector/pgvector:pg16 image |
+| Kafka | Yes | Yes | Use existing single KRaft broker |
+| Redis | Yes | Yes | Use existing |
+| OpenTelemetry | Yes | No | Add otel-collector service |
+| Prometheus | Yes | No | Add prometheus service + scrape config |
+| Grafana | Yes | No | Add grafana service + health dashboard |
+| Vault | No | No | Defer to PI-08 |
+| Kubernetes | No | No | Defer to deployment PI |
