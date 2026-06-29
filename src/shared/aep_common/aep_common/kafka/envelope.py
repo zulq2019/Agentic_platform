@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from aep_common.kafka.contracts import find_event_envelope_schema_path
 from aep_common.kafka.exceptions import EventEnvelopeValidationError
 
 EventType = Literal[
@@ -23,10 +23,6 @@ EventType = Literal[
     "StateTransitioned",
     "RollbackTriggered",
 ]
-
-_SCHEMA_PATH = (
-    Path(__file__).resolve().parents[5] / "contracts" / "event-envelope.schema.json"
-)
 
 
 class EventEnvelope(BaseModel):
@@ -52,7 +48,7 @@ class EventEnvelope(BaseModel):
 
 
 def load_event_schema() -> dict[str, Any]:
-    with _SCHEMA_PATH.open(encoding="utf-8") as handle:
+    with find_event_envelope_schema_path().open(encoding="utf-8") as handle:
         return json.load(handle)
 
 

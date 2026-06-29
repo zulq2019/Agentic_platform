@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-from aep_common.kafka.envelope import EventEnvelope, validate_envelope_dict
+from aep_common.kafka.envelope import validate_envelope_dict
 from aep_common.kafka.exceptions import EventEnvelopeValidationError
 
 

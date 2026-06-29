@@ -29,4 +29,5 @@ All notable changes to the Agentic Engineering Platform are documented here.
 - Kafka topic catalog (11 topics + `aep.dlq`) with idempotent provisioning via `kafka-init`
 - `aep_common.kafka`: EventEnvelope validation, producer/consumer with DLQ routing
 - `scripts/provision_kafka_topics.py` and `scripts/verify_kafka_topology.py`
-- ACL catalog at `infra/kafka/acls.yaml` (enforced in deployed environments)
+- ACL catalog at `infra/kafka/acls.yaml` (broker enforcement deferred to deployment PI / Sprint 2.2)
+- Host Kafka access moved to `localhost:9094` (containers continue using `kafka:9092`)

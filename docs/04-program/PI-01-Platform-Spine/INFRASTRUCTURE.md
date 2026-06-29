@@ -34,7 +34,7 @@
 |-----------|------------------------|----------------|--------|
 | Docker Compose | Yes | Yes (US-01.02) | Add `kafka-init` provisioning container |
 | PostgreSQL | No | Yes | Not required for this story |
-| Kafka | Yes | Yes | Topic provisioning + topology verification |
+| Kafka | Yes | Yes | Topic provisioning + topology verification; ACL catalog at `infra/kafka/acls.yaml` (broker enforcement deferred — Sprint 2.2 / deployment PI) |
 | Redis | No | Yes | Not required for this story |
 | OpenTelemetry | No | Yes | Not required for this story |
 | Prometheus | No | Yes | Not required for this story |

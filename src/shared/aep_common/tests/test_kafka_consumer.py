@@ -139,3 +139,44 @@ def test_consumer_commits_tombstone_messages_without_dlq():
     assert consumer.process_next() is True
     assert fake.produced == []
     assert fake.committed == [message]
+
+
+@pytest.mark.story_us_01_03
+def test_consumer_skips_duplicate_event_id_without_calling_handler():
+    raw = _valid_envelope_bytes()
+    message = FakeKafkaMessage(topic="aep.task.created", value=raw)
+    fake = FakeConsumer(message)
+    import json
+
+    event_id = json.loads(raw.decode("utf-8"))["event_id"]
+    handled: list[str] = []
+
+    consumer = EventConsumer(
+        fake,
+        service_name="agent-runtime",
+        handler=lambda envelope: handled.append(str(envelope.event_id)),
+        processed_event_ids={event_id},
+    )
+
+    assert consumer.process_next() is True
+    assert handled == []
+    assert fake.committed == [message]
+
+
+@pytest.mark.story_us_01_03
+def test_consumer_routes_handler_failure_to_dlq_and_commits():
+    message = FakeKafkaMessage(topic="aep.task.created", value=_valid_envelope_bytes())
+    fake = FakeConsumer(message)
+
+    def _fail(_envelope):
+        raise RuntimeError("processing failed")
+
+    consumer = EventConsumer(
+        fake,
+        service_name="agent-runtime",
+        handler=_fail,
+    )
+
+    assert consumer.process_next() is True
+    assert fake.produced[0][0] == "aep.dlq"
+    assert fake.committed == [message]

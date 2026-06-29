@@ -74,7 +74,7 @@ pip install -e "src/shared/aep_common[health,kafka]" pytest pytest-asyncio httpx
 make dev-up
 ```
 
-`make dev-up` starts all 16 platform services plus Postgres (pgvector), Redis, Kafka, OTEL Collector, Prometheus, and Grafana. It then verifies:
+`make dev-up` starts all 16 platform services plus Postgres (pgvector), Redis, Kafka, OTEL Collector, Prometheus, and Grafana. Host-side Kafka scripts use **`localhost:9094`** (containers use `kafka:9092`). It then verifies:
 
 - All 16 `/health/live` endpoints return HTTP 200 within 60 seconds
 - Kafka topics provisioned (`scripts/verify_kafka_topology.py` exits 0)

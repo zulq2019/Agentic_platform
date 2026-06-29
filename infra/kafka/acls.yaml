@@ -1,5 +1,5 @@
 # Kafka topic ACL catalog for PI-01 (CAP-04).
-# Enforced in deployed environments; local PLAINTEXT dev records intent only.
+# Broker ACL apply deferred to deployment PI / Sprint 2.2 (local PLAINTEXT has no authorizer).
 
 acls:
   - principal: orchestrator-service

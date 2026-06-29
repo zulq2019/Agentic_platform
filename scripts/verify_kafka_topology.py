@@ -3,14 +3,13 @@
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
 import yaml
 
+from aep_common.kafka.bootstrap import resolve_bootstrap_servers
 from aep_common.kafka.topic_catalog import (
-    HOST_BOOTSTRAP_SERVERS,
     LOCAL_REPLICATION_FACTOR,
     TOPIC_SPECS,
     business_topic_count,
@@ -18,13 +17,6 @@ from aep_common.kafka.topic_catalog import (
 
 ROOT = Path(__file__).resolve().parents[1]
 ACL_CATALOG = ROOT / "infra" / "kafka" / "acls.yaml"
-
-
-def _bootstrap_servers() -> str:
-    value = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", HOST_BOOTSTRAP_SERVERS)
-    if value in {"localhost:9092", "kafka:9092"}:
-        return HOST_BOOTSTRAP_SERVERS
-    return value
 
 
 def verify_acl_catalog() -> list[str]:
@@ -63,7 +55,7 @@ def verify_topics(*, bootstrap_servers: str | None = None) -> list[str]:
             "confluent-kafka not installed — pip install -e 'src/shared/aep_common[kafka]'"
         ]
 
-    servers = bootstrap_servers or _bootstrap_servers()
+    servers = resolve_bootstrap_servers(bootstrap_servers)
     admin = AdminClient({"bootstrap.servers": servers})
 
     try:

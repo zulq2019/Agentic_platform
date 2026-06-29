@@ -11,6 +11,7 @@ from aep_common.kafka.envelope import (
     validate_envelope_dict,
 )
 from aep_common.kafka.exceptions import EventEnvelopeValidationError
+from aep_common.kafka.tracing import kafka_span
 from aep_common.logging import get_logger
 
 
@@ -30,9 +31,16 @@ class MessageProducer(Protocol):
 class EventProducer:
     """Validates envelopes before publish; invalid messages go to DLQ."""
 
-    def __init__(self, producer: MessageProducer, *, service_name: str) -> None:
+    def __init__(
+        self,
+        producer: MessageProducer,
+        *,
+        service_name: str,
+        flush_after_publish: bool = True,
+    ) -> None:
         self._producer = producer
         self._service_name = service_name
+        self._flush_after_publish = flush_after_publish
         self._logger = get_logger(service_name)
 
     def publish(
@@ -40,23 +48,29 @@ class EventProducer:
         topic: str,
         message: EventEnvelope | dict[str, Any],
     ) -> None:
-        try:
-            if isinstance(message, EventEnvelope):
-                envelope = message
-            else:
-                envelope = validate_envelope_dict(message)
-        except EventEnvelopeValidationError as exc:
-            self._route_invalid_to_dlq(
-                original_topic=topic,
-                error=str(exc),
-                raw_message=message if isinstance(message, dict) else None,
-            )
-            return
+        with kafka_span(
+            "kafka.publish",
+            topic=topic,
+            service=self._service_name,
+        ):
+            try:
+                if isinstance(message, EventEnvelope):
+                    envelope = message
+                else:
+                    envelope = validate_envelope_dict(message)
+            except EventEnvelopeValidationError as exc:
+                self._route_invalid_to_dlq(
+                    original_topic=topic,
+                    error=str(exc),
+                    raw_message=message if isinstance(message, dict) else None,
+                )
+                return
 
-        payload = envelope_to_bytes(envelope)
-        key = envelope.tenant_id.encode("utf-8")
-        self._producer.produce(topic, payload, key=key)
-        self._producer.flush()
+            payload = envelope_to_bytes(envelope)
+            key = envelope.tenant_id.encode("utf-8")
+            self._producer.produce(topic, payload, key=key)
+            if self._flush_after_publish:
+                self._producer.flush()
 
     def _route_invalid_to_dlq(
         self,
@@ -90,4 +104,5 @@ class EventProducer:
             dlq_record_to_bytes(record),
             key=(str(tenant_id).encode("utf-8") if tenant_id else None),
         )
-        self._producer.flush()
+        if self._flush_after_publish:
+            self._producer.flush()
