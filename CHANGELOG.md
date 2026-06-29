@@ -37,3 +37,8 @@ All notable changes to the Agentic Engineering Platform are documented here.
 
 - Database DSNs and app role password must be supplied via environment variables (no hardcoded defaults in library or migration code)
 - Memory embedding index uses HNSW instead of IVFFlat for empty-table safety
+
+### Fixed (US-01.04)
+
+- CI runs US-01.04 database integration tests (AC-01.03) against Postgres service job
+- Migration `005_app_role_grants` updates `aep_app` password on re-run and revokes default privileges on downgrade

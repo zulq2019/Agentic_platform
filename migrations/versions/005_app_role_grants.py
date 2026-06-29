@@ -40,6 +40,8 @@ def upgrade() -> None:
             IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{APP_ROLE}') THEN
                 CREATE ROLE {APP_ROLE} WITH LOGIN PASSWORD '{password}'
                     NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT;
+            ELSE
+                ALTER ROLE {APP_ROLE} WITH PASSWORD '{password}';
             END IF;
         END
         $$
@@ -63,6 +65,10 @@ def downgrade() -> None:
         op.execute(f"REVOKE ALL ON {qualified} FROM {APP_ROLE}")
 
     for schema in reversed(PLATFORM_SCHEMAS):
+        op.execute(f"""
+            ALTER DEFAULT PRIVILEGES FOR ROLE current_user IN SCHEMA {schema}
+            REVOKE SELECT, INSERT, UPDATE, DELETE ON TABLES FROM {APP_ROLE}
+            """)
         op.execute(f"REVOKE USAGE ON SCHEMA {schema} FROM {APP_ROLE}")
 
     op.execute(f"DROP ROLE IF EXISTS {APP_ROLE}")

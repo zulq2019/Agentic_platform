@@ -2,20 +2,42 @@
 
 from __future__ import annotations
 
-import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 import asyncpg
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class DatabaseConfigurationError(RuntimeError):
     """Raised when required database environment variables are missing."""
 
 
+class DatabaseSettings(BaseSettings):
+    """Database connection settings loaded from environment variables."""
+
+    model_config = SettingsConfigDict(extra="ignore")
+
+    postgres_dsn: str | None = Field(default=None, validation_alias="POSTGRES_DSN")
+    database_url: str | None = Field(default=None, validation_alias="DATABASE_URL")
+    aep_app_postgres_dsn: str | None = Field(
+        default=None, validation_alias="AEP_APP_POSTGRES_DSN"
+    )
+    app_postgres_dsn: str | None = Field(
+        default=None, validation_alias="APP_POSTGRES_DSN"
+    )
+
+
+def _load_settings() -> DatabaseSettings:
+    """Load settings from the current process environment."""
+    return DatabaseSettings()
+
+
 def get_postgres_dsn() -> str:
     """Return the configured PostgreSQL DSN from environment variables."""
-    dsn = os.environ.get("POSTGRES_DSN") or os.environ.get("DATABASE_URL")
+    settings = _load_settings()
+    dsn = settings.postgres_dsn or settings.database_url
     if not dsn:
         raise DatabaseConfigurationError(
             "POSTGRES_DSN or DATABASE_URL must be set (see .env.example)"
@@ -25,7 +47,8 @@ def get_postgres_dsn() -> str:
 
 def get_app_postgres_dsn() -> str:
     """Return the tenant-scoped application role DSN subject to RLS policies."""
-    dsn = os.environ.get("AEP_APP_POSTGRES_DSN") or os.environ.get("APP_POSTGRES_DSN")
+    settings = _load_settings()
+    dsn = settings.aep_app_postgres_dsn or settings.app_postgres_dsn
     if not dsn:
         raise DatabaseConfigurationError(
             "AEP_APP_POSTGRES_DSN or APP_POSTGRES_DSN must be set (see .env.example)"

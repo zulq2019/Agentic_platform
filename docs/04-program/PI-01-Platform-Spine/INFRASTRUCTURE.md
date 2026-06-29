@@ -41,3 +41,20 @@
 | Grafana | No | Yes | Not required for database story |
 | Vault | No | No | Defer to PI-08 |
 | Kubernetes | No | No | Defer to deployment PI |
+
+### Deployment (US-01.04)
+
+1. Set `POSTGRES_DSN`, `AEP_APP_DB_PASSWORD`, and `AEP_APP_POSTGRES_DSN` in `.env` (password in DSN must match `AEP_APP_DB_PASSWORD`).
+2. Start Postgres (`make dev-up` or existing instance).
+3. Run `make migrate` — verify Alembic reaches revision `005_app_role_grants`.
+4. Verify RLS: `pytest src/tests -m "story_us_01_04 and integration" -v`.
+
+### Rollback (US-01.04)
+
+**Risk:** MEDIUM — downgrade drops schemas/tables and the `aep_app` role. Safe only when no production data exists in platform tables.
+
+1. Stop services writing to platform schemas.
+2. With `POSTGRES_DSN` set: `alembic downgrade base` (or repeated `alembic downgrade -1` through `001`).
+3. Verify: `alembic current` is empty or at the pre-migration revision.
+4. If only the app role password was wrong: `DROP ROLE IF EXISTS aep_app` and re-run `make migrate` with the correct `AEP_APP_DB_PASSWORD`.
+5. Re-deploy previous application image if service code was updated (PI-01 services do not query new tables yet).
