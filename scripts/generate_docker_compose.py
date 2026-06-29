@@ -29,7 +29,7 @@ SERVICES = [
 HEADER = """\
 services:
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: aep
       POSTGRES_PASSWORD: aep
@@ -76,6 +76,59 @@ services:
       retries: 12
       start_period: 30s
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    command: ["--config=/etc/otel-collector/otel-config.yaml"]
+    volumes:
+      - ./observability/otel-collector/otel-config.yaml:/etc/otel-collector/otel-config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "13133:13133"
+    healthcheck:
+      disable: true
+
+  prometheus:
+    image: prom/prometheus:v2.49.1
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    depends_on:
+      otel-collector:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9090/-/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  grafana:
+    image: grafana/grafana:10.3.1
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
 """
 
 PYTHON_TEMPLATE = """\
@@ -91,6 +144,7 @@ PYTHON_TEMPLATE = """\
       POSTGRES_DSN: postgresql://aep:aep@postgres:5432/aep
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       REDIS_URL: redis://redis:6379/0
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       ENVIRONMENT: dev
     depends_on:
       postgres:
@@ -99,6 +153,8 @@ PYTHON_TEMPLATE = """\
         condition: service_healthy
       redis:
         condition: service_healthy
+      otel-collector:
+        condition: service_started
 """
 
 GATEWAY = """\
@@ -114,6 +170,7 @@ GATEWAY = """\
       POSTGRES_HOST: postgres:5432
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       REDIS_HOST: redis:6379
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       ENVIRONMENT: dev
     depends_on:
       postgres:
@@ -122,6 +179,8 @@ GATEWAY = """\
         condition: service_healthy
       redis:
         condition: service_healthy
+      otel-collector:
+        condition: service_started
 """
 
 

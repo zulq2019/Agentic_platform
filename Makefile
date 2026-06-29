@@ -1,8 +1,9 @@
-.PHONY: dev-up dev-down dev-logs lint test scaffold compose
+.PHONY: dev-up dev-down dev-logs lint test scaffold compose dev-status
 
 dev-up: compose
 	docker compose up -d --build
 	python scripts/wait_for_health.py
+	python scripts/verify_dev_environment.py
 
 dev-down:
 	docker compose down -v
@@ -10,7 +11,12 @@ dev-down:
 dev-logs:
 	docker compose logs -f
 
+dev-status:
+	python scripts/wait_for_health.py
+	python scripts/verify_dev_environment.py
+
 compose:
+	python scripts/generate_prometheus_config.py
 	python scripts/generate_docker_compose.py
 
 scaffold:

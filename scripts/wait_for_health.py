@@ -36,7 +36,7 @@ def check_health(name: str, port: int) -> bool:
     try:
         with urllib.request.urlopen(url, timeout=3) as response:
             return response.status == 200
-    except (urllib.error.URLError, TimeoutError):
+    except (urllib.error.URLError, TimeoutError, OSError):
         return False
 
 
