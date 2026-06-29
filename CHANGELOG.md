@@ -17,6 +17,13 @@ All notable changes to the Agentic Engineering Platform are documented here.
 - Service config defaults no longer embed database credentials; use `POSTGRES_DSN` env var
 - Logging includes correlation ID context vars (`task_id`, `workflow_run_id`, `tenant_id`)
 
+### Added (US-01.05)
+
+- CI pipeline Phase 1: parallel quality, golangci-lint, and 16-container build matrix
+- `scripts/validate_contract.py` bulk mode for `contracts/` directory validation
+- Security gates: pip-audit, detect-secrets baseline, Trivy image scan (CRITICAL/HIGH)
+- mypy --strict on `aep_common`; acceptance tests for AC-01.04 CI pipeline criteria
+
 ### Added (US-01.02)
 
 - Observability stack in docker-compose: OTEL Collector, Prometheus, Grafana
