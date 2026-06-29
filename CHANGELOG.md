@@ -23,3 +23,10 @@ All notable changes to the Agentic Engineering Platform are documented here.
 - PostgreSQL image upgraded to `pgvector/pgvector:pg16`
 - `scripts/verify_dev_environment.py` and `scripts/generate_prometheus_config.py`
 - README local development onboarding (clone → `make dev-up`)
+
+### Added (US-01.03)
+
+- Kafka topic catalog (11 topics + `aep.dlq`) with idempotent provisioning via `kafka-init`
+- `aep_common.kafka`: EventEnvelope validation, producer/consumer with DLQ routing
+- `scripts/provision_kafka_topics.py` and `scripts/verify_kafka_topology.py`
+- ACL catalog at `infra/kafka/acls.yaml` (enforced in deployed environments)

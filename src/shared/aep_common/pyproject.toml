@@ -20,6 +20,11 @@ health = [
     "asyncpg>=0.29.0",
     "redis>=5.0.0",
 ]
+kafka = [
+    "confluent-kafka>=2.3.0",
+    "jsonschema>=4.21.0",
+    "pyyaml>=6.0.0",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["aep_common"]

@@ -27,3 +27,17 @@
 | Grafana | Yes | No | Add grafana service + health dashboard |
 | Vault | No | No | Defer to PI-08 |
 | Kubernetes | No | No | Defer to deployment PI |
+
+## US-01.03
+
+| Component | Required for this story | Already Exists | Action |
+|-----------|------------------------|----------------|--------|
+| Docker Compose | Yes | Yes (US-01.02) | Add `kafka-init` provisioning container |
+| PostgreSQL | No | Yes | Not required for this story |
+| Kafka | Yes | Yes | Topic provisioning + topology verification |
+| Redis | No | Yes | Not required for this story |
+| OpenTelemetry | No | Yes | Not required for this story |
+| Prometheus | No | Yes | Not required for this story |
+| Grafana | No | Yes | Not required for this story |
+| Vault | No | No | Defer to PI-08 |
+| Kubernetes | No | No | Defer to deployment PI |

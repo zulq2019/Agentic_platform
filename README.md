@@ -70,13 +70,14 @@ Prerequisites: **Git**, **Docker Desktop**, **Python 3.12+**
 ```bash
 git clone https://github.com/zulq2019/Agentic_platform.git
 cd Agentic_platform
-pip install -e "src/shared/aep_common[health]" pytest pytest-asyncio httpx
+pip install -e "src/shared/aep_common[health,kafka]" pytest pytest-asyncio httpx
 make dev-up
 ```
 
 `make dev-up` starts all 16 platform services plus Postgres (pgvector), Redis, Kafka, OTEL Collector, Prometheus, and Grafana. It then verifies:
 
 - All 16 `/health/live` endpoints return HTTP 200 within 60 seconds
+- Kafka topics provisioned (`scripts/verify_kafka_topology.py` exits 0)
 - Prometheus (`http://localhost:9090`), Grafana (`http://localhost:3001`), and OTEL Collector are healthy
 
 | URL | Purpose |
@@ -86,6 +87,7 @@ make dev-up
 | http://localhost:9090 | Prometheus metrics |
 | http://localhost:3001 | Grafana (admin / admin — local dev only) |
 | http://localhost:4317 | OTEL Collector (gRPC) |
+| http://localhost:9094 | Kafka (host access; containers use `kafka:9092`) |
 
 Stop the stack: `make dev-down`  
 Tail logs: `make dev-logs`  

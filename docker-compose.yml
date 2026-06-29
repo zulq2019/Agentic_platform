@@ -27,14 +27,15 @@ services:
     image: apache/kafka:3.8.1
     hostname: kafka
     ports:
-      - "9092:9092"
+      - "9094:9094"
     environment:
       KAFKA_NODE_ID: "1"
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:9094,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:9094
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
@@ -46,6 +47,25 @@ services:
       timeout: 10s
       retries: 12
       start_period: 30s
+
+  kafka-init:
+    image: python:3.12-slim
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      PYTHONPATH: /app/src/shared/aep_common
+    volumes:
+      - ./src/shared/aep_common:/app/src/shared/aep_common:ro
+      - ./scripts/provision_kafka_topics.py:/app/scripts/provision_kafka_topics.py:ro
+    working_dir: /app
+    command:
+      - /bin/sh
+      - -c
+      - |
+        pip install --quiet -e '/app/src/shared/aep_common[kafka]' &&         python /app/scripts/provision_kafka_topics.py
+    restart: "no"
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.96.0
