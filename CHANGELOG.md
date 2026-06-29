@@ -23,3 +23,11 @@ All notable changes to the Agentic Engineering Platform are documented here.
 - PostgreSQL image upgraded to `pgvector/pgvector:pg16`
 - `scripts/verify_dev_environment.py` and `scripts/generate_prometheus_config.py`
 - README local development onboarding (clone → `make dev-up`)
+
+### Added (US-01.04)
+
+- Alembic migrations for orchestrator, agents, tools, memory, and approval schemas
+- Row-level security (`tenant_isolation` policy) on all platform tables
+- `make migrate` runs versioned migrations via `scripts/run_migrations.py`
+- `aep_common.db` tenant context helpers for RLS-scoped queries
+- Database migration and RLS isolation tests (`story_us_01_04` marker)

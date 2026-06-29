@@ -27,3 +27,17 @@
 | Grafana | Yes | No | Add grafana service + health dashboard |
 | Vault | No | No | Defer to PI-08 |
 | Kubernetes | No | No | Defer to deployment PI |
+
+## US-01.04
+
+| Component | Required for this story | Already Exists | Action |
+|-----------|------------------------|----------------|--------|
+| Docker Compose | Yes | Yes (US-01.02) | Use existing postgres service |
+| PostgreSQL | Yes | Yes | Run Alembic migrations via `make migrate` |
+| Kafka | No | Yes | Not required for database story |
+| Redis | No | Yes | Not required for database story |
+| OpenTelemetry | No | Yes | Not required for database story |
+| Prometheus | No | Yes | Not required for database story |
+| Grafana | No | Yes | Not required for database story |
+| Vault | No | No | Defer to PI-08 |
+| Kubernetes | No | No | Defer to deployment PI |

@@ -32,4 +32,5 @@ test:
 	python -m pytest src/tests -m "story_us_01_01 and not integration and not e2e" -v --cov=aep_common --cov-fail-under=80
 
 migrate:
-	@echo "Migrations deferred to US-01.04"
+	pip install alembic sqlalchemy psycopg2-binary
+	python scripts/run_migrations.py
