@@ -21,10 +21,12 @@ target_metadata = None
 
 
 def _database_url() -> str:
-    return os.environ.get("POSTGRES_DSN") or os.environ.get(
-        "DATABASE_URL",
-        "postgresql://aep:aep@localhost:5432/aep",
-    )
+    url = os.environ.get("POSTGRES_DSN") or os.environ.get("DATABASE_URL")
+    if not url:
+        raise RuntimeError(
+            "POSTGRES_DSN or DATABASE_URL must be set for Alembic migrations"
+        )
+    return url
 
 
 def run_migrations_offline() -> None:

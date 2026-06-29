@@ -11,11 +11,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _require_env(name: str) -> str | None:
+    value = os.environ.get(name)
+    if not value:
+        print(f"{name} must be set (see .env.example)", file=sys.stderr)
+        return None
+    return value
+
+
 def main() -> int:
-    dsn = os.environ.get("POSTGRES_DSN") or os.environ.get(
-        "DATABASE_URL",
-        "postgresql://aep:aep@localhost:5432/aep",
-    )
+    from aep_common.db import DatabaseConfigurationError, get_postgres_dsn
+
+    try:
+        dsn = get_postgres_dsn()
+    except DatabaseConfigurationError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    if _require_env("AEP_APP_DB_PASSWORD") is None:
+        return 1
     os.environ["POSTGRES_DSN"] = dsn
     print(f"Running Alembic migrations against {dsn.split('@')[-1]}")
     return subprocess.call(

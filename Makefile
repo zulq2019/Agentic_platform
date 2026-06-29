@@ -32,5 +32,6 @@ test:
 	python -m pytest src/tests -m "story_us_01_01 and not integration and not e2e" -v --cov=aep_common --cov-fail-under=80
 
 migrate:
-	pip install alembic sqlalchemy psycopg2-binary
+	pip install -r requirements-dev.txt
+	pip install -e "src/shared/aep_common[health]"
 	python scripts/run_migrations.py

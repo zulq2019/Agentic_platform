@@ -67,15 +67,28 @@ def test_migrations_apply_rls_policy_pattern():
 
 @pytest.mark.story_us_01_04
 def test_env_example_documents_postgres_dsn():
-    """Root .env.example documents POSTGRES_DSN for migrations."""
+    """Root .env.example documents database connection variables."""
     env_example = (ROOT / ".env.example").read_text(encoding="utf-8")
     assert "POSTGRES_DSN=" in env_example
+    assert "AEP_APP_DB_PASSWORD=" in env_example
+    assert "AEP_APP_POSTGRES_DSN=" in env_example
+
+
+@pytest.mark.story_us_01_04
+def test_app_role_migration_reads_password_from_environment():
+    """Migration 005 must not embed application role credentials in source."""
+    content = (ROOT / "migrations" / "versions" / "005_app_role_grants.py").read_text(
+        encoding="utf-8"
+    )
+    assert "AEP_APP_DB_PASSWORD" in content
+    assert "APP_PASSWORD =" not in content
 
 
 @pytest.mark.story_us_01_04
 def test_aep_common_db_exports_tenant_helpers():
     """aep_common.db provides tenant context helpers for RLS queries."""
     from aep_common.db import (  # noqa: PLC0415
+        DatabaseConfigurationError,
         get_app_postgres_dsn,
         get_postgres_dsn,
         set_tenant_context,
@@ -86,3 +99,4 @@ def test_aep_common_db_exports_tenant_helpers():
     assert callable(get_app_postgres_dsn)
     assert callable(set_tenant_context)
     assert callable(tenant_connection)
+    assert issubclass(DatabaseConfigurationError, RuntimeError)

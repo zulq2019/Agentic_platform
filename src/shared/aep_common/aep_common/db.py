@@ -8,24 +8,29 @@ from contextlib import asynccontextmanager
 
 import asyncpg
 
-DEFAULT_POSTGRES_DSN = "postgresql://aep:aep@localhost:5432/aep"
-DEFAULT_APP_POSTGRES_DSN = "postgresql://aep_app:aep_app@localhost:5432/aep"
+
+class DatabaseConfigurationError(RuntimeError):
+    """Raised when required database environment variables are missing."""
 
 
 def get_postgres_dsn() -> str:
     """Return the configured PostgreSQL DSN from environment variables."""
-    return os.environ.get("POSTGRES_DSN") or os.environ.get(
-        "DATABASE_URL",
-        DEFAULT_POSTGRES_DSN,
-    )
+    dsn = os.environ.get("POSTGRES_DSN") or os.environ.get("DATABASE_URL")
+    if not dsn:
+        raise DatabaseConfigurationError(
+            "POSTGRES_DSN or DATABASE_URL must be set (see .env.example)"
+        )
+    return dsn
 
 
 def get_app_postgres_dsn() -> str:
     """Return the tenant-scoped application role DSN subject to RLS policies."""
-    return os.environ.get("AEP_APP_POSTGRES_DSN") or os.environ.get(
-        "APP_POSTGRES_DSN",
-        DEFAULT_APP_POSTGRES_DSN,
-    )
+    dsn = os.environ.get("AEP_APP_POSTGRES_DSN") or os.environ.get("APP_POSTGRES_DSN")
+    if not dsn:
+        raise DatabaseConfigurationError(
+            "AEP_APP_POSTGRES_DSN or APP_POSTGRES_DSN must be set (see .env.example)"
+        )
+    return dsn
 
 
 async def set_tenant_context(conn: asyncpg.Connection, tenant_id: str) -> None:
@@ -50,7 +55,11 @@ async def tenant_connection(tenant_id: str) -> AsyncIterator[asyncpg.Connection]
 async def postgres_is_reachable() -> bool:
     """Return True when PostgreSQL accepts connections using the configured DSN."""
     try:
-        conn = await asyncpg.connect(get_postgres_dsn())
+        dsn = get_postgres_dsn()
+    except DatabaseConfigurationError:
+        return False
+    try:
+        conn = await asyncpg.connect(dsn)
     except (OSError, asyncpg.PostgresError):
         return False
     await conn.close()

@@ -36,8 +36,7 @@ def upgrade() -> None:
         """)
     op.execute("""
         CREATE INDEX IF NOT EXISTS idx_memory_embedding
-            ON memory.entries USING ivfflat (embedding vector_cosine_ops)
-            WITH (lists = 100)
+            ON memory.entries USING hnsw (embedding vector_cosine_ops)
         """)
     op.execute("""
         CREATE INDEX IF NOT EXISTS idx_memory_tenant_type

@@ -7,6 +7,7 @@ Create Date: 2026-06-29
 
 from __future__ import annotations
 
+import os
 from typing import Sequence, Union
 
 from alembic import op
@@ -19,15 +20,25 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 APP_ROLE = "aep_app"
-APP_PASSWORD = "aep_app"
+
+
+def _app_db_password() -> str:
+    password = os.environ.get("AEP_APP_DB_PASSWORD")
+    if not password:
+        raise RuntimeError(
+            "AEP_APP_DB_PASSWORD must be set before running migrations "
+            "(see .env.example)"
+        )
+    return password.replace("'", "''")
 
 
 def upgrade() -> None:
+    password = _app_db_password()
     op.execute(f"""
         DO $$
         BEGIN
             IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{APP_ROLE}') THEN
-                CREATE ROLE {APP_ROLE} WITH LOGIN PASSWORD '{APP_PASSWORD}'
+                CREATE ROLE {APP_ROLE} WITH LOGIN PASSWORD '{password}'
                     NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT;
             END IF;
         END

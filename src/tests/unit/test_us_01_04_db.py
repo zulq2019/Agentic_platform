@@ -8,6 +8,7 @@ import asyncpg
 import pytest
 
 from aep_common.db import (
+    DatabaseConfigurationError,
     get_app_postgres_dsn,
     get_postgres_dsn,
     postgres_is_reachable,
@@ -95,9 +96,32 @@ async def test_postgres_is_reachable_returns_true_when_connect_succeeds():
 
 
 @pytest.mark.story_us_01_04
+def test_get_postgres_dsn_raises_when_unconfigured(monkeypatch):
+    """Missing DSN must fail fast instead of using embedded credentials."""
+    monkeypatch.delenv("POSTGRES_DSN", raising=False)
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+
+    with pytest.raises(DatabaseConfigurationError, match="POSTGRES_DSN"):
+        get_postgres_dsn()
+
+
+@pytest.mark.story_us_01_04
+def test_get_app_postgres_dsn_raises_when_unconfigured(monkeypatch):
+    monkeypatch.delenv("AEP_APP_POSTGRES_DSN", raising=False)
+    monkeypatch.delenv("APP_POSTGRES_DSN", raising=False)
+
+    with pytest.raises(DatabaseConfigurationError, match="AEP_APP_POSTGRES_DSN"):
+        get_app_postgres_dsn()
+
+
+@pytest.mark.story_us_01_04
 @pytest.mark.asyncio
-async def test_tenant_connection_sets_context_and_closes():
+async def test_tenant_connection_sets_context_and_closes(monkeypatch):
     """tenant_connection must scope RLS and always release the connection."""
+    monkeypatch.setenv(
+        "AEP_APP_POSTGRES_DSN",
+        "postgresql://aep_app:secret@db:5432/aep",
+    )
     conn = AsyncMock()
     with patch("aep_common.db.asyncpg.connect", return_value=conn):
         async with tenant_connection("tenant-beta") as scoped:

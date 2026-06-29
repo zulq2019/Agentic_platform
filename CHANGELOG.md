@@ -31,3 +31,9 @@ All notable changes to the Agentic Engineering Platform are documented here.
 - `make migrate` runs versioned migrations via `scripts/run_migrations.py`
 - `aep_common.db` tenant context helpers for RLS-scoped queries
 - Database migration and RLS isolation tests (`story_us_01_04` marker)
+- CI runs `story_us_01_04` unit tests; `AEP_APP_DB_PASSWORD` required for `make migrate`
+
+### Changed (US-01.04)
+
+- Database DSNs and app role password must be supplied via environment variables (no hardcoded defaults in library or migration code)
+- Memory embedding index uses HNSW instead of IVFFlat for empty-table safety

@@ -14,8 +14,17 @@ from .test_migrations import _run_migrations
 
 @pytest.fixture(scope="module")
 def requires_postgres():
+    import os
+
     from aep_common.db import postgres_is_reachable
 
+    required = ("POSTGRES_DSN", "AEP_APP_POSTGRES_DSN", "AEP_APP_DB_PASSWORD")
+    missing = [name for name in required if not os.environ.get(name)]
+    if missing:
+        pytest.skip(
+            "Set POSTGRES_DSN, AEP_APP_POSTGRES_DSN, and AEP_APP_DB_PASSWORD "
+            "for integration tests (see .env.example)"
+        )
     if not asyncio.run(postgres_is_reachable()):
         pytest.skip("PostgreSQL not reachable — start with make dev-up")
 
