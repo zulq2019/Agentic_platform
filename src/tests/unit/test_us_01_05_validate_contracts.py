@@ -115,7 +115,9 @@ def test_main_single_document_mode_exits_zero(validate_contract_module) -> None:
 
 
 @pytest.mark.story_us_01_05
-def test_main_bulk_mode_with_contracts_path_exits_zero(validate_contract_module) -> None:
+def test_main_bulk_mode_with_contracts_path_exits_zero(
+    validate_contract_module,
+) -> None:
     """CLI bulk mode accepts the repository contracts/ path."""
     import sys as sys_module
 
@@ -162,4 +164,3 @@ def test_validate_contracts_directory_validates_mapped_examples(
     )
 
     validate_contract_module.validate_contracts_directory(tmp_path)
-

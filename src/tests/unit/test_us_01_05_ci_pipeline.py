@@ -80,7 +80,11 @@ def test_ac_01_04_container_build_matrix_covers_sixteen_services(
     """
     CAP-06 requires all 16 platform container images to build in CI.
     """
-    found = {line.strip().removeprefix("- id: ") for line in ci_workflow_text.splitlines() if line.strip().startswith("- id: ")}
+    found = {
+        line.strip().removeprefix("- id: ")
+        for line in ci_workflow_text.splitlines()
+        if line.strip().startswith("- id: ")
+    }
     assert found == EXPECTED_CONTAINER_IDS
 
 

@@ -126,7 +126,7 @@ jobs:
         run: docker build -f ${{ matrix.file }} -t aep-ci/${{ matrix.id }}:test .
 
       - name: Trivy image scan
-        uses: aquasecurity/trivy-action@0.27.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: aep-ci/${{ matrix.id }}:test
           format: table
