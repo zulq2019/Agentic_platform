@@ -66,6 +66,10 @@ jobs:
         with:
           go-version: "1.22"
 
+      - name: Download Go modules
+        working-directory: src/platform/gateway
+        run: go mod tidy && go mod download
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
@@ -122,7 +126,7 @@ jobs:
         run: docker build -f ${{ matrix.file }} -t aep-ci/${{ matrix.id }}:test .
 
       - name: Trivy image scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.27.0
         with:
           image-ref: aep-ci/${{ matrix.id }}:test
           format: table
