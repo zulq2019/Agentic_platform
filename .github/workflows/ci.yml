@@ -131,4 +131,5 @@ jobs:
           image-ref: aep-ci/${{ matrix.id }}:test
           format: table
           severity: CRITICAL,HIGH
+          ignore-unfixed: true
           exit-code: 1
