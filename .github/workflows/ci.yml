@@ -44,7 +44,7 @@ jobs:
           python -m pytest src/tests -m "story_us_01_01 and not integration and not e2e" -v --cov=aep_common.app --cov=aep_common.dependencies --cov=aep_common.health --cov=aep_common.logging --cov=aep_common.metrics --cov-report=term-missing --cov-fail-under=80
 
       - name: Unit tests (US-01.05)
-        run: python -m pytest src/tests -m "story_us_01_05 and not integration" -v
+        run: python -m pytest src/tests -m "story_us_01_05 and not integration" -v --cov=validate_contract --cov-report=term-missing --cov-fail-under=80
 
       - name: Contract validation
         run: python scripts/validate_contract.py contracts/
