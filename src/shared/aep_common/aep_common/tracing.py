@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Protocol
+from collections.abc import Iterator
+from contextlib import AbstractContextManager, contextmanager
+from typing import TYPE_CHECKING, Any, Protocol
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 _tracer_provider: object | None = None
 _configured = False
@@ -15,11 +20,11 @@ class _NoOpSpan:
 
 
 class _NoOpTracer:
-    def start_as_current_span(self, name: str, **kwargs: Any):  # noqa: ANN201
-        from contextlib import contextmanager
-
+    def start_as_current_span(
+        self, name: str, **kwargs: Any
+    ) -> AbstractContextManager[_NoOpSpan]:
         @contextmanager
-        def _cm():
+        def _cm() -> Iterator[_NoOpSpan]:
             yield _NoOpSpan()
 
         return _cm()
@@ -48,7 +53,12 @@ def configure_tracing(
     if _sdk_disabled():
         return False
 
-    endpoint = (otlp_endpoint or os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")).strip()
+    raw_endpoint = (
+        otlp_endpoint
+        if otlp_endpoint is not None
+        else os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
+    )
+    endpoint = raw_endpoint.strip()
     if not endpoint:
         return False
 
@@ -98,7 +108,7 @@ def get_tracer(name: str) -> Any:
         return _NoOpTracer()
 
 
-def instrument_fastapi(app: object) -> bool:
+def instrument_fastapi(app: FastAPI) -> bool:
     """Auto-instrument a FastAPI app when instrumentation packages are installed."""
     try:
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
