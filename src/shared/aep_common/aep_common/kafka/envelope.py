@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, cast
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -49,7 +49,7 @@ class EventEnvelope(BaseModel):
 
 def load_event_schema() -> dict[str, Any]:
     with find_event_envelope_schema_path().open(encoding="utf-8") as handle:
-        return json.load(handle)
+        return cast(dict[str, Any], json.load(handle))
 
 
 def validate_envelope_dict(message: dict[str, Any]) -> EventEnvelope:
@@ -60,7 +60,7 @@ def validate_envelope_dict(message: dict[str, Any]) -> EventEnvelope:
         raise EventEnvelopeValidationError(str(exc)) from exc
 
     try:
-        import jsonschema
+        import jsonschema  # type: ignore[import-untyped]
     except ImportError:
         return envelope
 

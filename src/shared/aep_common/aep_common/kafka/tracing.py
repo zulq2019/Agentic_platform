@@ -16,7 +16,7 @@ class _NoOpSpan:
 def kafka_span(name: str, **attributes: Any) -> Iterator[_NoOpSpan]:
     """Start an OTEL span when opentelemetry is installed; otherwise no-op."""
     try:
-        from opentelemetry import trace
+        from opentelemetry import trace  # type: ignore[import-not-found]
 
         tracer = trace.get_tracer("aep_common.kafka")
         with tracer.start_as_current_span(name) as span:
