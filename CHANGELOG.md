@@ -28,7 +28,7 @@ All notable changes to the Agentic Engineering Platform are documented here.
 ### Changed (US-01.05)
 
 - Trivy container scans use `ignore-unfixed: true` during PI-01 bootstrap so CI blocks only on vendor-patched CRITICAL/HIGH CVEs (PI-level zero-unfixed-CVE gate deferred — see TASKS.md)
-- Gateway image upgraded to Go 1.25.10 (via `GOTOOLCHAIN`) and Alpine 3.21 for patched stdlib and dependency CVEs
+- Gateway image upgraded to Go 1.25.11 (via `GOTOOLCHAIN`) and Alpine 3.21 for patched stdlib and dependency CVEs
 
 ### Added (US-01.02)
 

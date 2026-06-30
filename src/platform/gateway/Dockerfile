@@ -1,6 +1,6 @@
 FROM golang:1.25-alpine3.21 AS builder
 
-ENV GOTOOLCHAIN=go1.25.10
+ENV GOTOOLCHAIN=go1.25.11
 
 WORKDIR /build
 COPY src/platform/gateway/go.mod src/platform/gateway/go.sum* ./
