@@ -104,18 +104,19 @@ def test_observability_config_files_exist():
 
 
 @pytest.mark.story_us_01_02
-def test_verify_dev_environment_script_checks_three_observability_endpoints():
+def test_verify_dev_environment_script_checks_observability_endpoints():
     module = _load_script("verify_dev_environment", "scripts/verify_dev_environment.py")
 
-    assert len(module.OBSERVABILITY_CHECKS) == 3
+    assert len(module.OBSERVABILITY_CHECKS) == 4
     urls = [url for _, url in module.OBSERVABILITY_CHECKS]
     assert "http://localhost:9090/-/ready" in urls
     assert "http://localhost:3001/api/health" in urls
     assert "http://localhost:13133/health" in urls
+    assert "http://localhost:3200/ready" in urls
 
     with patch.object(module, "check_url", return_value=True) as mock_check:
         assert module.main() == 0
-    assert mock_check.call_count == 3
+    assert mock_check.call_count == 4
 
 
 @pytest.mark.story_us_01_02

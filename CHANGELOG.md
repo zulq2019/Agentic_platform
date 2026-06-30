@@ -69,3 +69,13 @@ All notable changes to the Agentic Engineering Platform are documented here.
 - FastAPI middleware in `create_platform_app` binds `x-task-id`, `x-workflow-run-id`, `x-tenant-id` per request
 - Kafka `EventConsumer` binds envelope correlation IDs for handler-scoped structured logs
 - CI job for `story_us_01_06` with ≥80% coverage on `aep_common.logging` and `aep_common.app`
+
+### Added (US-01.07)
+
+- `aep_common.tracing`: OTLP trace export, FastAPI auto-instrumentation, shared `get_tracer()`
+- OTEL collector exports traces to Grafana Tempo (`observability/tempo/tempo.yaml`)
+- Grafana Tempo datasource provisioned; `verify_dev_environment.py` checks Tempo readiness
+- Platform app lifespan configures tracing from `otel_exporter_otlp_endpoint`
+- API Gateway (Go): OTLP trace export via `otelecho` when `OTEL_EXPORTER_OTLP_ENDPOINT` is set
+- `ACCEPTANCE_CRITERIA.md` AC-01.07 and `INFRASTRUCTURE.md` US-01.07 sections added
+- CI job for `story_us_01_07` with ≥80% coverage on `aep_common.tracing` and `aep_common.app`
