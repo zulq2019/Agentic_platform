@@ -17,6 +17,19 @@ All notable changes to the Agentic Engineering Platform are documented here.
 - Service config defaults no longer embed database credentials; use `POSTGRES_DSN` env var
 - Logging includes correlation ID context vars (`task_id`, `workflow_run_id`, `tenant_id`)
 
+### Added (US-01.05)
+
+- CI pipeline Phase 1: parallel quality, golangci-lint, and 16-container build matrix
+- `scripts/validate_contract.py` bulk mode for `contracts/` directory validation
+- Security gates: pip-audit, detect-secrets baseline, Trivy image scan (CRITICAL/HIGH, fixable CVEs only)
+- mypy --strict on `aep_common`; acceptance tests for AC-01.04 CI pipeline criteria
+- US-01.05 CI enforces ≥80% coverage on `validate_contract.py`
+
+### Changed (US-01.05)
+
+- Trivy container scans use `ignore-unfixed: true` during PI-01 bootstrap so CI blocks only on vendor-patched CRITICAL/HIGH CVEs (PI-level zero-unfixed-CVE gate deferred — see TASKS.md)
+- Gateway image upgraded to Go 1.25.11 (via `GOTOOLCHAIN`) and Alpine 3.21 for patched stdlib and dependency CVEs
+
 ### Added (US-01.02)
 
 - Observability stack in docker-compose: OTEL Collector, Prometheus, Grafana

@@ -1,4 +1,6 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.25-alpine3.21 AS builder
+
+ENV GOTOOLCHAIN=go1.25.11
 
 WORKDIR /build
 COPY src/platform/gateway/go.mod src/platform/gateway/go.sum* ./
@@ -6,7 +8,7 @@ RUN go mod download 2>/dev/null || true
 COPY src/platform/gateway/ ./
 RUN go mod tidy && CGO_ENABLED=0 go build -o /gateway .
 
-FROM alpine:3.19
+FROM alpine:3.21
 RUN addgroup -g 1000 aep && adduser -u 1000 -G aep -D aep
 WORKDIR /app
 COPY --from=builder /gateway /app/gateway

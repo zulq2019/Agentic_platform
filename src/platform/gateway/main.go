@@ -137,7 +137,7 @@ func tcpCheck(ctx context.Context, address string) string {
 	if err != nil {
 		return "error"
 	}
-	conn.Close()
+	_ = conn.Close()
 	return "ok"
 }
 

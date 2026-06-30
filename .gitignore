@@ -33,6 +33,7 @@ credentials.json
 dist/
 build/
 *.log
+.coverage
 
 # Reference architecture source (keep locally, not in repo unless desired)
 # docs/reference/*.docx

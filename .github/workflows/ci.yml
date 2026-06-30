@@ -5,9 +5,15 @@ on:
     branches: [main, master, develop, "feature/**"]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lint-and-test:
+  quality:
+    name: lint-and-test
     runs-on: ubuntu-latest
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
 
@@ -18,16 +24,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ruff black pytest pytest-asyncio httpx pytest-cov
+          pip install ruff black pytest pytest-asyncio httpx pytest-cov mypy types-redis pip-audit detect-secrets
           pip install -r requirements-dev.txt
           pip install -e "src/shared/aep_common[health]"
           pip install "fastapi>=0.110.0" "uvicorn[standard]>=0.27.0"
 
       - name: Ruff
-        run: ruff check src/shared/aep_common src/platform src/tests migrations scripts/run_migrations.py
+        run: ruff check src/shared/aep_common src/platform src/tests migrations scripts
 
       - name: Black
-        run: black --check src/shared/aep_common src/platform src/tests migrations scripts/run_migrations.py
+        run: black --check src/shared/aep_common src/platform src/tests migrations scripts
+
+      - name: Mypy
+        run: python -m mypy --strict src/shared/aep_common/aep_common
 
       - name: Unit tests (US-01.01)
         run: |
@@ -37,8 +46,21 @@ jobs:
       - name: Unit tests (US-01.04)
         run: python -m pytest src/tests -m "story_us_01_04 and not integration" -v --cov=aep_common.db --cov-report=term-missing --cov-fail-under=80
 
+      - name: Unit tests (US-01.05)
+        run: python -m pytest src/tests -m "story_us_01_05 and not integration" -v --cov=validate_contract --cov-report=term-missing --cov-fail-under=80
+
+      - name: Contract validation
+        run: python scripts/validate_contract.py contracts/
+
+      - name: pip-audit
+        run: pip-audit -r requirements-dev.txt
+
+      - name: detect-secrets
+        run: detect-secrets scan --baseline .secrets.baseline
+
   database-integration:
     runs-on: ubuntu-latest
+    timeout-minutes: 8
     services:
       postgres:
         image: pgvector/pgvector:pg16
@@ -74,3 +96,82 @@ jobs:
 
       - name: Integration tests (US-01.04 AC-01.03)
         run: python -m pytest src/tests/db src/tests/concurrency -m "story_us_01_04 and integration" -v
+
+  golangci:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache-dependency-path: src/platform/gateway/go.sum
+
+      - name: Download Go modules
+        working-directory: src/platform/gateway
+        run: go mod tidy && go mod download
+
+      - name: golangci-lint
+        working-directory: src/platform/gateway
+        run: |
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6
+          golangci-lint run --timeout=5m
+
+  container-build:
+    name: container-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: gateway
+            file: src/platform/gateway/Dockerfile
+          - id: orchestrator
+            file: src/platform/orchestrator/Dockerfile
+          - id: workflow
+            file: src/platform/workflow/Dockerfile
+          - id: task
+            file: src/platform/task/Dockerfile
+          - id: runtime
+            file: src/platform/runtime/Dockerfile
+          - id: agent-registry
+            file: src/platform/registry/agent-registry/Dockerfile
+          - id: tool-registry
+            file: src/platform/registry/tool-registry/Dockerfile
+          - id: model-router
+            file: src/platform/registry/model-router/Dockerfile
+          - id: auth-service
+            file: src/platform/services/auth-service/Dockerfile
+          - id: rbac-service
+            file: src/platform/services/rbac-service/Dockerfile
+          - id: approval-service
+            file: src/platform/services/approval-service/Dockerfile
+          - id: memory-service
+            file: src/platform/services/memory-service/Dockerfile
+          - id: audit-service
+            file: src/platform/services/audit-service/Dockerfile
+          - id: secrets-service
+            file: src/platform/services/secrets-service/Dockerfile
+          - id: policy-engine
+            file: src/platform/services/policy-engine/Dockerfile
+          - id: config-service
+            file: src/platform/services/config-service/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        run: docker build -f ${{ matrix.file }} -t aep-ci/${{ matrix.id }}:test .
+
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: aep-ci/${{ matrix.id }}:test
+          format: table
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: 1
