@@ -3,6 +3,7 @@
 dev-up: compose
 	docker compose up -d --build
 	python scripts/wait_for_health.py
+	python scripts/verify_kafka_topology.py
 	python scripts/verify_dev_environment.py
 
 dev-down:
@@ -13,6 +14,7 @@ dev-logs:
 
 dev-status:
 	python scripts/wait_for_health.py
+	python scripts/verify_kafka_topology.py
 	python scripts/verify_dev_environment.py
 
 compose:
@@ -27,7 +29,7 @@ lint:
 	black --check src/shared/aep_common src/platform
 
 test:
-	pip install -e "src/shared/aep_common[health]" pytest pytest-asyncio httpx "fastapi>=0.110.0" pytest-cov
+	pip install -e "src/shared/aep_common[health,kafka]" pytest pytest-asyncio httpx "fastapi>=0.110.0" pytest-cov pyyaml
 	python scripts/run_tests.py
 	python -m pytest src/tests -m "story_us_01_01 and not integration and not e2e" -v --cov=aep_common --cov-fail-under=80
 

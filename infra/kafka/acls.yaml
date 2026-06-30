@@ -1,0 +1,43 @@
+# Kafka topic ACL catalog for PI-01 (CAP-04).
+# Broker ACL apply deferred to deployment PI / Sprint 2.2 (local PLAINTEXT has no authorizer).
+
+acls:
+  - principal: orchestrator-service
+    operations: [WRITE]
+    topics: [aep.task.created, aep.workflow.state.changed, aep.approval.requested]
+  - principal: orchestrator-service
+    operations: [READ]
+    topics: [aep.task.completed, aep.task.failed, aep.agent.completed, aep.agent.failed, aep.approval.decided]
+  - principal: agent-runtime
+    operations: [WRITE]
+    topics:
+      - aep.task.completed
+      - aep.task.failed
+      - aep.agent.started
+      - aep.agent.completed
+      - aep.agent.failed
+      - aep.memory.written
+  - principal: agent-runtime
+    operations: [READ]
+    topics: [aep.task.created]
+  - principal: approval-service
+    operations: [READ]
+    topics: [aep.approval.requested]
+  - principal: approval-service
+    operations: [WRITE]
+    topics: [aep.approval.decided]
+  - principal: memory-service
+    operations: [READ]
+    topics: [aep.memory.written]
+  - principal: audit-service
+    operations: [READ]
+    topics:
+      - aep.agent.started
+      - aep.agent.completed
+      - aep.agent.failed
+      - aep.workflow.state.changed
+      - aep.audit.event
+      - aep.dlq
+  - principal: all-services
+    operations: [WRITE]
+    topics: [aep.audit.event, aep.dlq]

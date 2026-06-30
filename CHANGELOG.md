@@ -37,6 +37,14 @@ All notable changes to the Agentic Engineering Platform are documented here.
 - `scripts/verify_dev_environment.py` and `scripts/generate_prometheus_config.py`
 - README local development onboarding (clone → `make dev-up`)
 
+### Added (US-01.03)
+
+- Kafka topic catalog (11 topics + `aep.dlq`) with idempotent provisioning via `kafka-init`
+- `aep_common.kafka`: EventEnvelope validation, producer/consumer with DLQ routing
+- `scripts/provision_kafka_topics.py` and `scripts/verify_kafka_topology.py`
+- ACL catalog at `infra/kafka/acls.yaml` (broker enforcement deferred to deployment PI / Sprint 2.2)
+- Host Kafka access moved to `localhost:9094` (containers continue using `kafka:9092`)
+
 ### Added (US-01.04)
 
 - Alembic migrations for orchestrator, agents, tools, memory, and approval schemas
