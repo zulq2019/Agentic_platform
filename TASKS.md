@@ -842,6 +842,17 @@ Tracked gaps explicitly deferred during PI-01 bootstrap. Each item has an owner 
 
 ---
 
+## PI-01 Deferred Quality Gates (tracked for PI closure)
+
+| Item | Deferred from | Owner | Priority | Target |
+|------|---------------|-------|----------|--------|
+| `mypy --strict` in CI for all PI-01 Python | US-01.04 | Platform Engineer | P1 | PI-01 closure |
+| `detect-secrets scan` in CI | US-01.04 | Platform Engineer | P1 | PI-01 closure |
+| `pip-audit` in CI | US-01.04 | Platform Engineer | P1 | PI-01 closure |
+| Contract validation + container build CI jobs (AC-01.04) | US-01.04 | Platform Engineer | P0 | US-01.04 CI story |
+
+---
+
 ## Global Definition of Done
 
 A task is done when:
