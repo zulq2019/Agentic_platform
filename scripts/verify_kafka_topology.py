@@ -84,7 +84,10 @@ def verify_topics(*, bootstrap_servers: str | None = None) -> list[str]:
             )
 
         for partition in partitions.values():
-            if partition.replicas and len(partition.replicas) != LOCAL_REPLICATION_FACTOR:
+            if (
+                partition.replicas
+                and len(partition.replicas) != LOCAL_REPLICATION_FACTOR
+            ):
                 errors.append(
                     f"topic {spec.name}: expected replication factor "
                     f"{LOCAL_REPLICATION_FACTOR}, found {len(partition.replicas)}"

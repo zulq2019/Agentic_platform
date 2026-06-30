@@ -23,7 +23,9 @@ class KafkaMessage(Protocol):
 class MessageConsumer(Protocol):
     def poll(self, timeout: float = 1.0) -> KafkaMessage | None: ...
 
-    def commit(self, message: KafkaMessage | None = None, asynchronous: bool = False) -> None: ...
+    def commit(
+        self, message: KafkaMessage | None = None, asynchronous: bool = False
+    ) -> None: ...
 
     def produce(
         self,
@@ -53,7 +55,9 @@ class EventConsumer:
         self._consumer = consumer
         self._service_name = service_name
         self._handler = handler
-        self._processed_event_ids = processed_event_ids if processed_event_ids is not None else set()
+        self._processed_event_ids = (
+            processed_event_ids if processed_event_ids is not None else set()
+        )
         self._logger = get_logger(service_name)
 
     def process_next(self, *, poll_timeout: float = 1.0) -> bool:

@@ -24,7 +24,9 @@ def _load_script(name: str, path: str):
 def test_verify_kafka_topology_returns_nonzero_when_topics_missing():
     module = _load_script("verify_kafka_topology", "scripts/verify_kafka_topology.py")
 
-    with patch.object(module, "verify_topology", return_value=(False, ["missing topic"])):
+    with patch.object(
+        module, "verify_topology", return_value=(False, ["missing topic"])
+    ):
         assert module.main() == 1
 
 

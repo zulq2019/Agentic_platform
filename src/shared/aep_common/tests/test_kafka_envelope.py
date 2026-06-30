@@ -97,4 +97,3 @@ def test_validate_envelope_dict_applies_jsonschema_allof_rules():
 
     with pytest.raises(EventEnvelopeValidationError):
         validate_envelope_dict(payload)
-
