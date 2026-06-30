@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import subprocess
 import sys
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 import pytest

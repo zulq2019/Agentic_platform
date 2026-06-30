@@ -87,6 +87,23 @@ def test_ac_6_grafana_dashboard_and_tempo_datasource_exist():
 
 
 @pytest.mark.story_us_01_07
+def test_ac_2_gateway_wires_otel_exporter_and_echo_middleware():
+    """
+    AC-01.07: Given the api-gateway with OTEL_EXPORTER_OTLP_ENDPOINT set,
+    when the gateway source is built, then OTLP export and otelecho middleware are wired.
+    """
+    main_go = (ROOT / "src/platform/gateway/main.go").read_text(encoding="utf-8")
+    tracing_go = (ROOT / "src/platform/gateway/tracing.go").read_text(encoding="utf-8")
+    compose = (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+
+    assert "otelecho.Middleware" in main_go
+    assert "configureTracing" in main_go
+    assert "OTEL_EXPORTER_OTLP_ENDPOINT" in tracing_go
+    assert "api-gateway:" in compose
+    assert "OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317" in compose
+
+
+@pytest.mark.story_us_01_07
 def test_ac_7_compose_includes_tempo_and_otel_collector():
     """
     US-01.07: Given docker-compose.yml, when observability services are defined,
