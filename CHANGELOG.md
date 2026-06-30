@@ -15,7 +15,6 @@ All notable changes to the Agentic Engineering Platform are documented here.
 
 - Python service Dockerfiles use multi-stage builds with non-root runtime user
 - Service config defaults no longer embed database credentials; use `POSTGRES_DSN` env var
-- Logging includes correlation ID context vars (`task_id`, `workflow_run_id`, `tenant_id`)
 
 ### Added (US-01.05)
 
@@ -63,3 +62,10 @@ All notable changes to the Agentic Engineering Platform are documented here.
 
 - CI runs US-01.04 database integration tests (AC-01.03) against Postgres service job
 - Migration `005_app_role_grants` updates `aep_app` password on re-run and revokes default privileges on downgrade
+
+### Added (US-01.06)
+
+- `aep_common.logging`: HTTP header binding, envelope correlation, `correlation_context` manager
+- FastAPI middleware in `create_platform_app` binds `x-task-id`, `x-workflow-run-id`, `x-tenant-id` per request
+- Kafka `EventConsumer` binds envelope correlation IDs for handler-scoped structured logs
+- CI job for `story_us_01_06` with ≥80% coverage on `aep_common.logging` and `aep_common.app`

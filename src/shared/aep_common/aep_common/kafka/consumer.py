@@ -9,7 +9,7 @@ from aep_common.kafka.dlq import build_dlq_record, dlq_record_to_bytes, dlq_topi
 from aep_common.kafka.envelope import EventEnvelope, parse_envelope_bytes
 from aep_common.kafka.exceptions import EventEnvelopeValidationError
 from aep_common.kafka.tracing import kafka_span
-from aep_common.logging import get_logger
+from aep_common.logging import correlation_context, get_logger
 
 
 class KafkaMessage(Protocol):
@@ -89,7 +89,12 @@ class EventConsumer:
                 return True
 
             try:
-                self._handler(envelope)
+                with correlation_context(
+                    task_id=str(envelope.task_id),
+                    workflow_run_id=str(envelope.workflow_run_id),
+                    tenant_id=envelope.tenant_id,
+                ):
+                    self._handler(envelope)
             except Exception as exc:
                 self._reject_to_dlq(
                     message.topic(),

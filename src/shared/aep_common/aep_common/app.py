@@ -13,7 +13,11 @@ from starlette.responses import Response
 
 from aep_common.dependencies import check_kafka, check_postgres, check_redis
 from aep_common.health import create_health_router
-from aep_common.logging import get_logger
+from aep_common.logging import (
+    bind_correlation_from_headers,
+    clear_correlation_ids,
+    get_logger,
+)
 from aep_common.metrics import create_service_metrics, metrics_endpoint
 
 __all__ = ["PlatformServiceSettings", "create_platform_app"]
@@ -69,6 +73,17 @@ def create_platform_app(settings: PlatformServiceSettings) -> FastAPI:
             "contract_version": settings.contract_version,
             "environment": settings.environment,
         }
+
+    @app.middleware("http")
+    async def bind_request_correlation(
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+    ) -> Response:
+        bind_correlation_from_headers(request.headers)
+        try:
+            return await call_next(request)
+        finally:
+            clear_correlation_ids()
 
     @app.middleware("http")
     async def record_metrics(
