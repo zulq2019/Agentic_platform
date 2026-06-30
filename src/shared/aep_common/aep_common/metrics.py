@@ -23,6 +23,7 @@ def create_service_metrics(service_name: str) -> tuple[Counter, Histogram]:
             ["service", "method"],
             buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0),
         )
+    assert _requests_total is not None and _request_duration is not None
     _requests_total.labels(service=service_name, method="GET", status="200")
     _request_duration.labels(service=service_name, method="GET")
     return _requests_total, _request_duration

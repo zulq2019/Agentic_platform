@@ -811,6 +811,17 @@ Work is organised as **Epic → Feature → Story → Task**. Each story include
 
 ---
 
+## PI-01 Deferrals
+
+Tracked gaps explicitly deferred during PI-01 bootstrap. Each item has an owner and a target story/PI gate.
+
+| ID | Story | Item | Owner | Priority | Target |
+|----|-------|------|-------|----------|--------|
+| DEF-PI01-01 | US-01.05 | Trivy `ignore-unfixed: true` — CI enforces zero fixable CRITICAL/HIGH only; unfixed base-image CVEs allowed until images are digest-pinned/upgraded | Platform Engineer | P2 | PI-01 closeout / pre-GA hardening |
+| DEF-PI01-02 | US-01.05 | Gateway Go unit tests (`main_test.go` for `tcpCheck` and health handlers) | Platform Engineer | P3 | Post US-01.05 |
+
+---
+
 ## Summary
 
 | Epic | Phase | Estimate | Milestone |

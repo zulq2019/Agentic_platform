@@ -50,7 +50,9 @@ def test_verify_dev_environment_check_url_returns_false_on_http_error():
 
 @pytest.mark.story_us_01_02
 def test_verify_dev_environment_check_url_returns_false_on_connection_error():
-    module = _load_script_module("verify_dev_environment", "scripts/verify_dev_environment.py")
+    module = _load_script_module(
+        "verify_dev_environment", "scripts/verify_dev_environment.py"
+    )
 
     with patch.object(
         module.urllib.request,

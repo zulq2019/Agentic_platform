@@ -6,7 +6,10 @@ import time
 from contextlib import asynccontextmanager
 from typing import AsyncIterator, Protocol
 
+from collections.abc import Awaitable, Callable
+
 from fastapi import FastAPI, Request
+from starlette.responses import Response
 
 from aep_common.dependencies import check_kafka, check_postgres, check_redis
 from aep_common.health import create_health_router
@@ -55,7 +58,7 @@ def create_platform_app(settings: PlatformServiceSettings) -> FastAPI:
     app.include_router(health_router)
 
     @app.get("/metrics")
-    async def metrics(request: Request):
+    async def metrics(request: Request) -> Response:
         return await metrics_endpoint(request)
 
     @app.get("/info")
@@ -68,7 +71,10 @@ def create_platform_app(settings: PlatformServiceSettings) -> FastAPI:
         }
 
     @app.middleware("http")
-    async def record_metrics(request: Request, call_next):
+    async def record_metrics(
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+    ) -> Response:
         if request.url.path.startswith("/health"):
             return await call_next(request)
         start = time.perf_counter()

@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import socket
 
-import asyncpg
+import asyncpg  # type: ignore[import-untyped]
 from redis.asyncio import Redis
 
 
@@ -59,4 +59,4 @@ async def check_redis(redis_url: str, timeout: float = 3.0) -> str:
     except Exception:
         return "error"
     finally:
-        await client.aclose()
+        await client.aclose()  # type: ignore[attr-defined]

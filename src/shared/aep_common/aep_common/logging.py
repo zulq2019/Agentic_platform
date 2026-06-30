@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import contextvars
-from typing import Any
+from typing import cast
 
 import structlog
+from structlog.types import EventDict, WrappedLogger
 
 task_id_var: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "task_id", default=None
@@ -21,8 +22,8 @@ _configured = False
 
 
 def _merge_correlation_ids(
-    _logger: Any, _method_name: str, event_dict: dict[str, Any]
-) -> dict[str, Any]:
+    _logger: WrappedLogger, _method_name: str, event_dict: EventDict
+) -> EventDict:
     for key, var in (
         ("task_id", task_id_var),
         ("workflow_run_id", workflow_run_id_var),
@@ -71,4 +72,7 @@ def get_logger(service: str) -> structlog.stdlib.BoundLogger:
             cache_logger_on_first_use=True,
         )
         _configured = True
-    return structlog.get_logger().bind(service=service, emitted_by=service)
+    return cast(
+        structlog.stdlib.BoundLogger,
+        structlog.get_logger().bind(service=service, emitted_by=service),
+    )
