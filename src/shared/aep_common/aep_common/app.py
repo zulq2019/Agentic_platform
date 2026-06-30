@@ -54,7 +54,9 @@ def create_platform_app(settings: PlatformServiceSettings) -> FastAPI:
             otlp_endpoint=settings.otel_exporter_otlp_endpoint,
         )
         if tracing_active:
-            logger.info("tracing_configured", endpoint=settings.otel_exporter_otlp_endpoint)
+            logger.info(
+                "tracing_configured", endpoint=settings.otel_exporter_otlp_endpoint
+            )
         logger.info("service_starting")
         yield
         shutdown_tracing()
