@@ -8,22 +8,10 @@ from pathlib import Path
 
 import pytest
 
+from observability_stack import observability_stack_running
 from services import ALL_SERVICES, stack_is_running
 
 ROOT = Path(__file__).resolve().parents[3]
-
-
-def observability_stack_running() -> bool:
-    import urllib.error
-    import urllib.request
-
-    try:
-        with urllib.request.urlopen(
-            "http://localhost:9090/-/ready", timeout=2
-        ) as response:
-            return response.status == 200
-    except (urllib.error.URLError, TimeoutError, OSError):
-        return False
 
 
 @pytest.fixture

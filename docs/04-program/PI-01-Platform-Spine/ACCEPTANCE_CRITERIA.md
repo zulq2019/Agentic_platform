@@ -45,3 +45,21 @@
 **Given** a developer has Docker, Git, and Python 3.12 installed,  
 **When** they follow the README from clone to `make dev-up`,  
 **Then** the full environment is running in under 30 minutes.
+
+## AC-01.07 — Observability Baseline
+
+**Given** a Python platform service with `otel_exporter_otlp_endpoint` configured,  
+**When** the service starts and handles HTTP traffic,  
+**Then** OpenTelemetry traces are exported to the OTEL collector and forwarded to Tempo.
+
+**Given** the api-gateway (Go) with `OTEL_EXPORTER_OTLP_ENDPOINT` set,  
+**When** the gateway handles HTTP traffic,  
+**Then** request spans are exported to the OTEL collector.
+
+**Given** Prometheus is running after `make dev-up`,  
+**When** scrape targets are listed,  
+**Then** all 16 platform services (ports 8001–8015 and api-gateway:8080) expose `/metrics`.
+
+**Given** Grafana is provisioned,  
+**When** datasources and dashboards load,  
+**Then** Prometheus and Tempo are available and the service health dashboard is present.

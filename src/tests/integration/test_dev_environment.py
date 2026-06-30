@@ -4,25 +4,14 @@ from __future__ import annotations
 
 import subprocess
 import sys
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 import pytest
 
+from observability_stack import observability_stack_running
 from services import stack_is_running
 
 ROOT = Path(__file__).resolve().parents[3]
-
-
-def observability_stack_running() -> bool:
-    try:
-        with urllib.request.urlopen(
-            "http://localhost:9090/-/ready", timeout=2
-        ) as response:
-            return response.status == 200
-    except (urllib.error.URLError, TimeoutError, OSError):
-        return False
 
 
 @pytest.fixture
@@ -50,7 +39,7 @@ def test_ac_01_05_prometheus_scrape_config_matches_running_stack(requires_full_s
 @pytest.mark.integration
 def test_ac_01_05_observability_stack_healthy(requires_full_stack):
     """
-    AC-01.05: Full local environment includes Prometheus, Grafana, and OTEL Collector.
+    AC-01.05: Full local environment includes Prometheus, Grafana, OTEL Collector, and Tempo.
     """
     result = subprocess.run(
         [sys.executable, str(ROOT / "scripts" / "verify_dev_environment.py")],

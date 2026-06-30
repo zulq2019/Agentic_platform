@@ -26,7 +26,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install ruff black pytest pytest-asyncio httpx pytest-cov mypy types-redis pip-audit detect-secrets
           pip install -r requirements-dev.txt
-          pip install -e "src/shared/aep_common[health,kafka]"
+          pip install -e "src/shared/aep_common[health,kafka,observability]"
           pip install "fastapi>=0.110.0" "uvicorn[standard]>=0.27.0"
 
       - name: Ruff
@@ -54,6 +54,9 @@ jobs:
 
       - name: Unit tests (US-01.06)
         run: python -m pytest src/tests src/shared/aep_common/tests -m "story_us_01_06 and not integration and not e2e" -v --cov=aep_common.logging --cov=aep_common.app --cov-report=term-missing --cov-fail-under=80
+
+      - name: Unit tests (US-01.07)
+        run: python -m pytest src/tests src/shared/aep_common/tests -m "story_us_01_07 and not integration and not e2e" -v --cov=aep_common.tracing --cov=aep_common.app --cov-report=term-missing --cov-fail-under=80
 
       - name: Contract validation
         run: python scripts/validate_contract.py contracts/

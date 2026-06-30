@@ -19,6 +19,7 @@ class _TestSettings(BaseSettings):
     postgres_dsn: str = ""
     kafka_bootstrap_servers: str = "kafka:9092"
     redis_url: str = "redis://redis:6379/0"
+    otel_exporter_otlp_endpoint: str = ""
 
     model_config = SettingsConfigDict(extra="ignore")
 

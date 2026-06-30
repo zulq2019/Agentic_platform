@@ -97,6 +97,20 @@ services:
         python /app/scripts/provision_kafka_topics.py
     restart: "no"
 
+  tempo:
+    image: grafana/tempo:2.3.1
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    volumes:
+      - ./observability/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
+    ports:
+      - "3200:3200"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3200/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.96.0
     command: ["--config=/etc/otel-collector/otel-config.yaml"]
@@ -106,6 +120,9 @@ services:
       - "4317:4317"
       - "4318:4318"
       - "13133:13133"
+    depends_on:
+      tempo:
+        condition: service_healthy
     healthcheck:
       disable: true
 

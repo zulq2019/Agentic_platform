@@ -6,13 +6,16 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 )
 
 type config struct {
@@ -71,9 +74,15 @@ func init() {
 
 func main() {
 	cfg := loadConfig()
+	ctx := context.Background()
+	shutdownTracing, tracingActive := configureTracing(ctx, cfg)
+
 	e := echo.New()
 	e.HideBanner = true
 	e.Use(middleware.Recover())
+	if tracingActive {
+		e.Use(otelecho.Middleware(cfg.ServiceName))
+	}
 	e.Use(metricsMiddleware(cfg.ServiceName))
 
 	e.GET("/health/live", func(c echo.Context) error {
@@ -111,7 +120,22 @@ func main() {
 		})
 	})
 
-	e.Logger.Fatal(e.Start(":" + cfg.Port))
+	go func() {
+		if err := e.Start(":" + cfg.Port); err != nil && err != http.ErrServerClosed {
+			e.Logger.Fatal(err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if shutdownTracing != nil {
+		_ = shutdownTracing(shutdownCtx)
+	}
+	_ = e.Shutdown(shutdownCtx)
 }
 
 func metricsMiddleware(serviceName string) echo.MiddlewareFunc {

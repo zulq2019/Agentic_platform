@@ -72,3 +72,32 @@
 3. Verify: `alembic current` is empty or at the pre-migration revision.
 4. If only the app role password was wrong: `DROP ROLE IF EXISTS aep_app` and re-run `make migrate` with the correct `AEP_APP_DB_PASSWORD`.
 5. Re-deploy previous application image if service code was updated (PI-01 services do not query new tables yet).
+
+## US-01.07
+
+| Component | Required for this story | Already Exists | Action |
+|-----------|------------------------|----------------|--------|
+| Docker Compose | Yes | Yes (US-01.02) | Add `tempo` service; wire otel-collector → Tempo |
+| PostgreSQL | No | Yes | Not required for observability story |
+| Kafka | No | Yes | Not required for observability story |
+| Redis | No | Yes | Not required for observability story |
+| OpenTelemetry | Yes | Partial (US-01.02 collector) | `aep_common.tracing` + Go gateway `otelecho`; export to Tempo |
+| Prometheus | Yes | Yes (US-01.02) | Verify scrape config covers all 16 services |
+| Grafana | Yes | Yes (US-01.02) | Add Tempo datasource; keep service health dashboard |
+| Vault | No | No | Defer to PI-08 |
+| Kubernetes | No | No | Defer to deployment PI |
+
+### Deployment (US-01.07)
+
+1. `make dev-up` — confirm Tempo healthy at `http://localhost:3200/ready`.
+2. `python scripts/verify_dev_environment.py` — exits 0 (Prometheus, Grafana, OTEL Collector, Tempo).
+3. Hit any service `/metrics` and confirm Prometheus `up` for all 16 targets.
+4. Generate traffic; confirm traces visible in Grafana → Tempo.
+
+### Rollback (US-01.07)
+
+**Risk:** LOW — observability is additive; disabling export does not affect service behaviour.
+
+1. Unset `OTEL_EXPORTER_OTLP_ENDPOINT` / set `OTEL_SDK_DISABLED=true` on services.
+2. Remove `tempo` from compose if Tempo causes resource issues (traces buffer at collector only).
+3. Revert `aep_common.tracing` wiring in `create_platform_app` if needed.

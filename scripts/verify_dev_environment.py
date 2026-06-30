@@ -11,6 +11,7 @@ OBSERVABILITY_CHECKS: list[tuple[str, str]] = [
     ("Prometheus", "http://localhost:9090/-/ready"),
     ("Grafana", "http://localhost:3001/api/health"),
     ("OTEL Collector", "http://localhost:13133/health"),
+    ("Tempo", "http://localhost:3200/ready"),
 ]
 
 
@@ -37,7 +38,7 @@ def main() -> int:
         print("Observability stack verification failed.", file=sys.stderr)
         return 1
 
-    print("Observability stack healthy (Prometheus, Grafana, OTEL Collector).")
+    print("Observability stack healthy (Prometheus, Grafana, OTEL Collector, Tempo).")
     return 0
 
 

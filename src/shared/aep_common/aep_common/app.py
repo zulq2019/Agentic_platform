@@ -19,6 +19,11 @@ from aep_common.logging import (
     get_logger,
 )
 from aep_common.metrics import create_service_metrics, metrics_endpoint
+from aep_common.tracing import (
+    configure_tracing,
+    instrument_fastapi,
+    shutdown_tracing,
+)
 
 __all__ = ["PlatformServiceSettings", "create_platform_app"]
 
@@ -33,6 +38,7 @@ class PlatformServiceSettings(Protocol):
     postgres_dsn: str
     kafka_bootstrap_servers: str
     redis_url: str
+    otel_exporter_otlp_endpoint: str
 
 
 def create_platform_app(settings: PlatformServiceSettings) -> FastAPI:
@@ -42,8 +48,18 @@ def create_platform_app(settings: PlatformServiceSettings) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+        tracing_active = configure_tracing(
+            service_name=settings.service_name,
+            environment=settings.environment,
+            otlp_endpoint=settings.otel_exporter_otlp_endpoint,
+        )
+        if tracing_active:
+            logger.info(
+                "tracing_configured", endpoint=settings.otel_exporter_otlp_endpoint
+            )
         logger.info("service_starting")
         yield
+        shutdown_tracing()
         logger.info("service_stopped")
 
     app = FastAPI(
@@ -105,4 +121,5 @@ def create_platform_app(settings: PlatformServiceSettings) -> FastAPI:
         ).observe(duration)
         return response
 
+    instrument_fastapi(app)
     return app
