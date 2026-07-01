@@ -29,7 +29,26 @@ Architecture Baseline **v2.0** stabilises the platform as a **metadata-driven en
 | **D-v2-09** | Observability on every object — no exemptions | Enterprise operability | Accepted in contracts |
 | **D-v2-10** | Thirteen primitives unchanged | Stability | Accepted |
 
-**Proposed formal ADRs:** ADR-025 (Provider Model), ADR-026 (Metadata Engine), ADR-027 (Execution Profiles supersede ADR-012 authoring) — to be added to [DECISIONS.md](../../DECISIONS.md).
+**Formal ADRs:** ADR-025 (Provider Model), ADR-026 (Metadata Engine), ADR-027 (Execution Profiles supersede ADR-012 authoring) — **accepted** in [DECISIONS.md](../../DECISIONS.md) (1 July 2026 stabilisation pass).
+
+---
+
+## Stabilisation pass (1 July 2026)
+
+Final architecture stabilisation before implementation resume on `feature/ArchitectureV2`:
+
+| Action | Files |
+|--------|-------|
+| Enterprise principles validation matrix | ARCHITECTURE_BASELINE_V2.md §4 |
+| Lexical mapping v1 → v2 | ARCHITECTURE.md |
+| Execution Profile evolution diagram note | REFERENCE_ARCHITECTURE.md §24.1 |
+| ADR-025–027 accepted | DECISIONS.md |
+| Contract schema roadmap | contracts/README.md |
+| PI surgical updates | PI-02/06/07 OBJECTIVES+README; PROMPT_MAPPING PI-02–04, 06–08, 10 |
+| Readiness re-score | IMPLEMENTATION_READINESS.md v1.1 (76/100) |
+| Cross-links | VISION.md, ROADMAP.md document relationships |
+
+No production code or contract schema files changed in this pass.
 
 ---
 
@@ -105,13 +124,15 @@ Architecture Baseline **v2.0** stabilises the platform as a **metadata-driven en
 | `docs/architecture/ARCHITECTURE_CHANGELOG_V2.md` | **New** — this file |
 | `docs/architecture/IMPLEMENTATION_READINESS.md` | **New** — readiness assessment |
 | `docs/architecture/*` (v2 docs) | Already committed — primitives, contracts, meta, UX, glossary, philosophy |
-| `ARCHITECTURE.md` | **Updated** — baseline pointer, v1.1 |
-| `VISION.md` | **Updated** — metadata-driven positioning |
-| `ROADMAP.md` | **Updated** — baseline v2 milestone |
-| `docs/04-program/PI-*/` | **Surgical** — objectives, README, prompt context |
-| `contracts/` | **No change in v2 stabilisation** — gap G-02; implement in PI |
+| `ARCHITECTURE.md` | **Updated** — baseline pointer, lexical mapping v1.1 |
+| `VISION.md` | **Updated** — metadata-driven positioning, baseline link |
+| `ROADMAP.md` | **Updated** — baseline v2 milestone, Execution Profile flags |
+| `docs/architecture/REFERENCE_ARCHITECTURE.md` | **Updated** — §24.1 Execution Profiles, baseline pointer v1.1 |
+| `DECISIONS.md` | **Updated** — ADR-025–027 accepted |
+| `contracts/README.md` | **Updated** — v2 schema roadmap |
+| `docs/engineering/implementation-roadmap/PI-*/` | **Surgical** — objectives, README, prompt context |
+| `contracts/` | **Roadmap only** — gap G-02 schemas documented; implement in PI-09 |
 | `src/` | **No change** — architecture only |
-| `DECISIONS.md` | **Recommended** — ADR-025+ (not in this stabilisation commit) |
 
 ---
 

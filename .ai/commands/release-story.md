@@ -21,10 +21,10 @@ This command is the final checkpoint before merge. It does not merge or deploy â
 |-------|----------|----------|
 | Constitution | `CONSTITUTION.md` | Mandatory |
 | AI implementation rules | `CLAUDE.md` | Mandatory |
-| Definition of Done | `docs/04-program/{PI}/DEFINITION_OF_DONE.md` | Mandatory |
-| Review Checklist | `docs/04-program/{PI}/REVIEW_CHECKLIST.md` | Mandatory |
-| User Story | `docs/04-program/{PI}/USER_STORIES.md` â€” implemented story | Mandatory |
-| Acceptance Criteria | `docs/04-program/{PI}/ACCEPTANCE_CRITERIA.md` | Mandatory |
+| Definition of Done | `docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md` | Mandatory |
+| Review Checklist | `docs/engineering/implementation-roadmap/{PI}/REVIEW_CHECKLIST.md` | Mandatory |
+| User Story | `docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md` â€” implemented story | Mandatory |
+| Acceptance Criteria | `docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md` | Mandatory |
 | Review report | Output of `review-story.md` â€” must be PASS | Mandatory |
 | Security review report | Output of `security-review.md` | If story touches auth/data/secrets |
 | Performance review report | Output of `performance-review.md` | If story has latency SLOs |
@@ -35,7 +35,7 @@ This command is the final checkpoint before merge. It does not merge or deploy â
 **Substitutions required:**
 
 ```
-{PI}              = e.g. PI-05-Tool-Registry
+{PI}              = e.g. PI-05-Execution-Framework
 {story_id}        = e.g. US-PI-05-03
 {story_title}     = e.g. Tool Capability Discovery
 {service_name}    = e.g. tool-registry-service
@@ -63,7 +63,7 @@ This command is the final checkpoint before merge. It does not merge or deploy â
 
 ### Step 1 â€” Final Definition of Done sweep
 
-Work through every item in `docs/04-program/{PI}/DEFINITION_OF_DONE.md`. For each item:
+Work through every item in `docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md`. For each item:
 - Mark as MET with evidence, or
 - Mark as NOT MET with the blocking issue
 

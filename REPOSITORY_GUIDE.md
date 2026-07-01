@@ -1,7 +1,7 @@
 # Repository Guide
 
 **Agentic Engineering Platform**  
-**Version:** 1.0  
+**Version:** 1.1 (Architecture v2.0 repository layout)  
 **Audience:** Every engineer, AI assistant, and contributor working in this repository  
 **Authority:** [CONSTITUTION.md](CONSTITUTION.md) · [CLAUDE.md](CLAUDE.md) · [ARCHITECTURE.md](ARCHITECTURE.md)
 
@@ -19,15 +19,16 @@ agentic-engineering-platform/
 │
 ├── src/                    ← ALL production code lives here. Nowhere else.
 ├── .ai/                    ← AI engineering assets (prompts, templates, checklists)
-├── docs/                   ← ALL documentation lives here
-│   ├── 04-program/         ← Engineering execution plans (PI-01 → PI-10)
-│   ├── 05-blueprints/      ← Future capability designs
-│   ├── artifacts/          ← Architecture diagrams
-│   └── reference/          ← Source reference architecture
+├── docs/                   ← ALL documentation (four domains)
+│   ├── architecture/       ← Ontology, contracts, ADR, reference architecture
+│   ├── product/            ← Vision, roadmap, commercial model (customer-facing)
+│   ├── engineering/        ← Implementation roadmap, release plan, alignment
+│   ├── reference/          ← Blueprints, contracts index
+│   └── migration/          ← Migration reports
 ├── contracts/              ← JSON Schema contracts (production deliverable)
 ├── workflows/              ← Workflow templates (production deliverable)
 ├── scripts/                ← CI and developer utility scripts
-└── [root docs]             ← CONSTITUTION, ARCHITECTURE, CLAUDE, DECISIONS, etc.
+└── [root docs]             ← CONSTITUTION, ARCHITECTURE, CLAUDE (+ relocation stubs)
 ```
 
 ---
@@ -93,7 +94,7 @@ src/
 
 ### When is a `src/` folder created?
 
-A folder inside `src/` is created **at the start of its PI**, not before. The blueprint in `docs/05-blueprints/` describes what will go there. The PI plan in `docs/04-program/` describes when and how.
+A folder inside `src/` is created **at the start of its PI**, not before. The blueprint in `docs/reference/blueprints/` describes what will go there. The PI plan in `docs/engineering/implementation-roadmap/` describes when and how.
 
 **Empty code folders are forbidden.** If it exists in `src/`, it contains production code.
 
@@ -105,30 +106,32 @@ A folder inside `src/` is created **at the start of its PI**, not before. The bl
 
 ```
 docs/
-├── 04-program/             ← Engineering execution plans
-│   └── PI-01 through PI-10
-│       Each PI contains 16 documents:
-│       README, OBJECTIVES, FEATURES, USER_STORIES,
-│       ACCEPTANCE_CRITERIA, IMPLEMENTATION, PROMPTS,
-│       SPRINT_PLAN, TESTING, RISKS, DEFINITION_OF_DONE,
-│       API_SPEC, SEQUENCE_DIAGRAMS, DATA_MODEL,
-│       REVIEW_CHECKLIST, DEMO
+├── architecture/           ← Platform ontology (v2.0)
+│   ├── PLATFORM_*.md       ← Primitives, Contracts, Meta Model, UX, Glossary
+│   ├── ARCHITECTURE_BASELINE_V2.md
+│   ├── REFERENCE_ARCHITECTURE.md
+│   └── ADR/DECISIONS.md
 │
-├── 05-blueprints/          ← Future capability designs (replaces empty code folders)
-│   └── {capability}/BLUEPRINT.md
-│       platform-services, agent-runtime, specialist-agents,
-│       tool-connectors, agent-sdk, tool-sdk, frontend-dashboard,
-│       infra-terraform, infra-kubernetes, observability-stack,
-│       workflow-templates
+├── product/                ← Customer-facing
+│   ├── VISION.md, ROADMAP.md
+│   ├── COMMERCIAL_MODEL.md, MARKETPLACE.md, SOLUTION_PACKS.md
+│   └── PRODUCT_*.md
 │
-├── artifacts/              ← Architecture diagrams
-│   └── TECHNICAL_ARCHITECTURE.md  ← 25 architecture diagrams, all styles
+├── engineering/              ← Internal execution (not customer-facing)
+│   ├── implementation-roadmap/   ← PI-01 through PI-10
+│   ├── release-plan.md
+│   ├── architecture-alignment/
+│   └── sprint-history/
 │
-├── reference/              ← Source reference architecture (read-only)
-│   └── *.docx
+├── reference/              ← Technical reference
+│   └── blueprints/         ← Future capability designs
 │
-└── MIGRATION_PLAN.md       ← Repository reorganisation rationale
+└── migration/              ← Migration plans and reports
 ```
+
+**Restructure report:** [REPOSITORY_RESTRUCTURE_REPORT.md](REPOSITORY_RESTRUCTURE_REPORT.md)
+
+Legacy paths `docs/04-program/` and `docs/05-blueprints/` contain redirect READMEs only.
 
 ### Root-level reference documents
 
@@ -137,26 +140,27 @@ These live at the root because they apply to the entire repository:
 | File | Purpose | Mutable? |
 |------|---------|----------|
 | `CONSTITUTION.md` | Immutable engineering principles | No |
-| `ARCHITECTURE.md` | Long-term system architecture | Living |
+| `ARCHITECTURE.md` | Container topology and system structure | Living |
 | `CLAUDE.md` | AI implementation rules | Living |
-| `DECISIONS.md` | ADR repository | Append-only |
-| `ROADMAP.md` | Delivery phases | Living |
+| `DECISIONS.md` | **Stub** → [docs/architecture/ADR/DECISIONS.md](docs/architecture/ADR/DECISIONS.md) | Append-only |
+| `ROADMAP.md` | **Stub** → [docs/product/ROADMAP.md](docs/product/ROADMAP.md) | Living |
+| `VISION.md` | **Stub** → [docs/product/VISION.md](docs/product/VISION.md) | Living |
 | `TASKS.md` | Engineering work breakdown | Living |
-| `VISION.md` | Product vision | Living |
 | `README.md` | Repository index | Living |
 | `REPOSITORY_GUIDE.md` | This file — onboarding | Living |
+| `REPOSITORY_RESTRUCTURE_REPORT.md` | Docs v2 layout change log | Living |
 
 ### Where does my documentation go?
 
 | I am writing... | Goes in |
 |----------------|---------|
-| Sprint plan, implementation guide for a PI | `docs/04-program/PI-XX-*/` |
-| AI prompt mapping for a PI | `docs/04-program/PI-XX-.../PROMPT_MAPPING.md` |
+| Sprint plan, implementation guide for a PI | `docs/engineering/implementation-roadmap/PI-XX-*/` |
+| AI prompt mapping for a PI | `docs/engineering/implementation-roadmap/PI-XX-.../PROMPT_MAPPING.md` |
 | Reusable AI prompt commands | `.ai/commands/` |
-| Design for a future component not yet built | `docs/05-blueprints/{component}/BLUEPRINT.md` |
-| Architecture diagram | `docs/artifacts/TECHNICAL_ARCHITECTURE.md` |
+| Design for a future component not yet built | `docs/reference/blueprints/{component}/BLUEPRINT.md` |
+| Architecture diagram | `docs/architecture/REFERENCE_ARCHITECTURE.md` |
 | Architectural decision record | `DECISIONS.md` |
-| API spec for a service (generated) | `docs/artifacts/` or service `README.md` |
+| API spec for a service (generated) | Service `README.md` or OpenAPI under `src/` |
 | Service-level README | `src/platform/{service}/README.md` |
 
 ---
@@ -232,7 +236,7 @@ workflows/
 └── greenfield-v1.0.0.json      ← Complete and operational
     brownfield-v1.0.0.json      ← Planned (PI-05)
     defect-resolution-v1.0.0.json
-    ... (7 more — see docs/05-blueprints/workflow-templates/BLUEPRINT.md)
+    ... (7 more — see docs/reference/blueprints/workflow-templates/BLUEPRINT.md)
 ```
 
 ---
@@ -257,8 +261,8 @@ Before writing your first line of code:
 - [ ] Read `CONSTITUTION.md` — understand what can never be violated
 - [ ] Read `CLAUDE.md` — understand coding standards and forbidden patterns
 - [ ] Read `ARCHITECTURE.md` — understand the system you are building
-- [ ] Read `docs/04-program/PI-01-Platform-Spine/README.md` — understand what is being built now
-- [ ] Read `docs/04-program/PI-01-Platform-Spine/IMPLEMENTATION.md` — understand the code patterns
+- [ ] Read `docs/engineering/implementation-roadmap/PI-01-Platform-Core/README.md` — understand what is being built now
+- [ ] Read `docs/engineering/implementation-roadmap/PI-01-Platform-Core/IMPLEMENTATION.md` — understand the code patterns
 - [ ] Run `make dev-up` (once PI-01 is complete) — verify your local environment
 - [ ] Run `python scripts/validate_contract.py contracts/` — verify contracts pass
 
@@ -287,9 +291,9 @@ Before writing your first line of code:
 |----------|--------------|
 | What are the platform principles? | `CONSTITUTION.md` |
 | How does the system work? | `ARCHITECTURE.md` |
-| What am I building this sprint? | `docs/04-program/PI-0X-.../SPRINT_PLAN.md` |
-| How do I implement X? | `docs/04-program/PI-0X-.../IMPLEMENTATION.md` |
+| What am I building this sprint? | `docs/engineering/implementation-roadmap/PI-0X-.../SPRINT_PLAN.md` |
+| How do I implement X? | `docs/engineering/implementation-roadmap/PI-0X-.../IMPLEMENTATION.md` |
 | What AI prompts should I use? | `.ai/commands/` (prompt library) and the current PI's `PROMPT_MAPPING.md` |
-| What does a future component look like? | `docs/05-blueprints/{component}/BLUEPRINT.md` |
+| What does a future component look like? | `docs/reference/blueprints/{component}/BLUEPRINT.md` |
 | Why was this decision made? | `DECISIONS.md` |
-| What is the full architecture diagram? | `docs/artifacts/TECHNICAL_ARCHITECTURE.md` |
+| What is the full architecture diagram? | `docs/architecture/REFERENCE_ARCHITECTURE.md` |

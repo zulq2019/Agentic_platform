@@ -22,7 +22,7 @@ A refactor under this command must be provably behaviour-preserving. If existing
 | Constitution | `CONSTITUTION.md` | Mandatory |
 | Architecture | `ARCHITECTURE.md` | Mandatory |
 | AI implementation rules | `CLAUDE.md` | Mandatory |
-| Implementation Guide | `docs/04-program/{PI}/IMPLEMENTATION.md` | Mandatory |
+| Implementation Guide | `docs/engineering/implementation-roadmap/{PI}/IMPLEMENTATION.md` | Mandatory |
 | Existing service code | `src/{target_folder}/` | Mandatory |
 | Existing test suite | `src/tests/` — all tests for this service | Mandatory |
 | ADRs relevant to this service | `DECISIONS.md` | Mandatory |

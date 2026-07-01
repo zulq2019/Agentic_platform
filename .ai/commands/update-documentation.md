@@ -25,18 +25,18 @@ Run this command after `implement-story.md` and before raising a PR.
 | Architecture | `ARCHITECTURE.md` | Mandatory |
 | AI implementation rules | `CLAUDE.md` (Documentation Rules section) | Mandatory |
 | Changed files | `git diff main` | Mandatory |
-| User Story | `docs/04-program/{PI}/USER_STORIES.md` — implemented story | Mandatory |
-| API Spec | `docs/04-program/{PI}/API_SPEC.md` | If story produces/modifies API |
-| Data Model | `docs/04-program/{PI}/DATA_MODEL.md` | If story touches schema |
-| Sequence Diagrams | `docs/04-program/{PI}/SEQUENCE_DIAGRAMS.md` | If story changes a flow |
+| User Story | `docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md` — implemented story | Mandatory |
+| API Spec | `docs/engineering/implementation-roadmap/{PI}/API_SPEC.md` | If story produces/modifies API |
+| Data Model | `docs/engineering/implementation-roadmap/{PI}/DATA_MODEL.md` | If story touches schema |
+| Sequence Diagrams | `docs/engineering/implementation-roadmap/{PI}/SEQUENCE_DIAGRAMS.md` | If story changes a flow |
 | ADR log | `DECISIONS.md` | If story involved an architectural decision |
-| Architecture diagrams | `docs/artifacts/TECHNICAL_ARCHITECTURE.md` | If service boundaries changed |
+| Architecture diagrams | `docs/architecture/REFERENCE_ARCHITECTURE.md` | If service boundaries changed |
 | `.env.example` | Service root | If new environment variables introduced |
 
 **Substitutions required:**
 
 ```
-{PI}          = e.g. PI-04-Memory
+{PI}          = e.g. PI-04-Workflow-Framework
 {story_id}    = e.g. US-PI-04-02
 {service_name} = e.g. memory-store-service
 ```
@@ -92,7 +92,7 @@ Category F — Agent or tool changed:
 
 ### Step 2 — Update API spec (if Category A)
 
-Update `docs/04-program/{PI}/API_SPEC.md`:
+Update `docs/engineering/implementation-roadmap/{PI}/API_SPEC.md`:
 - Add documentation for every new endpoint
 - Update request/response schema for every modified endpoint
 - Document every new error code with HTTP status, error code string, and description
@@ -121,15 +121,15 @@ Format every endpoint as:
 
 ### Step 3 — Update event catalogue (if Category B)
 
-Update `docs/04-program/{PI}/SEQUENCE_DIAGRAMS.md` if a new event flow was introduced.
+Update `docs/engineering/implementation-roadmap/{PI}/SEQUENCE_DIAGRAMS.md` if a new event flow was introduced.
 
-Also update the Event Catalogue in `docs/artifacts/TECHNICAL_ARCHITECTURE.md` (Section 8):
+Also update the Event Catalogue in `docs/architecture/REFERENCE_ARCHITECTURE.md` (Section 8):
 - Add the new topic and its schema reference
 - Add the new event type and its producer/consumer mapping
 
 ### Step 4 — Update data model (if Category C)
 
-Update `docs/04-program/{PI}/DATA_MODEL.md`:
+Update `docs/engineering/implementation-roadmap/{PI}/DATA_MODEL.md`:
 - Add ERD entry for new tables
 - Document every new column with type, constraints, and purpose
 - Document the migration file that introduces the change
@@ -151,7 +151,7 @@ Update `REPOSITORY_GUIDE.md` if a new platform-wide environment variable was int
 
 If a service boundary changed:
 - Update `ARCHITECTURE.md` — the C4 diagrams and service descriptions
-- Update `docs/artifacts/TECHNICAL_ARCHITECTURE.md` — relevant diagram section
+- Update `docs/architecture/REFERENCE_ARCHITECTURE.md` — relevant diagram section
 - Create a new ADR in `DECISIONS.md` explaining the decision
 
 ADR format:
@@ -213,7 +213,7 @@ ADR-{NNN}: {title} — {one line summary}
 | Updated `.env.example` | Any new environment variable |
 | Updated `ARCHITECTURE.md` | Any service boundary change |
 | New ADR in `DECISIONS.md` | Any architectural decision made |
-| Updated TECHNICAL_ARCHITECTURE.md | Any event catalogue or diagram change |
+| Updated REFERENCE_ARCHITECTURE.md | Any event catalogue or diagram change |
 | Documentation update summary | Always |
 
 ---
@@ -240,7 +240,7 @@ ADR-{NNN}: {title} — {one line summary}
 [ ] .env.example updated (if applicable)
 [ ] ARCHITECTURE.md updated (if applicable)
 [ ] ADR created (if architectural decision was made)
-[ ] TECHNICAL_ARCHITECTURE.md updated (if applicable)
+[ ] REFERENCE_ARCHITECTURE.md updated (if applicable)
 [ ] Documentation update summary produced
 [ ] No broken cross-references introduced
 ```

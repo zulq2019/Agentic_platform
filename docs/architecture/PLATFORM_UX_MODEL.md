@@ -1057,7 +1057,7 @@ Amendments require Decision Record and version bump.
 
 ## Appendix B — Mapping to PI-09 Developer Experience
 
-[PI-09](../../docs/04-program/PI-09-Developer-Experience/README.md) delivers the **unified shell** implementing this UX model:
+[PI-09](../../docs/engineering/implementation-roadmap/PI-09-Platform-UX/README.md) delivers the **unified shell** implementing this UX model:
 
 | PI-09 deliverable | UX model section |
 |-------------------|------------------|

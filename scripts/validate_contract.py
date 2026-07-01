@@ -23,10 +23,12 @@ SCHEMA_MAP = {
     "task": "task-schema.schema.json",
     "memory": "memory-schema.schema.json",
     "event": "event-envelope.schema.json",
+    "platform-object": "platform-object.schema.json",
 }
 
 EXAMPLE_SCHEMA_MAP = {
     "coding-agent-registration.json": "agent-contract.schema.json",
+    "sample-platform-object.json": "platform-object.schema.json",
 }
 
 

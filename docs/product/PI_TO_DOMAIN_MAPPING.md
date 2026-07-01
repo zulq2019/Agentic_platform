@@ -19,15 +19,15 @@
 
 | PI | Folder (unchanged) | Primary product domain | Secondary product domains |
 |----|-------------------|------------------------|---------------------------|
-| PI-01 | `PI-01-Platform-Spine` | Platform Core | Observability |
-| PI-02 | `PI-02-Agent-Runtime` | Platform Core | AI Operations |
-| PI-03 | `PI-03-Orchestrator` | Platform Core | Release Studio, Engineering Operations |
-| PI-04 | `PI-04-Memory` | Platform Core | Architecture Studio, Requirements Studio |
-| PI-05 | `PI-05-Tool-Registry` | Integration Marketplace | Platform Core (Tool Registry service) |
-| PI-06 | `PI-06-Engineering-Agents` | *(multi-studio)* | Development, Testing, Architecture, Requirements, Security, Release Studios |
-| PI-07 | `PI-07-Governance` | Administration | Engineering Operations, Observability |
-| PI-08 | `PI-08-Enterprise` | Administration | AI Operations, Engineering Operations |
-| PI-09 | `PI-09-Developer-Experience` | All Studios (UX shell) | Observability, Administration |
+| PI-01 | `PI-01-Platform-Core` | Platform Core | Observability |
+| PI-02 | `PI-02-Metadata-Engine` | Platform Core | AI Operations |
+| PI-03 | `PI-03-Provider-Framework` | Platform Core | Release Studio, Engineering Operations |
+| PI-04 | `PI-04-Workflow-Framework` | Platform Core | Architecture Studio, Requirements Studio |
+| PI-05 | `PI-05-Execution-Framework` | Integration Marketplace | Platform Core (Tool Registry service) |
+| PI-06 | `PI-06-Studio-Framework` | *(multi-studio)* | Development, Testing, Architecture, Requirements, Security, Release Studios |
+| PI-07 | `PI-07-Platform-Services` | Administration | Engineering Operations, Observability |
+| PI-08 | `PI-08-Solution-Packs` | Administration | AI Operations, Engineering Operations |
+| PI-09 | `PI-09-Platform-UX` | All Studios (UX shell) | Observability, Administration |
 | PI-10 | `PI-10-General-Availability` | Platform Core | Engineering Operations |
 
 ---
@@ -45,7 +45,7 @@
 | CI pipeline | Core engineering guardrails |
 | `make dev-up` | Core local platform |
 
-**Execution docs:** [docs/04-program/PI-01-Platform-Spine/](../04-program/PI-01-Platform-Spine/)
+**Execution docs:** [docs/engineering/implementation-roadmap/PI-01-Platform-Core/](../engineering/implementation-roadmap/PI-01-Platform-Core/)
 
 ---
 
@@ -61,7 +61,7 @@
 | Tier-1 retry | Task Engine + Runtime resilience |
 | Agent SDK | Core extension mechanism for all Studios |
 
-**Execution docs:** [docs/04-program/PI-02-Agent-Runtime/](../04-program/PI-02-Agent-Runtime/)
+**Execution docs:** [docs/engineering/implementation-roadmap/PI-02-Metadata-Engine/](../engineering/implementation-roadmap/PI-02-Metadata-Engine/)
 
 ---
 
@@ -76,7 +76,7 @@
 | Gate Enforcer | Shared gate primitive for all Studios |
 | Saga compensation / Tier 3 escalation | Core reliability patterns |
 
-**Execution docs:** [docs/04-program/PI-03-Orchestrator/](../04-program/PI-03-Orchestrator/)
+**Execution docs:** [docs/engineering/implementation-roadmap/PI-03-Provider-Framework/](../engineering/implementation-roadmap/PI-03-Provider-Framework/)
 
 ---
 
@@ -91,7 +91,7 @@
 | Long-term memory (pgvector) | Core durable knowledge |
 | Context Assembler / PostWorkflowWriter | Core orchestration hooks |
 
-**Execution docs:** [docs/04-program/PI-04-Memory/](../04-program/PI-04-Memory/)
+**Execution docs:** [docs/engineering/implementation-roadmap/PI-04-Workflow-Framework/](../engineering/implementation-roadmap/PI-04-Workflow-Framework/)
 
 ---
 
@@ -109,7 +109,7 @@
 
 **Future (not PI-05):** Enterprise marketplace install/configure/enable flow and connector lifecycle — [FUTURE_CAPABILITIES.md](./FUTURE_CAPABILITIES.md#fc-int-01--enterprise-integration-marketplace).
 
-**Execution docs:** [docs/04-program/PI-05-Tool-Registry/](../04-program/PI-05-Tool-Registry/)
+**Execution docs:** [docs/engineering/implementation-roadmap/PI-05-Execution-Framework/](../engineering/implementation-roadmap/PI-05-Execution-Framework/)
 
 ---
 
@@ -137,7 +137,7 @@ PI-06 implements specialist agents. Each agent maps to a Studio for **product** 
 | `release-agent` | Release Studio |
 | `root-cause-agent` | Engineering Operations |
 
-**Execution docs:** [docs/04-program/PI-06-Engineering-Agents/](../04-program/PI-06-Engineering-Agents/)
+**Execution docs:** [docs/engineering/implementation-roadmap/PI-06-Studio-Framework/](../engineering/implementation-roadmap/PI-06-Studio-Framework/)
 
 ---
 
@@ -153,7 +153,7 @@ PI-06 implements specialist agents. Each agent maps to a Studio for **product** 
 | Auth + RBAC | Administration — access control |
 | Governance dashboards | Administration + Observability UX |
 
-**Execution docs:** [docs/04-program/PI-07-Governance/](../04-program/PI-07-Governance/)
+**Execution docs:** [docs/engineering/implementation-roadmap/PI-07-Platform-Services/](../engineering/implementation-roadmap/PI-07-Platform-Services/)
 
 ---
 
@@ -169,7 +169,7 @@ PI-06 implements specialist agents. Each agent maps to a Studio for **product** 
 | Enterprise SSO / SCIM | Administration |
 | Data residency | Administration + Engineering Operations |
 
-**Execution docs:** [docs/04-program/PI-08-Enterprise/](../04-program/PI-08-Enterprise/README.md)
+**Execution docs:** [docs/engineering/implementation-roadmap/PI-08-Solution-Packs/](../engineering/implementation-roadmap/PI-08-Solution-Packs/README.md)
 
 ---
 
@@ -192,7 +192,7 @@ PI-09 does not introduce a new Studio. It provides **cross-studio UX**: dashboar
 | Metrics Dashboard | Observability |
 | Config Portal | Administration |
 
-**Execution docs:** [docs/04-program/PI-09-Developer-Experience/](../04-program/PI-09-Developer-Experience/)
+**Execution docs:** [docs/engineering/implementation-roadmap/PI-09-Platform-UX/](../engineering/implementation-roadmap/PI-09-Platform-UX/)
 
 ---
 
@@ -208,7 +208,7 @@ PI-09 does not introduce a new Studio. It provides **cross-studio UX**: dashboar
 | Load / DR / penetration testing | GA confidence for all domains |
 | External beta pilot | Whole platform |
 
-**Execution docs:** [docs/04-program/PI-10-General-Availability/](../04-program/PI-10-General-Availability/)
+**Execution docs:** [docs/engineering/implementation-roadmap/PI-10-General-Availability/](../engineering/implementation-roadmap/PI-10-General-Availability/)
 
 ---
 

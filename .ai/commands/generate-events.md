@@ -22,18 +22,18 @@ One execution = one event flow (one topic, one producer, one consumer pair).
 | Input | Location | Required |
 |-------|----------|----------|
 | Constitution — Architecture principles | `CONSTITUTION.md` (A-series) | Mandatory |
-| Architecture — Event Bus section | `docs/artifacts/TECHNICAL_ARCHITECTURE.md` (Sections 7, 8) | Mandatory |
+| Architecture — Event Bus section | `docs/architecture/REFERENCE_ARCHITECTURE.md` (Sections 7, 8) | Mandatory |
 | AI implementation rules | `CLAUDE.md` | Mandatory |
 | Event Envelope schema | `contracts/event-envelope.schema.json` | Mandatory |
-| Sequence Diagrams | `docs/04-program/{PI}/SEQUENCE_DIAGRAMS.md` — target flow | Mandatory |
-| User Story | `docs/04-program/{PI}/USER_STORIES.md` — target story | Mandatory |
-| Data Model | `docs/04-program/{PI}/DATA_MODEL.md` | If event carries entity state |
+| Sequence Diagrams | `docs/engineering/implementation-roadmap/{PI}/SEQUENCE_DIAGRAMS.md` — target flow | Mandatory |
+| User Story | `docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md` — target story | Mandatory |
+| Data Model | `docs/engineering/implementation-roadmap/{PI}/DATA_MODEL.md` | If event carries entity state |
 | Relevant ADRs | `DECISIONS.md` | For event naming and versioning decisions |
 
 **Substitutions required:**
 
 ```
-{PI}               = e.g. PI-01-Platform-Spine
+{PI}               = e.g. PI-01-Platform-Core
 {story_id}         = e.g. US-PI-01-02
 {service_name}     = e.g. task-queue-service
 {topic_name}       = e.g. aep.task.created
@@ -294,7 +294,7 @@ Required tests:
 | DLQ handler | `src/{target_folder}/events/consumers/dlq_{event_type_snake}.py` |
 | Contract validation tests | `src/tests/contract/test_event_{event_type_snake}.py` |
 | Consumer resilience tests | `src/tests/integration/{service_name}/test_consumer_{event_type_snake}.py` |
-| Updated event catalogue | `docs/artifacts/TECHNICAL_ARCHITECTURE.md` Section 8 |
+| Updated event catalogue | `docs/architecture/REFERENCE_ARCHITECTURE.md` Section 8 |
 
 ---
 
@@ -320,7 +320,7 @@ Required tests:
 [ ] DLQ handler generated
 [ ] Contract validation tests written and passing
 [ ] Consumer resilience tests written and passing
-[ ] Event catalogue updated in TECHNICAL_ARCHITECTURE.md
+[ ] Event catalogue updated in REFERENCE_ARCHITECTURE.md
 ```
 
 ---

@@ -1,0 +1,89 @@
+{
+  "contract_version": "1.0.0",
+  "primitive_type": "capability",
+  "identity": {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "name": "generates-unit-tests",
+    "display_name": "Generates Unit Tests",
+    "description": "Capability for automated unit test generation.",
+    "version": "1.0.0",
+    "namespace": "engineering",
+    "tenant_id": "tenant-acme-corp",
+    "owner": "user:platform-admin",
+    "created_by": "user:platform-admin",
+    "created_at": "2026-07-01T12:00:00Z",
+    "modified_at": "2026-07-01T12:00:00Z",
+    "status": "Draft",
+    "tags": ["testing", "automation"]
+  },
+  "metadata": {
+    "business": {
+      "intent": "Reduce manual test authoring effort"
+    },
+    "technical": {
+      "capability_tag": "generates-unit-tests"
+    },
+    "custom": {},
+    "labels": {
+      "domain": "quality"
+    },
+    "annotations": {},
+    "documentation_links": [],
+    "examples": []
+  },
+  "configuration": {
+    "defaults": {
+      "coverage_threshold": 80
+    },
+    "customer_overrides": {},
+    "environment_overrides": {},
+    "templates": [],
+    "history": []
+  },
+  "lifecycle": {
+    "state": "Draft",
+    "transition_history": []
+  },
+  "dependencies": {
+    "depends_on": [],
+    "required_by": [],
+    "optional": []
+  },
+  "relationships": {
+    "edges": []
+  },
+  "security": {
+    "visibility": "tenant",
+    "classification": "internal",
+    "rbac_bindings": [],
+    "secret_refs": [],
+    "approval_requirements": []
+  },
+  "observability": {
+    "health": {
+      "status": "unknown",
+      "dependency_health": []
+    },
+    "metrics": {
+      "invocation_count": 0,
+      "error_count": 0
+    },
+    "audit_ref_ids": []
+  },
+  "governance": {
+    "risk_level": "low",
+    "compliance_tags": []
+  },
+  "versioning": {
+    "semantic_version": "1.0.0",
+    "published_versions": []
+  },
+  "extensions": {
+    "plugin_refs": [],
+    "hook_refs": [],
+    "event_subscriptions": [],
+    "callback_refs": [],
+    "policy_refs": [],
+    "custom_actions": []
+  }
+}

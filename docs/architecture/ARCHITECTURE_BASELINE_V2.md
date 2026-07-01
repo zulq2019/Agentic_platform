@@ -132,6 +132,35 @@ Validated against enterprise requirements (see [§34 Gap register](#34-architect
 
 **Constitutional invariants unchanged:** Agents never call agents; Orchestrator plans; registry extension; human gates; event bus; tenant isolation.
 
+### Enterprise principles coverage (validation)
+
+| Principle | Doc coverage | Implementation | Gap ID |
+|-----------|--------------|----------------|--------|
+| Metadata Driven Platform | ✅ Philosophy, META_MODEL, BASELINE | ❌ Metadata Engine | G-01 |
+| Configuration over Customization | ✅ PRIMITIVES §1.2, CONTRACTS | ⚠️ No Builders yet | G-07 |
+| Composition over Hardcoding | ✅ Solution Packs, Workflows | 🟡 JSON workflows only | G-09 |
+| Platform Object | ✅ PRIMITIVES §3, CONTRACTS CR-16 | ⚠️ No envelope schema | G-05 |
+| Provider Model | ✅ PRIMITIVES §5.1, §6.4 | ⚠️ agent/tool contracts split | G-02 |
+| Execution Profiles | ✅ PRIMITIVES §6.5, UX §9 | ⚠️ Model Router in code | G-04 |
+| Provider Builder | ✅ UX §10, PRIMITIVES | ❌ Not implemented | G-07 |
+| Marketplace | ✅ META_MODEL §12 | ❌ Not implemented | G-06 |
+| Solution Packs | ✅ PRIMITIVES §4.12, §6.11 | 🟡 Docs only | G-06 |
+| Commercial Packs | ✅ PRIMITIVES §6.12 | 🟡 Docs only | G-10 |
+| Entitlements | ✅ PRIMITIVES §6.13, CONTRACTS §16 | ❌ Runtime checks | G-10 |
+| Observability | ✅ PRIMITIVES §3.8, CONTRACTS §13 | 🟡 PI-01 partial | — |
+| Governance | ✅ PRIMITIVES §4.13, CONTRACTS §14 | 🟡 PI-07 planned | — |
+| Audit | ✅ CONSTITUTION E2–E3, Audit Store | 🟡 PI-07 planned | — |
+| Metrics | ✅ Observability contract | 🟡 PI-01 partial | — |
+| Lifecycle | ✅ PRIMITIVES §3.4 | 🟡 Workflows partial | G-09 |
+| Versioning | ✅ CONTRACTS §15 | ✅ Contract semver | — |
+| Inheritance | ✅ META_MODEL §5, PRIMITIVES §4.6 | ⚠️ Engine not built | G-01 |
+| Composition | ✅ PRIMITIVES §4.7, META_MODEL §7 | 🟡 Pack docs only | G-06 |
+| Multi-tenancy | ✅ CONSTITUTION MT1–MT3, ARCHITECTURE | 🟡 PI-08 planned | — |
+| Security | ✅ CONSTITUTION S1–S4, CONTRACTS §11 | 🟡 PI-07/08 | — |
+| Scalability | ✅ BASELINE §30, META_MODEL §1.4 | 🟡 Spine in progress | — |
+
+**Validation result:** All 22 enterprise principles are **normatively documented**. Four have **Critical/High implementation gaps** (G-01, G-02, G-04, G-06/G-07) tracked in [§34](#34-architecture-gap-register). Documentation passes; runtime lags by design until PI-08/09.
+
 ---
 
 ## 5. Platform layers
@@ -345,7 +374,7 @@ Detail: [PLATFORM_PRIMITIVES.md](./PLATFORM_PRIMITIVES.md) §6.13; [PLATFORM_CON
 
 ## 19. Platform Services
 
-Baseline v2 maps to deployment containers/services ([ARCHITECTURE.md](../../ARCHITECTURE.md), [TECHNICAL_ARCHITECTURE.md](../artifacts/TECHNICAL_ARCHITECTURE.md)):
+Baseline v2 maps to deployment containers/services ([ARCHITECTURE.md](../../ARCHITECTURE.md), [REFERENCE_ARCHITECTURE.md](./REFERENCE_ARCHITECTURE.md)):
 
 | Service / container | Baseline v2 role |
 |---------------------|------------------|
@@ -477,9 +506,9 @@ sequenceDiagram
 
 ## 29. Deployment view
 
-Sixteen microservices, event bus, data tier — see [TECHNICAL_ARCHITECTURE.md](../artifacts/TECHNICAL_ARCHITECTURE.md). Baseline v2 does not change deployment topology; adds **Metadata Engine** service as future container when implemented.
+Sixteen microservices, event bus, data tier — see [REFERENCE_ARCHITECTURE.md](./REFERENCE_ARCHITECTURE.md). Baseline v2 does not change deployment topology; adds **Metadata Engine** service as future container when implemented.
 
-Kubernetes/Terraform: [docs/05-blueprints/](../05-blueprints/).
+Kubernetes/Terraform: [docs/reference/blueprints/](../reference/blueprints/).
 
 ---
 
@@ -524,7 +553,7 @@ Detail: [PLATFORM_META_MODEL.md](./PLATFORM_META_MODEL.md) §13.
 7. [PLATFORM_UX_MODEL.md](./PLATFORM_UX_MODEL.md)
 8. **This document** (implementation baseline)
 9. [ARCHITECTURE.md](../../ARCHITECTURE.md) (containers)
-10. [TECHNICAL_ARCHITECTURE.md](../artifacts/TECHNICAL_ARCHITECTURE.md) (diagrams)
+10. [REFERENCE_ARCHITECTURE.md](./REFERENCE_ARCHITECTURE.md) (diagrams)
 
 ### PI alignment
 
@@ -540,6 +569,8 @@ Detail: [PLATFORM_META_MODEL.md](./PLATFORM_META_MODEL.md) §13.
 | PI-08 | Multi-tenancy, config, Entitlements, Marketplace prep |
 | PI-09 | Builders, Object Explorer, Developer Experience |
 | PI-10 | GA, partner ecosystem |
+
+**Engineering roadmap alignment:** [ARCHITECTURE_ALIGNMENT_REPORT.md](../engineering/architecture-alignment/ARCHITECTURE_ALIGNMENT_REPORT.md) — PI classifications, story impacts, implementation order.
 
 ---
 
@@ -561,16 +592,16 @@ Platform Core remains stable; vocabulary grows through glossary governance.
 |----|-----|----------|---------------|---------------|----------------|----------------------|-------------------|-------------|-------------------|
 | G-01 | No Metadata Engine service | **Critical** | Metadata docs only; config in services ad hoc | Central publish/resolve/registry | Customer metadata without code forks | New container + APIs; PI-08/09 | META_MODEL, BASELINE | PI-08, PI-09 | Phase 1: config-service; Phase 2: full ME |
 | G-02 | Provider Contract schema missing | **Critical** | agent-contract + tool-contract separate | Unified provider-contract.schema.json | Provider Model in validation CI | New schema; registry merge path | contracts/, CONTRACTS | PI-02, PI-05, PI-06 | Add schema v2; map agent/tool as kinds |
-| G-03 | ARCHITECTURE.md agent-centric | **High** | Nine containers; Agent/Tool Registry naming | Baseline v2 cross-reference; Provider lexical map | Single ontology for implementers | Doc + comments only | ARCHITECTURE.md | All | Add § baseline pointer; no container rename yet |
+| G-03 | ARCHITECTURE.md agent-centric | **High** | Nine containers; lexical mapping added | Baseline v2 cross-reference; Provider lexical map | Single ontology for implementers | Doc + comments only | ARCHITECTURE.md | All | ✅ § Baseline v2 lexical mapping |
 | G-04 | Model Router vs Execution Profile | **High** | ADR-012; model-router service | Profiles in metadata; router as resolver | Governed AI cost/quality | Profile metadata store; router reads profiles | PRIMITIVES, TECH_ARCH | PI-02, PI-06 | Router becomes profile resolver |
 | G-05 | No Platform Object API schema | **High** | Per-contract schemas | platform-object.schema.json envelope | Generic SDK/UI | New schema + validation | contracts/, CONTRACTS | PI-09 | Add envelope schema MINOR |
 | G-06 | Marketplace not implemented | **High** | Architecture only | Install pipeline + ME integration | Partner ecosystem | PI-08/09/10 scope | META_MODEL, UX | PI-08, PI-10 | Blueprint → PI stories |
 | G-07 | Builders not implemented | **High** | UX model only | Studio designers | Configuration over customization | Frontend PI-09 | UX_MODEL | PI-09 | Builder MVP per primitive |
-| G-08 | TECH_ARCH Model Routing section | **Medium** | Section 24 model-router | Execution Profile model | Align diagrams | Doc update | TECHNICAL_ARCHITECTURE | PI-06 | Add v2 section; retain legacy |
+| G-08 | TECH_ARCH Model Routing section | **Medium** | §24 + §24.1 Execution Profile evolution | Execution Profile model documented | Align diagrams | Doc update | TECHNICAL_ARCHITECTURE | PI-06 | ✅ §24.1 added; v1 diagram retained |
 | G-09 | Workflow metadata vs JSON files | **Medium** | greenfield-v1.0.0.json file | Workflow Platform Objects in registry | Full metadata-driven workflows | Workflow Engine reads registry | workflows/, PRIMITIVES | PI-03 | Dual path: file → object migration |
 | G-10 | Entitlement runtime checks | **Medium** | Commercial docs only | Enforcement in activation/execute | Revenue protection | Platform Services extension | CONTRACTS | PI-08 | Entitlement service + checks |
-| G-11 | ADR for Provider Model | **Medium** | v2 docs only | ADR-025 accepted | Decision traceability | DECISIONS.md entry | DECISIONS | — | Author ADR-025 |
-| G-12 | PI prompt mappings lack v2 context | **Low** | Agent/orchestrator wording | Baseline v2 reference in context lines | Correct AI-assisted impl | Prompt mapping headers | PI-*/PROMPT_MAPPING | All | Surgical PI updates |
+| G-11 | ADR for Provider Model | **Medium** | ADR-025–027 in DECISIONS.md | Decision traceability | DECISIONS.md entry | DECISIONS | — | ✅ ADR-025–027 accepted |
+| G-12 | PI prompt mappings lack v2 context | **Low** | PI-01–04, 06–08, 10 updated | Baseline v2 reference in context lines | Correct AI-assisted impl | Prompt mapping headers | PI-*/PROMPT_MAPPING | All | ✅ Surgical PI updates; PI-05 on touch |
 | G-13 | Skills reference agent-only patterns | **Low** | .ai/skills implement-story | Glossary + baseline in skills | Consistent AI dev | Skill header links | .ai/skills | — | Update skill references |
 | G-14 | Single workflow template | **Low** | greenfield only | Brownfield + more templates | Domain coverage | workflows/ | ROADMAP | PI-03+ | Add templates per roadmap |
 

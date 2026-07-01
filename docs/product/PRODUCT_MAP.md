@@ -15,7 +15,7 @@ This document is the **entry point** for how the Agentic Engineering Platform is
 
 - [ROADMAP.md](../../ROADMAP.md) — release phases and milestones
 - [TASKS.md](../../TASKS.md) — epics, features, stories
-- [docs/04-program/](../04-program/) — PI-01 through PI-10 execution packs
+- [docs/engineering/implementation-roadmap/](../engineering/implementation-roadmap/) — PI-01 through PI-10 execution packs
 - [ARCHITECTURE.md](../../ARCHITECTURE.md) — technical system structure
 - [CONSTITUTION.md](../../CONSTITUTION.md) — immutable principles
 
@@ -75,7 +75,7 @@ Studios are **not sequential**. They are independently valuable product areas th
 | Layer | Role | Location |
 |-------|------|----------|
 | **Product Domain** | *What* the platform offers — modular Studios on a shared core | `docs/product/` (this folder) |
-| **Program Increment (PI)** | *When* and *how* capabilities are built — sequenced delivery | `docs/04-program/PI-0N-*` |
+| **Program Increment (PI)** | *When* and *how* capabilities are built — sequenced delivery | `docs/engineering/implementation-roadmap/PI-0N-*` |
 | **User Story / AC** | *Done* criteria for each increment | Per-PI `USER_STORIES.md`, `ACCEPTANCE_CRITERIA.md` |
 | **Implementation** | Code, contracts, infra | `src/`, `contracts/`, `workflows/`, `infra/` |
 
@@ -112,18 +112,18 @@ PI names, story IDs, acceptance criteria, and delivery order are **unchanged**. 
 
 | Artifact | Status |
 |----------|--------|
-| PI folder names (`PI-01-Platform-Spine` … `PI-10-General-Availability`) | Unchanged |
+| PI folder names (`PI-01-Platform-Core` … `PI-10-General-Availability`) | Unchanged |
 | User story IDs and acceptance criteria | Unchanged |
 | [ROADMAP.md](../../ROADMAP.md) sequencing | Unchanged |
 | [ARCHITECTURE.md](../../ARCHITECTURE.md) containers and boundaries | Unchanged |
 | [contracts/](../../contracts/) schemas | Unchanged |
 | `src/` layout | Unchanged |
-| Implementation files in `docs/04-program/` | Unchanged |
+| Implementation files in `docs/engineering/implementation-roadmap/` | Unchanged |
 
 ### How teams should use both layers
 
 1. **Product conversations** (roadmap reviews, enterprise demos, studio squads) → start in `docs/product/`.
-2. **Delivery conversations** (sprints, PRs, `/implement-story`, release gates) → continue in `docs/04-program/PI-0N-*`.
+2. **Delivery conversations** (sprints, PRs, `/implement-story`, release gates) → continue in `docs/engineering/implementation-roadmap/PI-0N-*`.
 3. **Technical design** → [ARCHITECTURE.md](../../ARCHITECTURE.md) and [DECISIONS.md](../../DECISIONS.md).
 
 No repository paths were moved. This migration is **documentation-only**.
@@ -134,4 +134,4 @@ No repository paths were moved. This migration is **documentation-only**.
 
 - [VISION.md](../../VISION.md) — platform vision
 - [REPOSITORY_GUIDE.md](../../REPOSITORY_GUIDE.md) — where code and docs live
-- [docs/MIGRATION_REPORT.md](../MIGRATION_REPORT.md) — prior docs restructuring (execution layer)
+- [docs/migration/MIGRATION_REPORT.md](../MIGRATION_REPORT.md) — prior docs restructuring (execution layer)

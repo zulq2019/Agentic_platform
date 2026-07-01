@@ -24,11 +24,11 @@ Run this command after `implement-story.md` and before `git push`.
 | Constitution | `CONSTITUTION.md` | Mandatory |
 | Architecture | `ARCHITECTURE.md` | Mandatory |
 | AI implementation rules | `CLAUDE.md` | Mandatory |
-| User Story | `docs/04-program/{PI}/USER_STORIES.md` — target story | Mandatory |
-| Acceptance Criteria | `docs/04-program/{PI}/ACCEPTANCE_CRITERIA.md` — target story | Mandatory |
-| Definition of Done | `docs/04-program/{PI}/DEFINITION_OF_DONE.md` | Mandatory |
-| Review Checklist | `docs/04-program/{PI}/REVIEW_CHECKLIST.md` | Mandatory |
-| Implementation Guide | `docs/04-program/{PI}/IMPLEMENTATION.md` | Mandatory |
+| User Story | `docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md` — target story | Mandatory |
+| Acceptance Criteria | `docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md` — target story | Mandatory |
+| Definition of Done | `docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md` | Mandatory |
+| Review Checklist | `docs/engineering/implementation-roadmap/{PI}/REVIEW_CHECKLIST.md` | Mandatory |
+| Implementation Guide | `docs/engineering/implementation-roadmap/{PI}/IMPLEMENTATION.md` | Mandatory |
 | Changed files | Output of `git diff main` | Mandatory |
 | Test output | Output of `pytest` or equivalent | Mandatory |
 | Lint output | Output of `ruff check` + `black --check` + `mypy --strict` | Mandatory |
@@ -36,7 +36,7 @@ Run this command after `implement-story.md` and before `git push`.
 **Substitutions required:**
 
 ```
-{PI}          = e.g. PI-03-Orchestrator
+{PI}          = e.g. PI-03-Provider-Framework
 {story_id}    = e.g. US-PI-03-01
 {pr_branch}   = the branch under review
 ```
@@ -144,7 +144,7 @@ Test: {test_file}:{test_name}
 
 ### Step 7 — Definition of Done check
 
-Work through `docs/04-program/{PI}/DEFINITION_OF_DONE.md`. Mark each criterion as met or unmet.
+Work through `docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md`. Mark each criterion as met or unmet.
 
 ### Step 8 — Produce the review report
 

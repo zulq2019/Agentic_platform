@@ -30,7 +30,7 @@ Technical container boundaries, deployment topology, and data ownership are defi
 | **Policy Engine** | Pre-execution policy checks (OPA) | Platform Services — Policy Engine |
 | **Audit** | Immutable, append-only platform event record | Audit Store |
 | **Secrets** | Short-lived, scoped credentials for tools | Secrets Vault |
-| **Configuration** | Tenant configuration and feature flags | Config service ([PI-08](../04-program/PI-08-Enterprise/README.md)) |
+| **Configuration** | Tenant configuration and feature flags | Config service ([PI-08](../engineering/implementation-roadmap/PI-08-Solution-Packs/README.md)) |
 | **Observability** | Traces, metrics, structured logs | Observability stack |
 
 These capabilities are **unchanged** by the Product Domain layer. Naming here aligns with product language; implementation names in `src/platform/` follow [REPOSITORY_GUIDE.md](../../REPOSITORY_GUIDE.md).
@@ -72,11 +72,11 @@ flowchart TB
 
 | PI | Core capabilities delivered |
 |----|----------------------------|
-| [PI-01](../04-program/PI-01-Platform-Spine/README.md) | Service skeletons, Event Bus topology, database foundation, CI spine, local dev |
-| [PI-02](../04-program/PI-02-Agent-Runtime/README.md) | Agent Runtime, Agent Registry integration, Model Router routing |
-| [PI-03](../04-program/PI-03-Orchestrator/README.md) | Planner, Workflow Engine integration, Gate Enforcer, saga compensation |
-| [PI-04](../04-program/PI-04-Memory/README.md) | Memory Service (working + LTM), Context Assembler hooks |
-| [PI-10](../04-program/PI-10-General-Availability/README.md) | Production hardening of all Core services (K8s, chaos, DR) |
+| [PI-01](../engineering/implementation-roadmap/PI-01-Platform-Core/README.md) | Service skeletons, Event Bus topology, database foundation, CI spine, local dev |
+| [PI-02](../engineering/implementation-roadmap/PI-02-Metadata-Engine/README.md) | Agent Runtime, Agent Registry integration, Model Router routing |
+| [PI-03](../engineering/implementation-roadmap/PI-03-Provider-Framework/README.md) | Planner, Workflow Engine integration, Gate Enforcer, saga compensation |
+| [PI-04](../engineering/implementation-roadmap/PI-04-Workflow-Framework/README.md) | Memory Service (working + LTM), Context Assembler hooks |
+| [PI-10](../engineering/implementation-roadmap/PI-10-General-Availability/README.md) | Production hardening of all Core services (K8s, chaos, DR) |
 
 PI-05 (Tool Registry) is classified under **Integration Marketplace** as a product domain but implements a **Core registry service** — see [PI_TO_DOMAIN_MAPPING.md](./PI_TO_DOMAIN_MAPPING.md).
 
@@ -104,7 +104,7 @@ Every Studio follows the same integration pattern:
 2. **Subscribe** to workflow states via Orchestrator / Workflow Engine events.
 3. **Execute** work in Agent Runtime; publish `AgentCompleted` or `AgentFailed`.
 4. **Resolve** external systems only through Tool Registry.
-5. **Read/write memory** only through Memory Service APIs (agents do not write LTM directly — [PI-04](../04-program/PI-04-Memory/README.md)).
+5. **Read/write memory** only through Memory Service APIs (agents do not write LTM directly — [PI-04](../engineering/implementation-roadmap/PI-04-Workflow-Framework/README.md)).
 6. **Pass policy** before side effects; emit audit events for human and agent actions.
 
 Examples: [DOMAIN_INTERACTION.md](./DOMAIN_INTERACTION.md)

@@ -22,9 +22,9 @@ This document records **planned but not yet scheduled** platform capabilities fo
 
 **Related:**
 
-- [PI-05 Tool Registry](../04-program/PI-05-Tool-Registry/README.md) — current delivery increment
-- [tool-connectors blueprint](../05-blueprints/tool-connectors/BLUEPRINT.md) — connector inventory (PI-05/06/07)
-- [tool-sdk blueprint](../05-blueprints/tool-sdk/BLUEPRINT.md) — connector SDK (PI-05)
+- [PI-05 Tool Registry](../engineering/implementation-roadmap/PI-05-Execution-Framework/README.md) — current delivery increment
+- [tool-connectors blueprint](../reference/blueprints/tool-connectors/BLUEPRINT.md) — connector inventory (PI-05/06/07)
+- [tool-sdk blueprint](../reference/blueprints/tool-sdk/BLUEPRINT.md) — connector SDK (PI-05)
 - [STUDIO_OVERVIEW.md](./STUDIO_OVERVIEW.md#integration-marketplace) — Integration Marketplace studio
 - [PLATFORM_CORE.md](./PLATFORM_CORE.md) — Tool Registry as Core service
 
@@ -111,7 +111,7 @@ flowchart LR
 
 ### UX surfaces (future)
 
-Likely delivered through [PI-09](../04-program/PI-09-Developer-Experience/README.md) Config Portal and a dedicated **Integrations** view — **not** part of current PI-09 scope. Track as FC-INT-01 extension when PI is chartered.
+Likely delivered through [PI-09](../engineering/implementation-roadmap/PI-09-Platform-UX/README.md) Config Portal and a dedicated **Integrations** view — **not** part of current PI-09 scope. Track as FC-INT-01 extension when PI is chartered.
 
 ### Dependencies
 
@@ -208,7 +208,7 @@ Connectors are delivered in **phases**. Phases A–B align with existing program
 
 | Connector | Primary studios | Auth (planned) | Reference |
 |-----------|-----------------|----------------|-----------|
-| GitHub | Development, Release | GitHub App | [tool-connectors blueprint](../05-blueprints/tool-connectors/BLUEPRINT.md) |
+| GitHub | Development, Release | GitHub App | [tool-connectors blueprint](../reference/blueprints/tool-connectors/BLUEPRINT.md) |
 | Jira | Requirements, Administration | OAuth2 | Same |
 | Confluence | Architecture, Development | OAuth2 | Same |
 

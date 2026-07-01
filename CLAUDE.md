@@ -16,7 +16,7 @@ This document defines the rules every AI-assisted implementation MUST follow. Wh
 1. [CONSTITUTION.md](CONSTITUTION.md) — what MUST NEVER be violated
 2. [ARCHITECTURE.md](./ARCHITECTURE.md) — how the system is structured
 3. This document — how to implement correctly
-4. [DECISIONS.md](./DECISIONS.md) — why specific choices were made
+4. [DECISIONS.md](docs/architecture/ADR/DECISIONS.md) — why specific choices were made
 
 ---
 
@@ -499,9 +499,9 @@ Use this checklist when reviewing AI-generated or human-written code:
 |----------|---------|
 | [CONSTITUTION.md](CONSTITUTION.md) | Immutable principles |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | System structure |
-| [DECISIONS.md](./DECISIONS.md) | Why decisions were made |
+| [DECISIONS.md](docs/architecture/ADR/DECISIONS.md) | Why decisions were made |
 | [TASKS.md](./TASKS.md) | What to build |
-| [ROADMAP.md](./ROADMAP.md) | When to build it |
+| [ROADMAP.md](docs/product/ROADMAP.md) | When to build it |
 
 ---
 
