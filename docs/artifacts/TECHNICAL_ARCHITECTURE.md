@@ -1,10 +1,13 @@
 # Agentic Engineering Platform — Technical Architecture Diagrams
 
 **Status:** Living document  
-**Version:** 1.0  
-**Date:** 28 June 2026  
-**Authority:** Reference Architecture v1.0 · [CONSTITUTION.md](../../CONSTITUTION.md) · [ARCHITECTURE.md](../ARCHITECTURE.md)  
+**Version:** 1.1 (extends Baseline v2.0; container diagrams unchanged)  
+**Date:** 1 July 2026  
+**Authority:** Reference Architecture v1.0 · [CONSTITUTION.md](../../CONSTITUTION.md) · [ARCHITECTURE.md](../../ARCHITECTURE.md)  
+**Ontology baseline:** [ARCHITECTURE_BASELINE_V2.md](../architecture/ARCHITECTURE_BASELINE_V2.md)  
 **Audience:** Platform engineers, solution architects, CTOs, Fortune 500 enterprise evaluators
+
+> **Baseline v2 note:** Diagrams use v1 service names (Agent Runtime, Model Router, Tool Registry). Lexical mapping to Provider Model and Execution Profiles: [ARCHITECTURE.md](../../ARCHITECTURE.md) § Baseline v2 lexical mapping.
 
 ---
 
@@ -1534,6 +1537,19 @@ flowchart TB
     QCHECK --> QBACKP
 ```
 
+### 24.1 Execution Profile model (Baseline v2 evolution)
+
+Baseline v2 introduces **Execution Profiles** as versioned Platform Objects that govern *how* Capabilities execute. The `model-router` service remains the **runtime resolver**; authoring moves from ad hoc config to metadata.
+
+| Concern | v1 (this diagram §24) | v2 target |
+|---------|----------------------|-----------|
+| Tier selection | `cost_class` hint + TaskClassifier | Active Execution Profile: preferred / fallback / consensus models |
+| Prompts | Embedded in agent code | Prompt Profiles referenced by Profile |
+| Budget / retry | Router + agent defaults | Profile fields: budget, latency, quality, retry strategy |
+| Governance | ADR-012 Model Router | Profile lifecycle: Draft → Published → Active |
+
+**Transition:** PI-06 implements Profile-aware routing; Model Router reads Active Profile resolved by Metadata Engine. See [PLATFORM_PRIMITIVES.md](../architecture/PLATFORM_PRIMITIVES.md) §6.5 and gap G-04 in [ARCHITECTURE_BASELINE_V2.md](../architecture/ARCHITECTURE_BASELINE_V2.md).
+
 ---
 
 ## 25. SDK Architecture
@@ -1696,11 +1712,12 @@ All tool and infrastructure costs above are estimates as of mid-2026. Check vend
 | Document | Role |
 |----------|------|
 | [CONSTITUTION.md](../../CONSTITUTION.md) | Immutable principles — this diagram doc must not violate any |
-| [ARCHITECTURE.md](../ARCHITECTURE.md) | Source architecture this document visualises |
-| [DECISIONS.md](./DECISIONS.md) | ADRs explaining why each architectural choice was made |
-| [CLAUDE.md](../CLAUDE.md) | Implementation rules derived from this architecture |
-| [ROADMAP.md](../ROADMAP.md) | Delivery timeline for each architectural layer |
-| [TASKS.md](../TASKS.md) | Engineering breakdown implementing each diagram |
+| [ARCHITECTURE_BASELINE_V2.md](../architecture/ARCHITECTURE_BASELINE_V2.md) | Implementation baseline — ontology and gap register |
+| [ARCHITECTURE.md](../../ARCHITECTURE.md) | Source architecture this document visualises |
+| [DECISIONS.md](../../DECISIONS.md) | ADRs explaining why each architectural choice was made |
+| [CLAUDE.md](../../CLAUDE.md) | Implementation rules derived from this architecture |
+| [ROADMAP.md](../../ROADMAP.md) | Delivery timeline for each architectural layer |
+| [TASKS.md](../../TASKS.md) | Engineering breakdown implementing each diagram |
 
 ---
 

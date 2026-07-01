@@ -16,6 +16,21 @@ The Agentic Engineering Platform is a vendor-neutral, multi-agent orchestration 
 
 **Constitutional invariants:** Agents never call agents. Orchestrator plans, never executes. New agents plug in, never patch in. Humans approve, agents propose. Every decision is reconstructable. Vendor-neutral by construction.
 
+### Baseline v2 lexical mapping
+
+This document retains **v1 container and product names** for deployment stability. Map them to Baseline v2 ontology when reading across documents:
+
+| v1 term (this document) | Baseline v2 primitive / role | Notes |
+|-------------------------|-------------------------------|-------|
+| Agent / Agent Registry | Provider (`provider_kind: ai-agent`) | Agent Registry = typed Provider index |
+| Tool / Tool Registry | Provider (`connector` / `rest-api`) | Tool Registry = connector Provider index |
+| Orchestrator | Planner | Plans and routes; never executes specialist work |
+| Model Router | Execution Profile resolver | Profiles authored in metadata; router resolves tiers at runtime |
+| Workflow template (JSON file) | Workflow Platform Object | Dual path until Metadata Engine (PI-09) |
+| Agent Contract / Tool Contract | Provider Contract (future) | v1 schemas valid; unified schema in PI-09 (gap G-02) |
+
+Ontology authority: [docs/architecture/ARCHITECTURE_BASELINE_V2.md](docs/architecture/ARCHITECTURE_BASELINE_V2.md). Vocabulary: [docs/architecture/PLATFORM_GLOSSARY.md](docs/architecture/PLATFORM_GLOSSARY.md).
+
 ---
 
 ## C4 Level 1 — System Context

@@ -2,7 +2,8 @@
 
 **Status:** `PLANNED`  
 **Depends on:** PI-03 + PI-05 complete (orchestrator + tool registry operational)  
-**Target:** Sprint 20–25 (weeks 39–50)
+**Target:** Sprint 20–25 (weeks 39–50)  
+**Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Specialist agents are **`ai-agent` Providers** registered via Agent Registry; tools resolved as **connector Providers** by capability tag.
 
 ## What This PI Delivers
 

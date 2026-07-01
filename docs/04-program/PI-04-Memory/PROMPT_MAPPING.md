@@ -1,5 +1,7 @@
 ﻿# PI-04-Memory — Prompt Mapping
 
+> **Architecture Baseline v2.0:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md) · [PLATFORM_GLOSSARY.md](../../architecture/PLATFORM_GLOSSARY.md)
+
 > This file does not contain prompts.
 > It maps each User Story to reusable commands in \`.ai/commands/\`.
 > The prompt library lives in \`.ai/\`. This file is a reference index only.

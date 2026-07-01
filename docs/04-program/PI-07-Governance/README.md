@@ -2,7 +2,8 @@
 
 **Status:** `PLANNED`  
 **Depends on:** PI-03 complete (orchestrator + approval service operational)  
-**Target:** Sprint 26–29 (weeks 51–58)
+**Target:** Sprint 26–29 (weeks 51–58)  
+**Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Implements **Governance Contract** (versioning, approval, audit, lifecycle) for all Platform Objects at runtime.
 
 ## What This PI Delivers
 

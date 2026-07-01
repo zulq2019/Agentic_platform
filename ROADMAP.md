@@ -335,7 +335,7 @@ flowchart TD
 
 - New workflow templates: enabled per tenant via policy configuration.
 - New agents: enabled per tenant via Agent Registry visibility.
-- Model tier changes: enabled per tenant via Model Router configuration.
+- Model tier changes: enabled per tenant via **Execution Profile** or Model Router configuration (ADR-027).
 - Feature flags MUST NOT bypass constitutional gates or audit requirements.
 
 ---
@@ -345,6 +345,7 @@ flowchart TD
 | Document | Relationship |
 |----------|---------------|
 | [VISION.md](./VISION.md) | Five-year vision this roadmap implements |
+| [docs/architecture/ARCHITECTURE_BASELINE_V2.md](docs/architecture/ARCHITECTURE_BASELINE_V2.md) | Implementation baseline and gap register |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Technical architecture delivered per phase |
 | [TASKS.md](./TASKS.md) | Engineering work breakdown per milestone |
 | [CONSTITUTION.md](CONSTITUTION.md) | Invariants that constrain all releases |

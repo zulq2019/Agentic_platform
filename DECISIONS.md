@@ -986,6 +986,89 @@ Nine independently deployable containers: Orchestrator, Agent Runtime, Event Bus
 
 ---
 
+## ADR-025: Provider Model as First-Class Ontology
+
+**Status:** Accepted  
+**Date:** 1 July 2026  
+**Deciders:** Chief Enterprise Platform Architect  
+**Constitutional alignment:** A1, A3, AG4, AP5
+
+### Context
+
+Architecture Baseline v2 unifies AI agents, connectors, humans, APIs, and automation under a single **Provider** primitive with `provider_kind` discriminator. v1 docs and contracts used parallel Agent and Tool abstractions.
+
+### Decision
+
+- **Provider** is the meta-model primitive for all execution backends.
+- **Agent** remains product language for `provider_kind: ai-agent`.
+- **Tool Registry** is the typed index for `connector` / `rest-api` Providers.
+- Discovery is always by **capability tag**, never provider name.
+- Unified `provider-contract.schema.json` will supersede separate agent/tool contracts in PI-09 (non-breaking transition).
+
+### Consequences
+
+**Positive:** One ontology for thousands of tenant integrations; partner Marketplace artefacts align to Provider Plugins.
+
+**Negative:** Lexical migration across docs, PI stories, and skills until PI-09 schema lands.
+
+**Supersedes:** Informal "Agent-as-primitive" in platform architecture docs (not ADR-003 container topology).
+
+---
+
+## ADR-026: Metadata Engine Owns Publish and Resolve
+
+**Status:** Accepted  
+**Date:** 1 July 2026  
+**Deciders:** Chief Enterprise Platform Architect  
+**Constitutional alignment:** MT3, P4
+
+### Context
+
+Customer behaviour must be expressed as metadata without platform source forks. v1 distributed configuration across services ad hoc.
+
+### Decision
+
+- **Metadata Engine** is the authoritative service for Platform Object publish, validate, resolve, registry index, and `effective_configuration` materialisation.
+- Phase 1: `config-service` (PI-08) for configuration hierarchy.
+- Phase 2: full Metadata Engine MVP (PI-09) with Marketplace install pipeline integration.
+- Workflow JSON files in `workflows/` remain valid during dual-read transition (gap G-09).
+
+### Consequences
+
+**Positive:** Salesforce-class metadata lifecycle; Builders output validated objects only.
+
+**Negative:** New container/service; PI-01 spine unchanged until PI-08/09.
+
+---
+
+## ADR-027: Execution Profiles Supersede Ad Hoc Model Routing Authoring
+
+**Status:** Accepted  
+**Date:** 1 July 2026  
+**Deciders:** Chief Enterprise Platform Architect  
+**Constitutional alignment:** MI3 (no model names in Agent Contract)
+
+### Context
+
+ADR-012 established Model Router for tier selection. Baseline v2 requires governed, versioned **Execution Profiles** for preferred/fallback/consensus models, prompts, budget, and retry.
+
+### Decision
+
+- **Execution Profiles** are Platform Objects authored via Execution Profile Designer (PI-09).
+- **model-router** service becomes the **runtime resolver** of Active Profiles — not the authoring store.
+- `cost_class` on agents remains a compatibility hint until Profile schema is enforced.
+- Model names stay out of Agent/Provider contracts; profiles reference Model Registry tiers.
+
+### Consequences
+
+**Positive:** Governed AI cost/quality per workflow node; audit trail for profile changes.
+
+**Negative:** Profile storage and Metadata Engine dependency; PI-06 routing logic evolves.
+
+**Related:** ADR-012 (runtime routing — retained); [TECHNICAL_ARCHITECTURE.md](docs/artifacts/TECHNICAL_ARCHITECTURE.md) §24.1.
+
+---
+
 ## Reserved ADR Numbers
 
 | Range | Reserved for |

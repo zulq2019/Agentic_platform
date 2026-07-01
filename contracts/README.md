@@ -51,5 +51,16 @@ python scripts/validate_contract.py agent path/to/agent-registration.json
 ## Related Documents
 
 - [ARCHITECTURE.md](../ARCHITECTURE.md) — system structure
+- [docs/architecture/ARCHITECTURE_BASELINE_V2.md](../docs/architecture/ARCHITECTURE_BASELINE_V2.md) — implementation baseline
 - [CLAUDE.md](../CLAUDE.md) — implementation rules
 - [DECISIONS.md](../DECISIONS.md) — ADR-003, ADR-007, ADR-020
+
+## Baseline v2 schema roadmap (PI-09)
+
+| Planned schema | Purpose | Gap ID | Target PI |
+|----------------|---------|--------|-----------|
+| `provider-contract.schema.json` | Unified Provider registration (`ai-agent`, `connector`, etc.) | G-02 | PI-09 |
+| `platform-object.schema.json` | Universal Platform Object envelope | G-05 | PI-09 |
+| `execution-profile.schema.json` | Execution Profile metadata | G-04 | PI-09 |
+
+v1 schemas (`agent-contract`, `tool-contract`) remain valid until Provider Contract MINOR maps both kinds. See [ARCHITECTURE_CHANGELOG_V2.md](../docs/architecture/ARCHITECTURE_CHANGELOG_V2.md) migration guidance.

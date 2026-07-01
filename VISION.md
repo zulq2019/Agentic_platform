@@ -342,6 +342,7 @@ Source control · Issue tracking · CI/CD · Security scanning · Infrastructure
 | Document | Relationship |
 |----------|---------------|
 | [CONSTITUTION.md](CONSTITUTION.md) | Immutable principles this vision must not violate |
+| [docs/architecture/ARCHITECTURE_BASELINE_V2.md](docs/architecture/ARCHITECTURE_BASELINE_V2.md) | Metadata-driven enterprise ontology |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Technical realisation of this vision |
 | [ROADMAP.md](./ROADMAP.md) | Phased delivery plan |
 | [TASKS.md](./TASKS.md) | Engineering work breakdown |

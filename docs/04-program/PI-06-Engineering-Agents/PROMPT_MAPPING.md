@@ -1,5 +1,7 @@
 ﻿# PI-06-Engineering-Agents — Prompt Mapping
 
+> **Architecture Baseline v2.0:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md) · [PLATFORM_GLOSSARY.md](../../architecture/PLATFORM_GLOSSARY.md)
+
 > This file does not contain prompts.
 > It maps each User Story to reusable commands in \`.ai/commands/\`.
 > The prompt library lives in \`.ai/\`. This file is a reference index only.
@@ -23,7 +25,7 @@
 | Review | → \`.ai/commands/review-story.md\` |
 | Testing | → \`.ai/commands/generate-tests.md\` |
 
-**PI-06 context:** Deliverable = all 15 specialist agents. Each implements Agent Contract and idempotency strategy.
+**PI-06 context:** Deliverable = all 15 specialist agents as `ai-agent` Providers. Each implements Agent Contract (maps to Provider Contract G-02) and idempotency strategy.
 
 ---
 

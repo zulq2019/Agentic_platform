@@ -1,7 +1,7 @@
 # Implementation Readiness Assessment
 
 **Status:** Architecture gate review  
-**Version:** 1.0  
+**Version:** 1.1  
 **Effective:** 1 July 2026  
 **Baseline:** [ARCHITECTURE_BASELINE_V2.md](./ARCHITECTURE_BASELINE_V2.md)  
 **Audience:** Engineering leadership, PI leads, architects
@@ -12,7 +12,7 @@
 
 The repository is **ready to resume implementation** against **Architecture Baseline v2.0** for **continued PI-01 spine work** and **planned PI-02+ delivery**, with **documented blockers** for full metadata-driven customer self-service (Metadata Engine, Provider Contract schema, Builders, Marketplace).
 
-**Overall readiness score: 72 / 100** — architecture stabilised; implementation lags ontology by design.
+**Overall readiness score: 76 / 100** — architecture stabilisation complete; implementation lags ontology by design.
 
 ---
 
@@ -20,16 +20,16 @@ The repository is **ready to resume implementation** against **Architecture Base
 
 | Dimension | Score | Weight | Weighted | Status |
 |-----------|-------|--------|----------|--------|
-| Architecture | 92 | 20% | 18.4 | ✅ Stabilised v2 |
-| Documentation | 88 | 15% | 13.2 | ✅ Comprehensive |
+| Architecture | 94 | 20% | 18.8 | ✅ Stabilised v2 |
+| Documentation | 90 | 15% | 13.5 | ✅ Cross-linked |
 | Repository structure | 78 | 10% | 7.8 | 🟡 Mature docs; early code |
-| Contracts | 55 | 15% | 8.25 | ⚠️ v1 schemas only |
+| Contracts | 58 | 15% | 8.7 | ⚠️ v1 schemas; roadmap documented |
 | Skills | 70 | 5% | 3.5 | 🟡 Agent-centric wording |
-| Prompt library | 72 | 5% | 3.6 | 🟡 PI mappings need v2 context |
+| Prompt library | 78 | 5% | 3.9 | 🟡 PI mappings updated |
 | Platform design | 90 | 15% | 13.5 | ✅ Primitives, UX, glossary |
-| Governance | 85 | 10% | 8.5 | ✅ Constitution + contracts |
+| Governance | 88 | 10% | 8.8 | ✅ ADR-025–027 accepted |
 | Developer experience | 65 | 5% | 3.25 | 🟡 PI-01 in progress | 
-| **Total** | | **100%** | **72.0** | |
+| **Total** | | **100%** | **76.0** | |
 
 ---
 
@@ -45,8 +45,8 @@ The repository is **ready to resume implementation** against **Architecture Base
 
 **Gaps**
 
-- [ARCHITECTURE.md](../../ARCHITECTURE.md) and [TECHNICAL_ARCHITECTURE.md](../artifacts/TECHNICAL_ARCHITECTURE.md) still v1 container/agent framing (G-03, G-08) — mitigated by baseline cross-links
-- ADR-025+ not yet in DECISIONS.md (G-11)
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) container framing mitigated by baseline lexical mapping (G-03 ✅ doc)
+- ADR-025–027 now in [DECISIONS.md](../../DECISIONS.md) (G-11 ✅)
 
 **Verdict:** ✅ Ready for implementation with baseline as ontology authority.
 
@@ -63,8 +63,8 @@ The repository is **ready to resume implementation** against **Architecture Base
 
 **Gaps**
 
-- PI docs partially pre-v2 terminology
-- TECHNICAL_ARCHITECTURE not yet aligned to Execution Profiles
+- PI docs partially pre-v2 terminology — **mitigated** by surgical PI-02/03/05/06/07/08/09 updates and PROMPT_MAPPING headers
+- TECHNICAL_ARCHITECTURE §24.1 documents Execution Profile evolution (G-08 ✅ doc)
 
 **Verdict:** ✅ Sufficient for PI execution; update PI headers as stories are touched.
 
@@ -97,7 +97,7 @@ The repository is **ready to resume implementation** against **Architecture Base
 
 **Gaps (blockers for full v2)**
 
-- No `provider-contract.schema.json` (G-02)
+- No `provider-contract.schema.json` (G-02) — roadmap in [contracts/README.md](../../contracts/README.md)
 - No `platform-object.schema.json` envelope (G-05)
 - No `execution-profile.schema.json`
 - agent/tool split predates Provider Model
@@ -130,9 +130,9 @@ The repository is **ready to resume implementation** against **Architecture Base
 
 **Gaps**
 
-- PI prompt context lines agent-centric (G-12)
+- PI prompt context lines updated for PI-01–03, 04, 06–08, 10 (G-12 ✅ partial)
 
-**Verdict:** 🟡 Functional; surgical PI PROMPT_MAPPING updates applied in stabilisation.
+**Verdict:** 🟡 Functional; remaining PI-05/07 prompt context updates on story touch.
 
 ---
 
@@ -164,6 +164,7 @@ The repository is **ready to resume implementation** against **Architecture Base
 **Gaps**
 
 - Entitlement enforcement not implemented (G-10)
+- ADR-025–027 accepted; runtime enforcement in PI-07/08
 
 **Verdict:** ✅ Governance architecture complete; runtime in PI-07/08.
 
@@ -220,6 +221,9 @@ flowchart LR
 - [x] ARCHITECTURE_BASELINE_V2.md published
 - [x] Glossary and philosophy published
 - [x] Gap register documented
+- [x] Enterprise principles validation matrix (BASELINE §4)
+- [x] ADR-025–027 accepted
+- [x] PI PROMPT_MAPPING baseline headers (PI-01–04, 06–08, 10)
 - [ ] PI-01 Definition of Done met (implementation)
 - [ ] provider-contract.schema.json drafted (PI-09 story)
 
@@ -237,4 +241,4 @@ flowchart LR
 
 ---
 
-*Assessment valid at Architecture Baseline v2.0 stabilisation. Re-score after PI-01 completion and provider-contract schema merge.*
+*Assessment valid at Architecture Baseline v2.0 stabilisation (v1.1). Re-score after PI-01 completion and provider-contract schema merge.*

@@ -1,5 +1,7 @@
 ﻿# PI-02-Agent-Runtime — Prompt Mapping
 
+> **Architecture Baseline v2.0:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md) · [PLATFORM_GLOSSARY.md](../../architecture/PLATFORM_GLOSSARY.md)
+
 > This file does not contain prompts.
 > It maps each User Story to reusable commands in \`.ai/commands/\`.
 > The prompt library lives in \`.ai/\`. This file is a reference index only.
@@ -23,7 +25,7 @@
 | Review | → \`.ai/commands/review-story.md\` |
 | Testing | → \`.ai/commands/generate-tests.md\` |
 
-**PI-02 context:** Deliverable = agent-runtime + agent-registry + model-router services. Execution pattern in IMPLEMENTATION.md.
+**PI-02 context:** Deliverable = agent-runtime + agent-registry + model-router services. Agents are `ai-agent` Providers; model-router evolves to Execution Profile resolver per baseline G-04.
 
 ---
 
