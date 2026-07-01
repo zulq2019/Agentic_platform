@@ -3,15 +3,19 @@ name: regression-review
 description: |
   When the engineer types /regression-review <PR_NUMBER> or /regression-review <GitHub PR URL>,
   fetch the PR diff and perform a Principal Engineer level regression assessment across 11
-  compatibility dimensions. This skill asks "did this break anything that was already working?"
-  — a dedicated backward-compatibility audit separate from aep-review (which asks "is this
-  correct?"). Classifies every changed file into a compatibility zone, then executes 11 lenses
-  in order: Blast Radius → Contract Compatibility → API Compatibility → Event/Kafka Compatibility →
-  Database Schema Compatibility → Infrastructure Compatibility → Workflow Compatibility →
-  Agent Compatibility → Tool Compatibility → SDK Compatibility → Backward Compatibility Summary.
-  Produces a Blast Radius Map, per-lens findings with file:line citations and concrete fixes,
-  a Regression Risk table, and a merge verdict. A single Critical finding in any lens forces
-  REQUEST CHANGES regardless of all other results. Never approve a PR with an unresolved
+  compatibility dimensions. Architecture v2.0-aware: automatically identifies Platform Object
+  impact and regression scope across Capabilities, Providers, Policies, Execution Profiles,
+  Marketplace, Registries, Metadata Engine, Workflow Engine, and Platform APIs when PR touches
+  shared/contracts/metadata paths. This skill asks "did this break anything that was already
+  working?" — a dedicated backward-compatibility audit separate from aep-review (which asks
+  "is this correct?"). Classifies every changed file into a compatibility zone, then executes
+  11 lenses in order: Blast Radius → Contract Compatibility → API Compatibility → Event/Kafka
+  Compatibility → Database Schema Compatibility → Infrastructure Compatibility → Workflow
+  Compatibility → Agent Compatibility → Tool Compatibility → SDK Compatibility → Backward
+  Compatibility Summary. Produces a Blast Radius Map, Regression Scope, Regression Matrix,
+  Automation Coverage Recommendations, per-lens findings with file:line citations and concrete
+  fixes, a Regression Risk table, and a merge verdict. A single Critical finding in any lens
+  forces REQUEST CHANGES regardless of all other results. Never approve a PR with an unresolved
   regression.
 allowed-tools: |
   bash: gh, git, grep, rg, python, jq
@@ -19,6 +23,9 @@ allowed-tools: |
 ---
 
 # AEP Regression Review
+
+**Version:** 2.0 — Architecture v2.0-aware regression audit  
+**Backward compatible:** `/regression-review 42` and `/regression-review <PR_URL>` work exactly as before.
 
 <purpose>
 Detect regressions introduced by a Pull Request across 11 compatibility dimensions. This skill
@@ -56,6 +63,8 @@ Trigger when the engineer types `/regression-review` followed by a PR number or 
 - Agent registrations or the Agent Registry
 - Tool registrations or the Tool Registry
 - `sdks/` — public SDK interfaces
+- `src/shared/aep_meta/` or `metadata-engine/` — Platform Object envelope and Metadata Engine
+- `contracts/platform-object.schema.json` — universal Platform Object contract (Architecture v2.0)
 
 ---
 
@@ -103,11 +112,78 @@ Deletions:      -{N}
 | Zone I | Docker Compose, K8s manifests, GitHub Actions, `.env` | HIGH — all environments |
 | Zone SDK | `sdks/` | HIGH — external consumers |
 | Zone API | API route files, request/response schemas | HIGH — UI, SDK, external callers |
+| Zone M | `src/shared/aep_meta/`, `metadata-engine/`, `contracts/platform-object.schema.json` | CRITICAL — all Platform Objects and metadata-driven behaviour |
 
 Record the zone classification for every file. This drives which lenses are mandatory.
 
+**Architecture v2.0 trigger:** If the PR contains any file in Zone S, Zone C, or Zone M, set
+`load_platform_constitution = true` and execute Step 1b before Lens 1.
+
 **Stop condition:** If `gh` cannot fetch the diff, stop and report. Review cannot proceed
 without the full diff.
+
+---
+
+## Step 1b — Platform Object Impact Identification (Architecture v2.0)
+
+**Execute when:** `load_platform_constitution = true` (Zone S, Zone C, or Zone M files present).
+**Runs before Lens 1** — informs blast radius assessment with Platform Object semantics.
+
+**Why it matters:** Architecture v2.0 unifies Capabilities, Providers, Policies, Execution
+Profiles, Workflows, and Registries as specialised Platform Objects sharing one envelope.
+A breaking change to the Platform Object schema, lifecycle FSM, or `aep_meta` library propagates
+to every primitive — not just the Metadata Engine.
+
+**Step 1b.1 — Detect Platform Object surface changes:**
+
+```bash
+# Platform Object schema and examples
+git diff HEAD~1 -- contracts/platform-object.schema.json contracts/examples/sample-platform-object.json
+
+# aep_meta shared library
+gh pr diff <NUMBER> --name-status | rg "aep_meta|metadata-engine|platform.object|platform_object"
+
+# Lifecycle, versioning, and relationship fields in changed code
+rg "lifecycle_state|object_type|aep_meta|platform_object|PlatformObject" -- <changed_files>
+
+# Metadata Engine API routes
+rg "/api/v1/platform-objects|platform-objects" -- <changed_files>
+```
+
+**Step 1b.2 — Classify Platform Object impact:**
+
+| Change type | Regression class | Downstream effect |
+|------------|-----------------|-------------------|
+| `object_type` enum value added | Non-breaking ✅ | New primitive type — verify consumers ignore unknown types |
+| `object_type` renamed or removed | Breaking 🔴 | All objects of that type fail validation or lookup |
+| `lifecycle_state` added to FSM | Non-breaking ✅ if optional transition | |
+| `lifecycle_state` removed or renamed | Breaking 🔴 | In-flight objects in removed state stall |
+| Required envelope field added (no default) | Breaking 🔴 | All existing Platform Object producers fail validation |
+| Envelope field removed or type-changed | Breaking 🔴 | All consumers fail deserialization |
+| `schema_version` not incremented on breaking change | Breaking 🔴 | Version negotiation fails silently |
+| `aep_meta` exported symbol changed | Breaking 🔴 | Every Metadata Engine consumer and PI using `aep_meta` breaks |
+
+**Step 1b.3 — Map affected primitive types:**
+
+From the diff, record which Platform Object primitive types are directly or transitively affected:
+
+```
+Platform Object impact:
+  Schema changed:        yes | no
+  aep_meta changed:      yes | no
+  Primitive types:       {Capability | Provider | Policy | ExecutionProfile | Workflow | ... | none}
+  Lifecycle FSM changed: yes | no — states affected: {list}
+  Relationship model:    changed | unchanged
+  Downstream services:   {metadata-engine, agent-registry, tool-registry, orchestrator, ...}
+```
+
+Record this block in the review output under **Platform Object Impact**. Carry forward into
+Lens 1 (Blast Radius) and Step 2b (Regression Scope Generation).
+
+**Flag as Critical when:**
+- Breaking Platform Object envelope change with no `schema_version` increment
+- `lifecycle_state` removed while in-flight Platform Objects may occupy that state
+- `aep_meta` exported symbol renamed or removed with live importers
 
 ---
 
@@ -116,11 +192,36 @@ without the full diff.
 Read these documents as regression context. Do not re-output their contents. They are the
 authoritative baselines this PR is measured against.
 
+### Platform Constitution (Architecture v2.0 — when Zone S, C, or M present)
+
+**Execute when `load_platform_constitution = true`.** Read before Lens 1.
+
+```bash
+cat docs/architecture/PLATFORM_PRIMITIVES.md
+cat docs/architecture/PLATFORM_CONTRACTS.md
+cat docs/architecture/PLATFORM_META_MODEL.md
+cat docs/architecture/PLATFORM_UX_MODEL.md
+cat docs/architecture/PLATFORM_GLOSSARY.md
+cat docs/architecture/METADATA_DRIVEN_ENTERPRISE_PLATFORM.md
+cat docs/architecture/ARCHITECTURE_BASELINE_V2.md
+cat contracts/platform-object.schema.json
+```
+
+Extract and internalise:
+- **Platform Object envelope** from `PLATFORM_PRIMITIVES.md` §3 — identity, lifecycle, versioning, audit
+- **Primitive catalog** — Capabilities, Providers, Policies, Execution Profiles, Registries, Marketplace
+- **Lifecycle FSM** from `PLATFORM_META_MODEL.md` — valid transitions, no skip paths
+- **Contract versioning** from `PLATFORM_CONTRACTS.md` — breaking vs non-breaking rules
+- **Metadata Engine boundaries** from `ARCHITECTURE_BASELINE_V2.md` — API surfaces, engine ownership
+
+### Repository Constitution (always required)
+
 ```bash
 # Platform authorities — the baseline to regress against
 cat CONSTITUTION.md
 cat ARCHITECTURE.md
-cat DECISIONS.md
+cat CLAUDE.md
+cat docs/architecture/ADR/DECISIONS.md
 
 # All contract schemas — current baselines
 ls contracts/
@@ -143,6 +244,81 @@ cat docs/engineering/implementation-roadmap/{PI}/CAPABILITIES.md
 
 **Stop condition:** If `CONSTITUTION.md` or `ARCHITECTURE.md` or the `contracts/` directory
 cannot be read, stop and report. Regression review cannot proceed without these baselines.
+If `load_platform_constitution = true` and platform constitution docs cannot be read, stop
+and report — Architecture v2.0 regression scope cannot be determined.
+
+---
+
+## Step 2b — Regression Scope Generation (Architecture v2.0)
+
+**Execute after Step 2 when `load_platform_constitution = true`, or when any zone beyond
+Zone API is present.** Produces the impacted-platform-surface map that drives the Regression
+Matrix and Automation Coverage Recommendations.
+
+For every changed file, map to impacted Architecture v2.0 surfaces:
+
+| Surface | Path / signal patterns | What breaks if regressed |
+|---------|------------------------|--------------------------|
+| **Capabilities** | `capabilities/`, capability tags in workflows/agents, `object_type: capability` | Tasks orphaned — no agent resolves required capability |
+| **Providers** | `providers/`, provider framework, `object_type: provider`, ADR-012/027 refs | Capability resolution fails; wrong or missing provider binding |
+| **Policies** | `policy-engine/`, `object_type: policy`, policy evaluation hooks | Authorisation decisions change; tenant policy drift |
+| **Execution Profiles** | `execution_profile`, `ExecutionProfile`, profile schema handlers | Agent runtime constraints change; privilege or cost regression |
+| **Marketplace** | `marketplace/`, `solution_pack`, `commercial_pack`, install flows | Pack install/uninstall breaks; scope ceiling violations |
+| **Registries** | `agent-registry/`, `tool-registry/`, registration JSON, capability resolution | Agent/tool lookup fails; dispatch errors at runtime |
+| **Metadata Engine** | `metadata-engine/`, `aep_meta/`, `platform-object.schema.json` | All Platform Object CRUD and lifecycle transitions fail |
+| **Workflow Engine** | `workflows/`, orchestrator workflow handlers, state machine JSON | In-flight runs stall; gate or transition regressions |
+| **Platform APIs** | `/api/v1/`, OpenAPI specs, request/response schemas | UI, SDK, and external callers receive breaking responses |
+
+**Step 2b.1 — Produce Regression Scope block:**
+
+```bash
+# Capability tag references in diff
+git diff HEAD~1 -- <changed_files> | rg "capability_tag|capabilities"
+
+# Provider references
+rg "provider_id|provider_framework|resolve_provider|object_type.*provider" -- <changed_files>
+
+# Policy references
+rg "policy-engine|evaluate_policy|object_type.*policy" -- <changed_files>
+
+# Execution profile references
+rg "execution_profile|ExecutionProfile|profile_id" -- <changed_files>
+
+# Marketplace references
+rg "marketplace|solution_pack|install_pack|commercial_pack" -- <changed_files>
+
+# Registry references
+rg "agent-registry|tool-registry|agent_id|tool_id|register_" -- <changed_files>
+
+# Metadata Engine references
+rg "metadata-engine|aep_meta|platform-objects|platform_object" -- <changed_files>
+
+# Workflow Engine references
+rg "workflows/|workflow_run|state_machine|transition_state" -- <changed_files>
+
+# Platform API references
+rg "@router\.|/api/v1/" -- <changed_files>
+```
+
+Record:
+
+```
+Regression Scope:
+  Capabilities:        {affected | N/A} — {files or capability tags}
+  Providers:           {affected | N/A} — {files or provider IDs}
+  Policies:            {affected | N/A} — {files or policy IDs}
+  Execution Profiles:  {affected | N/A} — {files or profile IDs}
+  Marketplace:         {affected | N/A} — {files or pack IDs}
+  Registries:          {affected | N/A} — {agent/tool registrations changed}
+  Metadata Engine:     {affected | N/A} — {schema, aep_meta, or API changes}
+  Workflow Engine:     {affected | N/A} — {templates or orchestrator handlers}
+  Platform APIs:       {affected | N/A} — {endpoints changed}
+```
+
+Carry this scope into the Regression Matrix (Step 4 output) and Automation Coverage
+Recommendations. A surface marked **affected** must have a corresponding row in the
+Regression Matrix — do not mark a surface affected without identifying concrete test
+coverage gaps.
 
 ---
 
@@ -159,11 +335,16 @@ Priority is top-down: a Critical in Lens 1 is not superseded by a clean result i
 
 ### Lens 1 — Blast Radius Assessment
 
-**Applies to: Zone S (src/shared/, aep-common/). Highest priority — execute first.**
+**Applies to: Zone S (src/shared/, aep-common/) and Zone M (aep_meta/, metadata-engine/). Highest priority — execute first.**
 
-**Why it matters:** A single change to `aep-common` breaks every service simultaneously in
-production. There is no partial rollout. A renamed function, removed export, or changed return
-type silently fails in every importer at the moment the deployment lands.
+**Architecture v2.0 integration:** If Step 1b identified Platform Object impact, include
+`aep_meta` and Metadata Engine importers in the downstream importer scan alongside Zone S
+files. A change to the Platform Object envelope has equal or greater blast radius than a
+shared utility change.
+
+**Why it matters:** A single change to `aep-common` or `aep_meta` breaks every service
+simultaneously in production. There is no partial rollout. A renamed function, removed export,
+or changed return type silently fails in every importer at the moment the deployment lands.
 
 For every file changed in Zone S:
 
@@ -175,6 +356,12 @@ rg "from aep_common\.|import aep_common" src/ --include="*.py" -l
 
 # Find every TypeScript file that imports the changed module
 rg "from.*aep-common|require.*aep-common" src/ --include="*.ts" -l
+
+# Find every importer of aep_meta (Architecture v2.0)
+rg "from aep_meta|import aep_meta|from.*aep_meta" src/ --include="*.py" -l
+
+# Find Metadata Engine API consumers
+rg "platform-objects|platform_objects|metadata.engine" src/ --include="*.py" --include="*.ts" -l
 
 # Find every service that depends on the shared package
 rg "aep-common" requirements*.txt pyproject.toml package.json -l
@@ -1037,6 +1224,90 @@ Zone D (database):    {files or NONE} → {migration_file}: safe | risky | break
 Zone I (infra):       {files or NONE} → {N} env vars changed, {M} ports changed
 Zone SDK (sdk):       {files or NONE} → breaking | non-breaking | N/A
 Zone API (api):       {files or NONE} → breaking | non-breaking | N/A
+Zone M (metadata):    {files or NONE} → Platform Object impact: {summary}
+
+---
+
+### Platform Object Impact (Architecture v2.0)
+{Step 1b output — schema changed, primitive types, lifecycle FSM, downstream services}
+Or: N/A — no Zone M, Zone S, or Zone C files in PR
+
+---
+
+### Regression Scope (Architecture v2.0)
+| Surface | Status | Detail |
+|---------|--------|--------|
+| Capabilities | AFFECTED / N/A | {capability tags or files} |
+| Providers | AFFECTED / N/A | {provider IDs or files} |
+| Policies | AFFECTED / N/A | {policy IDs or files} |
+| Execution Profiles | AFFECTED / N/A | {profile IDs or files} |
+| Marketplace | AFFECTED / N/A | {pack IDs or files} |
+| Registries | AFFECTED / N/A | {registration changes} |
+| Metadata Engine | AFFECTED / N/A | {schema, aep_meta, API changes} |
+| Workflow Engine | AFFECTED / N/A | {template or handler changes} |
+| Platform APIs | AFFECTED / N/A | {endpoints changed} |
+
+---
+
+### Regression Matrix (Architecture v2.0)
+Dimensions × risk × test coverage required. One row per **affected** surface from Regression Scope.
+
+| Dimension | Regression Risk | Breaking Change? | Existing Test Coverage | Coverage Gap | Required Test Type |
+|-----------|-----------------|------------------|------------------------|--------------|-------------------|
+| Capabilities | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap description} | {contract / integration / workflow / e2e} |
+| Providers | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap} | {test type} |
+| Policies | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap} | {test type} |
+| Execution Profiles | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap} | {test type} |
+| Marketplace | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap} | {test type} |
+| Registries | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap} | {test type} |
+| Metadata Engine | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap} | {test type} |
+| Workflow Engine | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap} | {test type} |
+| Platform APIs | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap} | {test type} |
+| Blast Radius (Zone S) | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap} | {test type} |
+| Contracts (Zone C) | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap} | {test type} |
+| Events/Kafka (Zone K) | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap} | {test type} |
+| Database (Zone D) | HIGH / MED / LOW / N/A | yes / no / N/A | {test files or NONE} | {gap} | {test type} |
+
+Risk derivation:
+- **HIGH** — breaking change confirmed or Critical lens finding in this dimension
+- **MED** — non-breaking but behaviour change, or Major lens finding
+- **LOW** — additive change with existing coverage, or Minor finding only
+- **N/A** — surface not in Regression Scope
+
+---
+
+### Automation Coverage Recommendations
+Prioritised test automation to close Regression Matrix coverage gaps. Recommend only tests
+traceable to changed code — do not invent test scenarios for unaffected surfaces.
+
+**Priority 1 — Must add before merge (HIGH risk + coverage gap):**
+1. {test type}: `{test_file_path}` — covers {dimension} — validates {specific regression scenario}
+2. ...
+
+**Priority 2 — Should add in this PR or immediate follow-up (MED risk + coverage gap):**
+1. {test type}: `{test_file_path}` — covers {dimension} — validates {scenario}
+2. ...
+
+**Priority 3 — Track in TASKS.md (LOW risk or partial coverage):**
+1. {test type}: `{test_file_path}` — covers {dimension}
+2. ...
+
+**Recommended automation patterns by dimension:**
+
+| Dimension | Minimum automation |
+|-----------|-------------------|
+| Capabilities | Contract test: capability tag resolves to registered agent after change |
+| Providers | Integration test: provider resolution by capability tag; tenant isolation |
+| Policies | Integration test: policy evaluation outcome unchanged for baseline fixtures |
+| Execution Profiles | Contract test: profile schema validation; runtime hook boundary test |
+| Marketplace | Integration test: pack install/uninstall idempotency; scope ceiling enforcement |
+| Registries | Contract test: registration validates against agent/tool contract schema |
+| Metadata Engine | Contract test: `platform-object.schema.json` + example validation; lifecycle FSM transition test |
+| Workflow Engine | Workflow test: complete state traversal; in-flight state compatibility |
+| Platform APIs | Contract test: OpenAPI snapshot or response schema validation; backward-compat fixture |
+| Contracts | `python scripts/validate_contract.py` + example re-validation |
+| Events/Kafka | Consumer contract test: existing event fixtures still deserialize |
+| Database | Migration test: upgrade + downgrade round-trip on fixture data |
 
 ---
 
@@ -1125,6 +1396,8 @@ lens results:
 - `idempotency_key_strategy` changed (Lens 8)
 - SDK public method removed/renamed with no major version increment (Lens 10)
 - Zone S importer call site broken by changed interface (Lens 1)
+- Platform Object envelope breaking change without `schema_version` increment (Step 1b / Lens 2)
+- `aep_meta` exported symbol changed with live importers (Lens 1 / Step 1b)
 
 **`NEEDS DISCUSSION`** — required when:
 
@@ -1164,7 +1437,11 @@ lens results:
 11. If a lens has no applicable files (zone not present in PR), record it as N/A — do not
     skip it silently
 12. Maximum 20 findings total — prioritise by severity (Critical first), then by blast radius
-    (Zone S > Zone K > Zone D > others), then by concreteness of failure scenario
+    (Zone S > Zone M > Zone K > Zone D > others), then by concreteness of failure scenario
+13. Never skip platform constitution loading when Zone S, Zone C, or Zone M files are present
+14. Never mark a Regression Scope surface AFFECTED without a corresponding Regression Matrix row
+15. Never approve a HIGH-risk Regression Matrix row with no test coverage and no Priority 1
+    automation recommendation
 
 ---
 
@@ -1173,8 +1450,13 @@ lens results:
 Before producing the output, verify:
 
 - [ ] All applicable lenses executed (N/A recorded for lenses with no zone files)
-- [ ] Blast Radius Map produced with importer counts for every Zone S file
-- [ ] Regression Risk table complete for all 11 dimensions
+- [ ] Platform Object Impact assessed when Zone S, C, or M present (Step 1b)
+- [ ] Platform constitution loaded when `load_platform_constitution = true` (Step 2)
+- [ ] Regression Scope produced for all affected Architecture v2.0 surfaces (Step 2b)
+- [ ] Blast Radius Map produced with importer counts for every Zone S and Zone M file
+- [ ] Regression Risk table complete for all 11 lenses
+- [ ] Regression Matrix complete — one row per affected surface with risk and coverage gap
+- [ ] Automation Coverage Recommendations produced with Priority 1–3 items
 - [ ] Every Critical finding has a concrete runtime failure scenario and a specific fix
 - [ ] Backward Compatibility verdict stated (FULLY COMPATIBLE / COMPATIBLE WITH MIGRATION / BREAKING)
 - [ ] Verdict is consistent with Mandatory Verdict Rules

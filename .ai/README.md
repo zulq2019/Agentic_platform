@@ -64,10 +64,11 @@ Each file defines one reusable engineering operation. A command file contains:
 | `implement-story.md` | Implement a User Story end-to-end (v4.0 — Architecture v2.0-aware) |
 | `generate-tests.md` | Generate test suite for a story (v4.0 — Architecture v2.0-aware) |
 | `review-story.md` | Review a completed story before PR (v2.0 — Architecture v2.0-aware) |
+| `regression-review.md` | Backward-compatibility PR audit (v2.0 — Architecture v2.0-aware, 11 lenses) |
 | `security-review.md` | Security-focused PR audit (v2.0 — Architecture v2.0-aware, 20 lenses) |
-| `performance-review.md` | Latency, throughput, and resource usage review |
+| `performance-review.md` | Latency, throughput, and resource usage review (v2.0 — Architecture v2.0-aware, 18 lenses) |
 | `update-documentation.md` | Update service README, API spec, and ARCHITECTURE.md |
-| `release-story.md` | Prepare, tag, and document a PI or sprint release |
+| `release-story.md` | Final release gate before merge (v2.0 — Architecture v2.0-aware, Pre-Release Verification + 11 lenses) |
 
 ### `templates/` — Scaffolding templates
 
