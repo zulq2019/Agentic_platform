@@ -73,6 +73,7 @@ Each file defines one reusable engineering operation. A command file contains:
 | `performance-review.md` | `skills/performance-review/SKILL.md` | Latency, throughput, and resource usage review (v2.0 — Architecture v2.0-aware, 18 lenses) |
 | `update-documentation.md` | — | Update service README, API spec, and ARCHITECTURE.md |
 | `release-story.md` | `skills/release-story/SKILL.md` | Final release gate before merge (v2.0 — Architecture v2.0-aware, Pre-Release Verification + 11 lenses) |
+| `health-check.md` | `skills/health-check/SKILL.md` | Repository-wide engineering health audit (v1.0 — read-only governance gate, 35 checks, 8 scores, 7 reports) |
 
 ### `templates/` — Scaffolding templates
 
@@ -154,7 +155,8 @@ Each reviewer file configures an AI assistant to adopt a specific review perspec
 
 | Asset type | Convention | Example |
 |-----------|-----------|---------|
-| Command | `verb-noun.md` | `implement-story.md`, `security-review.md` |
+| Command | `verb-noun.md` | `implement-story.md`, `security-review.md`, `health-check.md` |
+| Skill | `skills/{name}/SKILL.md` | `skills/health-check/SKILL.md` |
 | Template | `noun-template.ext` | `agent-template.py`, `migration-template.py` |
 | Checklist | `when-checklist.md` | `pre-commit.md`, `pre-merge.md` |
 | Reviewer | `role-reviewer.md` | `security-reviewer.md`, `arch-reviewer.md` |
