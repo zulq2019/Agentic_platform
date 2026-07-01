@@ -1,8 +1,8 @@
 # review-story.md
 
 **Command:** `review-story`  
-**Version:** 1.0  
-**Library:** `.ai/commands/`  
+**Version:** 2.0 — Architecture v2.0-aware  
+**Skill authority:** `.ai/skills/review-story/SKILL.md` (full pipeline)  
 **Applies to:** All PIs, all sprints
 
 ---
@@ -11,9 +11,18 @@
 
 Use this command to review a completed User Story implementation before raising a pull request.
 
-This command operates as a structured peer reviewer. It checks constitutional compliance, architectural correctness, code quality, test completeness, and observability coverage. It produces a structured review report with a clear pass/fail verdict and actionable findings.
+This command operates as a structured peer reviewer. Before reviewing, it **automatically loads** platform constitution, repository constitution, current PI, current story, acceptance criteria, architecture contracts, platform contracts, and metadata model. It reviews against Architecture v2.0 dimensions and produces findings, risk assessment, compliance scores, and an overall recommendation.
 
 Run this command after `implement-story.md` and before `git push`.
+
+### Invocation (unchanged)
+
+```
+/review-story US-01.03
+/review-story US-02.01
+```
+
+See `.ai/skills/review-story/SKILL.md` for the complete authoritative workflow.
 
 ---
 
@@ -21,15 +30,22 @@ Run this command after `implement-story.md` and before `git push`.
 
 | Input | Location | Required |
 |-------|----------|----------|
+| Platform primitives | `docs/architecture/PLATFORM_PRIMITIVES.md` | Mandatory (v2) |
+| Platform contracts | `docs/architecture/PLATFORM_CONTRACTS.md` | Mandatory (v2) |
+| Meta model | `docs/architecture/PLATFORM_META_MODEL.md` | Mandatory (v2) |
+| Metadata-driven architecture | `docs/architecture/METADATA_DRIVEN_ENTERPRISE_PLATFORM.md` | Mandatory (v2) |
+| Architecture baseline v2 | `docs/architecture/ARCHITECTURE_BASELINE_V2.md` | Mandatory (v2) |
 | Constitution | `CONSTITUTION.md` | Mandatory |
 | Architecture | `ARCHITECTURE.md` | Mandatory |
 | AI implementation rules | `CLAUDE.md` | Mandatory |
-| User Story | `docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md` — target story | Mandatory |
-| Acceptance Criteria | `docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md` — target story | Mandatory |
+| ADRs | `docs/architecture/ADR/DECISIONS.md` | Mandatory |
+| User Story | `docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md` | Mandatory |
+| Acceptance Criteria | `docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md` | Mandatory |
 | Definition of Done | `docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md` | Mandatory |
 | Review Checklist | `docs/engineering/implementation-roadmap/{PI}/REVIEW_CHECKLIST.md` | Mandatory |
 | Implementation Guide | `docs/engineering/implementation-roadmap/{PI}/IMPLEMENTATION.md` | Mandatory |
-| Changed files | Output of `git diff main` | Mandatory |
+| Contract schemas | `contracts/` | Mandatory |
+| Changed files | Output of `git diff master` | Mandatory |
 | Test output | Output of `pytest` or equivalent | Mandatory |
 | Lint output | Output of `ruff check` + `black --check` + `mypy --strict` | Mandatory |
 
@@ -148,36 +164,31 @@ Work through `docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md
 
 ### Step 8 — Produce the review report
 
-Structure the report as:
+Structure the report as (see skill for full v2.0 template with scores):
 
 ```
 ## Review Report: {story_id} — {story_title}
 Branch: {pr_branch}
-Reviewed by: implement-story command (self-review)
 
-### Verdict: PASS | FAIL | PASS WITH WARNINGS
+### Verdict: PASS | PASS WITH WARNINGS | FAIL
 
-### Blockers (must fix before merge)
-1. ...
+### Findings (Critical / Warnings / Minor)
 
-### Warnings (should fix, not blocking)
-1. ...
+### Risk Assessment
 
-### Constitutional Compliance
-All principles: PASS | VIOLATIONS FOUND (list)
+### Compliance Scores
+| Architecture | Maintainability | Performance | Security | Overall |
+|--------------|-----------------|-------------|----------|---------|
+| {N}/100      | {N}/100         | {N}/100     | {N}/100  | {N}/100 |
 
-### Acceptance Criteria Coverage
-AC-01: COVERED — test_file.py::test_name
-AC-02: NOT COVERED — no test found
-...
+### Architecture v2.0 Dimension Summary
+(Architecture, DDD, SOLID, Platform Contracts, Metadata Driven, Security,
+ Performance, Extensibility, Config over Customization, Composition over Hardcoding,
+ Platform Object, Execution Profile, Provider Model, Workflow, Observability,
+ Governance, Versioning, Audit)
 
-### Definition of Done
-[ ] criterion 1 — MET | NOT MET
-[ ] criterion 2 — MET | NOT MET
-...
-
-### Summary
-{one paragraph describing the overall quality of the implementation}
+### Overall Recommendation
+{merge readiness and required fixes}
 ```
 
 ---

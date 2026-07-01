@@ -62,8 +62,8 @@ Each file defines one reusable engineering operation. A command file contains:
 | File | Operation |
 |------|-----------|
 | `implement-story.md` | Implement a User Story end-to-end (v4.0 — Architecture v2.0-aware) |
-| `review-story.md` | Review implementation for correctness and compliance |
-| `generate-tests.md` | Generate unit, integration, and contract tests |
+| `generate-tests.md` | Generate test suite for a story (v4.0 — Architecture v2.0-aware) |
+| `review-story.md` | Review a completed story before PR (v2.0 — Architecture v2.0-aware) |
 | `security-review.md` | Security-focused review: credentials, RLS, scope, injection |
 | `performance-review.md` | Latency, throughput, and resource usage review |
 | `update-documentation.md` | Update service README, API spec, and ARCHITECTURE.md |

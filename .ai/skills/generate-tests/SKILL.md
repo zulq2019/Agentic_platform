@@ -2,7 +2,9 @@
 name: generate-tests
 description: |
   When the engineer types /generate-tests <story_id>, generate the complete
-  testing suite for one implemented User Story. Executes 6 phases in order:
+  Architecture v2.0-aware testing suite for one implemented User Story.
+  Automatically loads platform constitution, PI context, and acceptance criteria
+  before generating tests across 18+ categories. Executes 6 phases in order:
   Read Context → Extract Acceptance Criteria → Identify Test Categories →
   Generate Tests by Category → Verify Coverage → Produce Test Summary.
   Never touches production code. Every acceptance criterion must have a
@@ -14,6 +16,9 @@ allowed-tools: |
 ---
 
 # AEP Generate Tests
+
+**Version:** 4.0 — Architecture v2.0-aware testing strategy  
+**Backward compatible:** `/generate-tests US-01.03` works exactly as before.
 
 <purpose>
 Complete test suite generation for one User Story on the Agentic Engineering
@@ -47,42 +52,68 @@ within that PI.
 Read these documents before writing a single test. They define the authoritative
 standards every test must meet. Do not re-output their contents.
 
+### Platform Constitution (Architecture v2.0 — always required)
+
 ```bash
-# Platform authorities — always required
+cat docs/architecture/PLATFORM_PRIMITIVES.md
+cat docs/architecture/PLATFORM_CONTRACTS.md
+cat docs/architecture/PLATFORM_META_MODEL.md
+cat docs/architecture/PLATFORM_UX_MODEL.md
+cat docs/architecture/PLATFORM_GLOSSARY.md
+cat docs/architecture/METADATA_DRIVEN_ENTERPRISE_PLATFORM.md
+cat docs/architecture/ARCHITECTURE_BASELINE_V2.md
+```
+
+### Repository Architecture
+
+```bash
 cat CONSTITUTION.md
 cat ARCHITECTURE.md
+cat CLAUDE.md
+```
 
-# Resolve the PI from the story ID prefix (e.g. US-01 → PI-01)
-PI_DIR=$(ls docs/engineering/implementation-roadmap/ | grep "PI-$(echo $STORY_ID | cut -d- -f2 | cut -d. -f1)")
+### Current PI and Story (resolve from story ID)
 
-# PI planning documents
+```bash
+# Resolve PI folder from story ID prefix (e.g. US-02.01 → PI-02-Metadata-Engine)
+PI_DIR=$(ls docs/engineering/implementation-roadmap/ | rg "PI-$(echo $STORY_ID | cut -d- -f2 | cut -d. -f1)")
+
+# Current PI context pack
+cat docs/engineering/implementation-roadmap/${PI_DIR}/README.md
+cat docs/engineering/implementation-roadmap/${PI_DIR}/OBJECTIVES.md
+cat docs/engineering/implementation-roadmap/${PI_DIR}/CAPABILITIES.md
+cat docs/engineering/implementation-roadmap/${PI_DIR}/USER_STORIES.md
 cat docs/engineering/implementation-roadmap/${PI_DIR}/ACCEPTANCE_CRITERIA.md
 cat docs/engineering/implementation-roadmap/${PI_DIR}/TESTING.md
-cat docs/engineering/implementation-roadmap/${PI_DIR}/DEFINITION_OF_DONE.md
 cat docs/engineering/implementation-roadmap/${PI_DIR}/IMPLEMENTATION.md
-cat docs/engineering/implementation-roadmap/${PI_DIR}/CAPABILITIES.md
+cat docs/engineering/implementation-roadmap/${PI_DIR}/API_SPEC.md
+cat docs/engineering/implementation-roadmap/${PI_DIR}/DATA_MODEL.md
+cat docs/engineering/implementation-roadmap/${PI_DIR}/STATUS.md
 
-# Contracts — validate published events and registrations against these
+# Contracts — v1 + v2 schemas
+ls contracts/
 cat contracts/event-envelope.schema.json
 cat contracts/agent-contract.schema.json
 cat contracts/tool-contract.schema.json
 cat contracts/task-schema.schema.json
 cat contracts/memory-schema.schema.json
+cat contracts/platform-object.schema.json
 
 # Locate implementation source files for the story
 rg "${STORY_ID}" --include="*.py" -l
 rg "${STORY_ID}" --include="*.ts" -l
 
 # Discover existing test structure
-find tests/ -name "*.py" | head -40
-find tests/ -name "conftest.py"
+find tests/ src/tests/ src/shared/*/tests/ -name "*.py" 2>/dev/null | head -40
+find tests/ src/tests/ -name "conftest.py" 2>/dev/null
 cat pytest.ini 2>/dev/null || cat pyproject.toml | grep -A 20 "\[tool.pytest"
 cat requirements-test.txt 2>/dev/null || cat requirements/test.txt 2>/dev/null
 ```
 
-**Stop condition:** If `CONSTITUTION.md`, `ACCEPTANCE_CRITERIA.md`, or the
-implementation source files cannot be read, stop and report. Test generation
-cannot proceed without the acceptance criteria and the code under test.
+**Stop condition:** If platform constitution docs, `CONSTITUTION.md`,
+`ACCEPTANCE_CRITERIA.md`, or the implementation source files cannot be read, stop
+and report. Test generation cannot proceed without architecture context, acceptance
+criteria, and the code under test.
 
 ---
 
@@ -315,21 +346,63 @@ risk — a future change to that method will not be caught by the test suite.
 story needs E2E tests. Not every story produces Kafka events. Generate only
 what is needed — but generate all of what is needed.
 
+#### Core categories (existing — always evaluate)
+
+| Category | Generate when… |
+|----------|----------------|
+| **Unit** | Domain/application logic exists |
+| **Integration** | DB, Kafka, or cross-module flows |
+| **Contract** | Publishes/consumes events or registers agents/tools |
+| **Event** | Kafka consumer or producer present |
+| **API** | HTTP endpoints exposed |
+| **Failure** | Dependency failures must publish AgentFailed/ToolFailed |
+| **Retry** | Idempotency key or retry logic present |
+| **Concurrency** | Tenant-scoped data touched |
+| **E2E** | Story triggers or completes a workflow |
+
+#### Architecture v2.0 categories (extended — evaluate per story)
+
+| Category | Generate when… |
+|----------|----------------|
+| **Negative** | Invalid input, auth failure, missing tenant_id, schema rejection |
+| **Security** | Auth, RBAC, secrets, scope enforcement, tenant isolation |
+| **Performance** | Hot-path queries, batch operations, rate limits |
+| **Regression** | Shared lib (`aep_common`, `aep_meta`), contract, or API touched |
+| **Metadata Validation** | Platform Objects produced/consumed (`platform-object.schema.json`) |
+| **Configuration** | Env vars, feature flags, tenant config — no hardcoded business rules |
+| **Provider** | Provider Framework registration, capability resolution |
+| **Workflow** | Workflow template state/transition logic |
+| **Execution Profile** | Execution Profile schema or runtime hooks |
+| **Policy** | Policy Engine checks, gate enforcement |
+| **Observability** | OTEL spans, Prometheus metrics, structured logs |
+| **Audit** | Audit events, lifecycle transitions, governance records |
+
 ```
 Required categories for {STORY_ID}:
-  Unit           YES — {N} domain methods to test
-  Integration    YES — persists to PostgreSQL
-  Contract       YES — publishes {EventType} event
-  Event          YES — Kafka consumer present
-  API            YES — {N} HTTP endpoints exposed
-  Failure        YES — dependency failures must publish AgentFailed
-  Retry          YES — retry logic with idempotency key present
-  Concurrency    YES — story touches tenant-scoped data
-  E2E            NO  — story is not an end-to-end workflow trigger
+  Unit                  YES/NO — {justification}
+  Integration           YES/NO — {justification}
+  Contract              YES/NO — {justification}
+  Event                 YES/NO — {justification}
+  API                   YES/NO — {justification}
+  Negative              YES/NO — {justification}
+  Security              YES/NO — {justification}
+  Performance           YES/NO — {justification}
+  Regression            YES/NO — {justification}
+  Metadata Validation   YES/NO — {justification}
+  Configuration         YES/NO — {justification}
+  Provider              YES/NO — {justification}
+  Workflow              YES/NO — {justification}
+  Execution Profile     YES/NO — {justification}
+  Policy                YES/NO — {justification}
+  Observability         YES/NO — {justification}
+  Audit                 YES/NO — {justification}
+  Failure               YES/NO — {justification}
+  Retry                 YES/NO — {justification}
+  Concurrency           YES/NO — {justification}
+  E2E                   YES/NO — {justification}
 
 Skipped categories with justification:
-  E2E: {STORY_ID} is an internal domain operation, not a workflow trigger.
-       E2E tests will be generated when the workflow-initiating story is tested.
+  {category}: {reason}
 ```
 
 **Why this step matters:** Generating all categories by default creates test
@@ -1570,7 +1643,47 @@ PI:    {PI_DIR}
 | Retry       | {N}   | tests/retry/test_{story}_retry.py        |
 | Concurrency | {N}   | tests/concurrency/test_{story}_conc.py   |
 | E2E         | {N}   | tests/e2e/test_{story}_e2e.py            |
+| Negative    | {N}   | tests/negative/test_{story}_negative.py  |
+| Security    | {N}   | tests/security/test_{story}_security.py  |
+| Performance | {N}   | tests/performance/test_{story}_perf.py   |
+| Regression  | {N}   | tests/regression/test_{story}_regression.py |
+| Metadata    | {N}   | tests/metadata/test_{story}_platform_object.py |
+| Config      | {N}   | tests/config/test_{story}_config.py      |
+| Provider    | {N}   | tests/provider/test_{story}_provider.py  |
+| Workflow    | {N}   | tests/workflow/test_{story}_workflow.py  |
+| ExecProfile | {N}   | tests/execution/test_{story}_profile.py    |
+| Policy      | {N}   | tests/policy/test_{story}_policy.py      |
+| Observability | {N} | tests/observability/test_{story}_otel.py |
+| Audit       | {N}   | tests/audit/test_{story}_audit.py        |
 | **TOTAL**   | **{N}** |                                        |
+
+### Coverage Recommendations
+
+Based on implementation map and category analysis, produce actionable coverage guidance:
+
+```
+Coverage Recommendations — {STORY_ID}
+────────────────────────────────────
+Overall target:     ≥ 80% on all new implementation modules
+
+Priority gaps (if any):
+  {module/path}     — {current %} → target 80%; add tests for {methods/branches}
+  {module/path}     — untested error paths in {function}
+
+Recommended focus areas:
+  1. {highest-risk untested path — e.g. lifecycle FSM illegal transition}
+  2. {tenant isolation boundary}
+  3. {contract validation boundary}
+
+Suggested pytest command:
+  pytest -m "story_{story_id}" --cov={target_package} --cov-report=term-missing
+
+CI marker registration (if new story):
+  Add to pytest.ini: story_{story_id}: Tests for User Story {STORY_ID}
+
+Categories deferred (document why):
+  {category}: {justification — e.g. Provider Framework not in scope until US-03.02}
+```
 
 ### Coverage Report
 
