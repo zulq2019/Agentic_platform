@@ -64,7 +64,9 @@ async def _delete_object(object_id: UUID) -> None:
 
 @pytest.mark.story_us_02_02
 @pytest.mark.integration
-def test_postgres_repository_persists_platform_object(requires_postgres) -> None:
+def test_ac_us_02_02_01_postgres_repository_persists_platform_object(
+    requires_postgres,
+) -> None:
     assert _run_migrations() == 0
 
     async def _verify() -> None:
@@ -81,7 +83,9 @@ def test_postgres_repository_persists_platform_object(requires_postgres) -> None
 
 @pytest.mark.story_us_02_02
 @pytest.mark.integration
-def test_postgres_repository_rls_isolates_tenants(requires_postgres) -> None:
+def test_ac_us_02_02_02_postgres_repository_rls_isolates_tenants(
+    requires_postgres,
+) -> None:
     assert _run_migrations() == 0
 
     async def _verify() -> None:
@@ -123,7 +127,9 @@ def test_postgres_service_round_trip_with_rls(requires_postgres) -> None:
 
 @pytest.mark.story_us_02_02
 @pytest.mark.integration
-def test_postgres_rls_list_returns_no_foreign_rows(requires_postgres) -> None:
+def test_ac_us_02_02_03_postgres_rls_list_returns_no_foreign_rows(
+    requires_postgres,
+) -> None:
     """Cross-tenant SELECT on metadata.platform_objects returns zero foreign rows."""
     assert _run_migrations() == 0
 

@@ -65,7 +65,15 @@ jobs:
 
       - name: Unit tests (US-02.02)
         run: |
-          python -m pytest src/shared/aep_meta/tests/test_postgres_repository.py -m "story_us_02_02 and not integration and not e2e" -v
+          python -m pytest \
+            src/shared/aep_meta/tests/test_postgres_repository.py \
+            src/tests/unit/test_us_02_02_metadata_engine_wiring.py \
+            -m "story_us_02_02 and not integration and not e2e" \
+            --cov=aep_meta.infrastructure.postgres_repository \
+            --cov=metadata_engine.dependencies \
+            --cov-report=term-missing \
+            --cov-fail-under=80 \
+            -v
 
       - name: Contract validation
         run: python scripts/validate_contract.py contracts/

@@ -6,9 +6,9 @@
 |--------|-------|
 | Unit tests (US-02.01) | 13 |
 | Integration tests (US-02.01) | 4 |
-| Unit tests (US-02.02) | 4 |
+| Unit tests (US-02.02) | 14 |
 | DB integration tests (US-02.02) | 4 |
-| Total tests (US-02.01 + US-02.02) | 25 |
+| Total tests (US-02.01 + US-02.02) | 35 |
 | CI jobs | `story_us_02_01`, `story_us_02_02` |
 | Test pass rate | 100% |
 | `aep_meta` line coverage | 95% |
