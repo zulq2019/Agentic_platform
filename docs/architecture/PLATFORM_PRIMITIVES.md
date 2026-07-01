@@ -1,8 +1,9 @@
 # Agentic Engineering Platform — Platform Primitives
 
 **Status:** Normative architectural meta-model  
-**Version:** 1.0  
+**Version:** 2.0 (extends v1.0; backward compatible)  
 **Effective:** 1 July 2026  
+**Architecture release:** Platform Architecture v2  
 **Authority:** Subordinate to [CONSTITUTION.md](../../CONSTITUTION.md); supersedes all product and implementation documents on matters of platform object semantics  
 **Audience:** Chief architects, platform engineers, Studio owners, integration partners, enterprise customers
 
@@ -54,6 +55,7 @@ The platform introduces **no new system of record**. It orchestrates authoritati
 | **Tenant sovereignty** | Every object is tenant-scoped. Cross-tenant visibility is forbidden by construction. |
 | **Audit by default** | If an action occurred, it is reconstructable from immutable audit records. |
 | **Extension without fork** | Customers and partners extend through Plugins, Solution Packs, and metadata — not platform source modification. |
+| **Configuration over customization** | Customers assemble Studios, Providers, Workflows, and Packs from metadata; platform source remains unchanged (§4.13). |
 
 ### 1.3 Architectural stance
 
@@ -133,7 +135,7 @@ Every API, SDK method, UI screen, and database table that represents definable p
 
 ## 3. Platform Object
 
-The **Platform Object** is the foundational abstraction of the entire platform. Every Platform Primitive **inherits** this specification in full. No primitive may redefine, subset, or replace any section below.
+The **Platform Object** is the **conceptual base class** and foundational abstraction of the entire platform. Every Platform Primitive **inherits** this specification in full — Studios, Capabilities, Workflows, Providers, Policies, Execution Profiles, Context, Resources, Artifacts, Plugins, Solution Packs, Commercial Packs, and Entitlements are all specialisations of Platform Object. No primitive may redefine, subset, or replace any section below.
 
 All platform services, APIs, registries, SDKs, UI components, database entities, and plugins **must** treat primitives through this common envelope.
 
@@ -267,19 +269,21 @@ No primitive may introduce its own security model.
 
 ### 3.8 Observability
 
-Every Platform Object **must** emit telemetry automatically:
+Every Platform Object **must** emit telemetry automatically — **no primitive is exempt**:
 
 | Signal | Requirement |
 |--------|-------------|
-| **Metrics** | Counters and histograms with `tenant_id`, `object_id`, `primitive_type` |
 | **Events** | Lifecycle and runtime facts on Event Bus |
+| **Metrics** | Counters and histograms with `tenant_id`, `object_id`, `primitive_type` |
 | **Logs** | Structured JSON with correlation IDs |
 | **Distributed traces** | Spans for publish, validate, execute paths |
+| **Audit records** | Immutable mutation and execution audit entries |
 | **Health** | Aggregate health derived from dependencies |
-| **Usage statistics** | Invocation counts, last-used timestamp |
-| **Execution history** | Append-only run records |
-| **Performance** | Latency percentiles per operation |
 | **Cost** | Token, compute, and external API cost attribution |
+| **Usage** | Invocation counts, metering dimensions |
+| **Performance** | Latency percentiles per operation |
+| **Correlation IDs** | `task_id`, `workflow_run_id`, `trace_id`, `span_id` on every signal |
+| **Execution history** | Append-only run records (retained) |
 
 No primitive may introduce its own observability model.
 
@@ -524,7 +528,36 @@ A **Solution Pack** is a versioned, publishable **composition** of primitives th
 
 Solution Packs are how customers receive **opinionated defaults** without code forks.
 
----
+**Pack categories (Architecture v2):**
+
+| Category | Typical audience |
+|----------|------------------|
+| **Engineering Pack** | Cross-studio engineering process bundles |
+| **Industry Pack** | Vertical compliance and domain templates |
+| **Team Pack** | Squad-scoped workflows and policies |
+| **Customer Pack** | Tenant-authored private compositions |
+| **Partner Pack** | ISV or SI certified distributions |
+
+**Composable members:** Studios, Capabilities, Providers, Policies, Workflows, Execution Profiles, Knowledge (Context templates), Dashboards, Reports, Templates, and referenced Plugins.
+
+### 4.13 Platform governance (Architecture v2)
+
+Every Platform Object participates in a **unified governance model** enforced by the Metadata Engine and Policy Engine:
+
+| Concern | Mechanism |
+|---------|-----------|
+| **Versioning** | Semver; immutable Published blobs |
+| **Approval** | Lifecycle transitions; Human Approval Checkpoint |
+| **Publishing** | Validation gate before Published |
+| **Rollback** | Active binding to prior Published version |
+| **Audit** | Append-only mutation and execution history |
+| **Ownership** | Business and technical owner fields |
+| **Dependencies** | DAG validation at publish |
+| **Validation** | Schema, business, policy, security layers |
+| **Security** | RBAC, classification, least privilege |
+| **Lifecycle** | Single state machine (§3.4) |
+
+No primitive may opt out of any governance concern.
 
 ## 5. Primitive catalog
 
@@ -533,10 +566,10 @@ The platform is based on **exactly** these thirteen primitives. No additional pr
 | Primitive | One-line purpose |
 |-----------|------------------|
 | **Studio** | Product module exposing designers and runtime views for a domain |
-| **Capability** | Declarable unit of work an agent or automation can perform |
+| **Capability** | Declarable unit of work; satisfied by one or more Providers |
 | **Workflow** | Event-driven state machine orchestrating engineering process |
-| **Provider** | Integration profile for an external system or runtime backend |
-| **Execution Profile** | Runtime constraints: model tier, cost, timeout, retry, resources |
+| **Provider** | Executable or integratable backend that **advertises Capabilities** (AI agent, connector, human, script, API, MCP, etc.) |
+| **Execution Profile** | Reusable runtime profile: preferred/fallback/consensus models, prompts, context policy, budget, latency, quality, retry |
 | **Policy** | Machine-evaluable rule governing mutation, access, or execution |
 | **Context** | Scoped knowledge bundle available during execution |
 | **Resource** | Metered platform asset (model quota, compute, connection slot) |
@@ -546,11 +579,30 @@ The platform is based on **exactly** these thirteen primitives. No additional pr
 | **Commercial Pack** | Product SKU binding features, limits, and billing |
 | **Entitlement** | Tenant grant to use specific commercial and technical objects |
 
-### 5.1 Lexical note: Connectors
+### 5.1 Lexical notes: Connectors, Agents, and the Provider Model (Architecture v2)
 
-**Connector** is a **product and documentation term** for a **Provider** implementation that adapts an external system of record to the platform's capability model (e.g. GitHub connector, Jira connector). Connector is **not** a separate primitive. All connector metadata is stored as Provider objects.
+**Provider Model:** The **Provider** is the generic first-class primitive for anything that **exposes Capabilities** at runtime. The **Planner** (Orchestrator) discovers Providers dynamically by capability tag — not by implementation class. Legacy documentation and containers may reference "Agent Registry" or "Agent Runtime"; architecturally these are **typed views and hosts for `provider_kind: ai-agent` Providers**, not a separate meta-model primitive.
 
----
+**Provider kinds** (metadata discriminator `provider_kind`):
+
+| Kind | Role |
+|------|------|
+| `ai-agent` | LLM or specialist agent execution |
+| `connector` | External system of record integration |
+| `human` | Human task queue / approval surface |
+| `script` | Sandboxed script execution |
+| `rest-api` | Generic REST invocation |
+| `container` | Containerised workload |
+| `mcp` | Model Context Protocol server |
+| `automation` | External automation platform (e.g. RPA) |
+| `marketplace` | Certified marketplace Provider template |
+| `partner` | Partner-certified Provider template |
+
+**Connector:** A **Connector** is a **Provider Plugin** — a Provider where `provider_kind: connector`, typically installed from Marketplace, that advertises integration Capabilities (e.g. GitHub, Jira). Connectors **self-register** in the Provider Registry on install and activation. Connector is **not** a separate primitive.
+
+**Provider Builder:** Customers and partners author new Providers through **Provider Builder** — a metadata authoring experience (see [PLATFORM_UX_MODEL.md](./PLATFORM_UX_MODEL.md)) that emits Provider Platform Objects without platform code changes. Supported builder templates align with `provider_kind` values above.
+
+**Agent (deprecated as primitive):** "Agent" remains valid as **product language** for `ai-agent` Providers and for constitutional references to agent execution containers. It is **not** a fourteenth primitive.
 
 ## 6. Primitive specifications
 
@@ -724,7 +776,7 @@ Invocation records with input/output hashes (not secrets), task_id, workflow_run
 
 #### Permissions
 
-`capability.execute` granted to Agent Runtime service accounts and delegated roles.
+`capability.execute` granted to Provider runtime service accounts and delegated roles.
 
 #### Extension points
 
@@ -743,7 +795,7 @@ Custom Capability schemas via Plugin-registered validators.
 
 #### Purpose
 
-A **Workflow** is a **published state machine** that orchestrates engineering process from trigger to completion. The Workflow Engine executes Workflows; the Orchestrator enforces gates and agent selection.
+A **Workflow** is a **published state machine** that orchestrates engineering process from trigger to completion. The Workflow Engine executes Workflows; the Orchestrator (Planner) enforces gates and **Provider selection by capability tag**.
 
 #### Responsibilities
 
@@ -823,17 +875,37 @@ Plugin hooks: `workflow.transition.before`, `workflow.transition.after`
 
 #### Purpose
 
-A **Provider** declares **how** the platform connects to an external system or runtime backend. Providers are resolved by **capability tag**, never by vendor name in agent logic.
+A **Provider** is the **generic execution and integration primitive** — anything that **advertises and satisfies Capabilities** at runtime. Providers replace "Agent" as a first-class architectural concept; AI agents are one `provider_kind` among many. Providers are resolved by **capability tag**, never by vendor name or legacy agent name in orchestration logic.
 
-In product language, a **Connector** is a Provider implementation for a specific external product (GitHub, Jira, Azure DevOps).
+In product language, a **Connector** is a **Provider Plugin** (`provider_kind: connector`) for a specific external product (GitHub, Jira, Azure DevOps). Connectors install from Marketplace and **register automatically** in the Provider Registry on activation.
 
 #### Responsibilities
 
-- Declare supported capability tags
+- **Advertise** supported capability tags
+- Declare `provider_kind` and runtime binding (see §5.1)
 - Declare scope (`read` \| `write` \| `admin` — default `read`)
 - Reference authentication via Secrets Vault handles
-- Normalise vendor responses to platform schemas
+- Normalise responses to platform schemas (via Plugin normaliser when needed)
 - Enforce rate limits and tenant isolation
+- Support **Provider Builder** authoring path for customer-created Providers
+
+#### Provider Builder (Architecture v2)
+
+Customers create Providers **without platform code changes** using Provider Builder templates:
+
+| Builder template | `provider_kind` |
+|------------------|---------------|
+| AI Agent | `ai-agent` |
+| Connector | `connector` |
+| Human task provider | `human` |
+| Script | `script` |
+| REST API | `rest-api` |
+| Container workload | `container` |
+| MCP Server | `mcp` |
+| Marketplace template | `marketplace` |
+| Partner template | `partner` |
+
+Builder output is a standard Provider Platform Object validated and published through the Metadata Engine.
 
 #### Lifecycle
 
@@ -843,19 +915,22 @@ Standard lifecycle. Active Providers require valid secrets and Entitlement.
 
 | Key | Description |
 |-----|-------------|
-| `provider_type` | `connector` \| `model` \| `storage` \| `identity` |
+| `provider_kind` | See §5.1 — `ai-agent`, `connector`, `human`, `script`, `rest-api`, `container`, `mcp`, `automation`, `marketplace`, `partner` |
+| `provider_type` | Legacy alias; prefer `provider_kind` (v2) |
 | `vendor` | Informational vendor string (not used for resolution) |
 | `capability_tags` | Tags this Provider satisfies |
 | `scope` | Maximum privilege level |
 | `auth_secret_ref` | Vault handle |
 | `rate_limit` | Requests per period |
 | `response_normaliser` | Plugin reference for shape mapping |
+| `builder_template` | Provider Builder template id if customer-authored |
+| `auto_register` | Marketplace connectors: `true` — registry updated on activate |
 
 #### Relationships
 
 | Relation | Target |
 |----------|--------|
-| Required by | Capability, Agent registrations |
+| Required by | Capability registrations |
 | References | Plugin (normaliser), Resource (connection pool) |
 | Associations | Solution Pack integration sets |
 
@@ -895,9 +970,11 @@ Plugin normalisers and custom auth flows.
 
 #### Examples
 
-- `github-prod` — satisfies `create-pull-request`, `read-repository`
-- `jira-tenant-a` — satisfies `create-issue`
-- `anthropic-tier-1` — model Provider for Execution Profile
+- `github-prod` — `provider_kind: connector`; satisfies `create-pull-request`, `read-repository`
+- `coding-agent-v2` — `provider_kind: ai-agent`; satisfies `generates-backend`
+- `cab-approvers` — `provider_kind: human`; satisfies `approve-release-gate`
+- `anthropic-tier-1` — `provider_kind: ai-agent`; model backend for Execution Profile
+- `mcp-docs-server` — `provider_kind: mcp`; satisfies `read-documentation`
 
 ---
 
@@ -905,13 +982,15 @@ Plugin normalisers and custom auth flows.
 
 #### Purpose
 
-An **Execution Profile** bundles **runtime constraints** for task execution: model tier, temperature bounds, token limits, timeout, retry, cost ceiling, and Resource reservations.
+An **Execution Profile** is a **reusable Platform Object** that defines **how** Capabilities execute — replacing ad hoc model routing with a governed, versioned profile. Profiles bundle model strategy, prompt strategy, context policy, cost, latency, quality, and retry semantics.
 
 #### Responsibilities
 
-- Bind model routing hints for Model Router
+- Declare **preferred**, **fallback**, and **consensus** model strategies (not single-model routing)
+- Bind **Prompt Profiles** and **Context Policies**
 - Cap cost per task and per workflow run
-- Declare retry and idempotency alignment with Capability
+- Declare **retry strategy** and idempotency alignment with Capability
+- Enforce latency and quality tier targets
 - Select compute Resource class
 
 #### Lifecycle
@@ -922,12 +1001,19 @@ Standard lifecycle.
 
 | Key | Description |
 |-----|-------------|
-| `model_tier` | `economy` \| `standard` \| `premium` |
+| `preferred_models` | Ordered list with tier and vendor-neutral selector |
+| `fallback_models` | Cascade on failure or quota exhaustion |
+| `consensus_models` | Multi-model voting configuration (optional) |
+| `prompt_profile_refs` | Named prompt template bindings |
+| `context_policy_ref` | Token budget, truncation, redaction rules |
+| `model_tier` | `economy` \| `standard` \| `premium` (summary hint) |
 | `max_tokens` | Integer |
 | `temperature_range` | Min/max |
 | `timeout_seconds` | Wall clock |
-| `retry_policy_ref` | Embedded or referenced policy |
+| `retry_strategy` | Backoff, max attempts, idempotency key strategy |
 | `cost_ceiling` | Per execution |
+| `latency_target_p95_ms` | Latency SLO hint |
+| `quality_tier` | Quality vs cost preference |
 | `resource_class` | Resource reference |
 
 #### Relationships
@@ -1370,8 +1456,8 @@ Standard lifecycle. Activation is tenant-scoped operation post-publish.
 
 | Key | Description |
 |-----|-------------|
-| `pack_type` | `vertical` \| `horizontal` \| `starter` |
-| `contains` | Object reference manifest |
+| `pack_type` | `engineering` \| `industry` \| `team` \| `customer` \| `partner` \| `vertical` \| `horizontal` \| `starter` (legacy values retained) |
+| `contains` | Object reference manifest — Studios, Capabilities, Providers, Policies, Workflows, Execution Profiles, Knowledge, Dashboards, Reports, Templates, Plugins |
 | `prerequisites` | Entitlements, platform version |
 | `activation_script` | Ordered bind operations (metadata) |
 
@@ -1427,13 +1513,16 @@ Pack may include Plugins.
 
 #### Purpose
 
-A **Commercial Pack** defines **what is sold** — edition, feature flags, quotas, billing meters, and license terms.
+A **Commercial Pack** defines **what is sold** and **what may be activated** — licensing, feature availability, marketplace access, and usage limits. Commercial Packs **produce Entitlements**; Entitlements enable platform capabilities for a tenant.
 
 #### Responsibilities
 
-- Map SKUs to Entitlements
-- Define usage limits and overage rules
-- Gate Studio and Capability availability
+- Map SKUs to Entitlement templates
+- Define **licensing** terms and edition
+- Gate **Studios**, **Marketplace** access, **Execution Profiles**, **Providers**, **Solution Packs**
+- Set **connector limits** and Provider quotas
+- Define usage limits, overage rules, and **support levels**
+- Declare **feature flags** and billing meters
 - Integrate with billing (external system of record)
 
 #### Lifecycle
@@ -1446,8 +1535,17 @@ Standard lifecycle. Commercial Packs are vendor-published.
 |-----|-------------|
 | `sku` | Commercial identifier |
 | `edition` | `community` \| `professional` \| `enterprise` |
-| `feature_flags` | Boolean map |
-| `default_quotas` | Resource limits |
+| `licensing` | License model and terms reference |
+| `feature_flags` | Boolean map — feature availability |
+| `studio_allowlist` | Studios enabled by this pack |
+| `marketplace_access` | Marketplace tier and catalog scope |
+| `execution_profile_allowlist` | Profiles included or gated |
+| `provider_allowlist` | Provider kinds or instances permitted |
+| `solution_pack_allowlist` | Solution Packs included |
+| `connector_limits` | Max connectors per tenant |
+| `usage_limits` | Token, task, workflow quotas |
+| `support_level` | `community` \| `standard` \| `premium` \| `enterprise` |
+| `default_quotas` | Resource limits (legacy key retained) |
 | `billing_meters` | Meter definitions |
 
 #### Relationships
@@ -1658,6 +1756,12 @@ These rules are **mandatory**. Violation is a constitutional defect, not a style
 | **PR-13** | Effective configuration MUST be the deterministic merge of the inheritance stack (§4.9). |
 | **PR-14** | Entitlement MUST be checked before Active objects execute in production. |
 | **PR-15** | Relationship graphs MUST be exposed through Platform Object APIs and UI. |
+| **PR-16** | Every definable entity MUST inherit Platform Object (§3); no parallel type hierarchies. |
+| **PR-17** | Customer Providers MUST be authored via Provider Builder metadata — not platform source changes (§6.4). |
+| **PR-18** | Execution Profiles MUST declare model strategy (preferred, fallback, consensus) — not ad hoc routing (§6.5). |
+| **PR-19** | Marketplace distributes metadata and plugins only — never business logic ([PLATFORM_META_MODEL.md](./PLATFORM_META_MODEL.md) §12). |
+| **PR-20** | Every Platform Object MUST emit the full observability signal set (§3.8); no exemptions. |
+| **PR-21** | Platform governance concerns (§4.13) apply uniformly; no primitive may opt out. |
 
 ---
 

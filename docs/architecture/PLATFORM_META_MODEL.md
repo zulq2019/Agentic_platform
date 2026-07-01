@@ -1,8 +1,9 @@
 # Agentic Engineering Platform — Platform Meta Model
 
 **Status:** Normative metadata architecture  
-**Version:** 1.0  
+**Version:** 2.0 (extends v1.0; backward compatible)  
 **Effective:** 1 July 2026  
+**Architecture release:** Platform Architecture v2  
 **Authority:** Subordinate to [CONSTITUTION.md](../../CONSTITUTION.md); implements [PLATFORM_PRIMITIVES.md](./PLATFORM_PRIMITIVES.md) and [PLATFORM_CONTRACTS.md](./PLATFORM_CONTRACTS.md)  
 **Audience:** Chief architects, metadata engine designers, registry engineers, data platform leads, marketplace operators, enterprise customers
 
@@ -280,6 +281,8 @@ The **Metadata Engine** is the platform subsystem responsible for **all metadata
 | **Composition** | Expand composition edges; verify pins and constraints |
 | **Dependency resolution** | Build DAG; detect cycles |
 | **Configuration resolution** | Compute `effective_configuration` per object and environment |
+| **Configuration overrides** | Apply deterministic override stack (§6) — tenant, environment, object layers |
+| **Runtime resolution** | Materialise Execution Plan Documents and Active bindings at dispatch time |
 | **Inheritance** | Resolve specialisation parent chain |
 | **Version resolution** | Select highest compatible Published version |
 | **Lifecycle management** | State transitions; immutability on Published |
@@ -881,9 +884,22 @@ Runtime resolution uses Active bindings — not latest Published globally.
 
 ### 12.1 Philosophy
 
-The **Marketplace** distributes **metadata packages** — Solution Packs, Plugins, certified Providers, Commercial Packs — not platform binaries.
+The **Marketplace** distributes **metadata packages and plugins** — never platform binaries and **never business logic**. Marketplace content is declarative configuration interpreted by immutable engines.
 
-Installation **updates registries automatically** via Metadata Engine install pipeline.
+**Distributed artefact types (Architecture v2):**
+
+| Category | Examples |
+|----------|----------|
+| **Provider Plugins** | Connectors, MCP servers, certified agents |
+| **Workflow Plugins** | Workflow templates and step libraries |
+| **Policy Plugins** | Policy rule packs |
+| **Execution Profiles** | Reusable model and prompt profiles |
+| **Knowledge Packs** | Context templates and corpora |
+| **Solution Packs** | Composed industry, team, or engineering bundles |
+| **Studio Extensions** | Studio UX and dashboard plugins |
+| **UI Extensions** | Design-system and inspector extensions |
+
+Installation **updates registries automatically** via Metadata Engine install pipeline. Connectors (Provider Plugins) **auto-register** capability advertisements on install.
 
 ### 12.2 Install pipeline
 
@@ -938,11 +954,11 @@ Partners extend the platform by publishing **metadata + optional Plugin bundles*
 | Extension | Delivered as |
 |-----------|--------------|
 | Studio | Studio object + Studio UX Plugin |
-| Capability | Capability metadata + Agent registration |
+| Capability | Capability metadata + Provider registration |
 | Workflow | Workflow template metadata |
 | Policy | Policy rule metadata |
 | Execution Profile | Profile metadata |
-| Connector | Provider metadata + Plugin normaliser |
+| Connector | Provider metadata (`provider_kind: connector`) + Plugin normaliser |
 | Plugin | Plugin metadata + signed artefact |
 
 ### 13.2 Certification
@@ -980,6 +996,10 @@ SDKs may provide **authoring helpers** — they generate metadata documents conf
 | **MM-13** | Connectors are Provider metadata ([PLATFORM_PRIMITIVES.md](./PLATFORM_PRIMITIVES.md) §5.1) |
 | **MM-14** | Effective configuration is materialised — not ad hoc per service |
 | **MM-15** | Cross-store access only via API or events |
+| **MM-16** | Metadata Engine owns configuration overrides and runtime resolution |
+| **MM-17** | Provider Builder output is validated Provider metadata — no core code paths |
+| **MM-18** | Marketplace never hosts executable business logic |
+| **MM-19** | Customer-specific behaviour is metadata-only ([PLATFORM_PRIMITIVES.md](./PLATFORM_PRIMITIVES.md) PR-03) |
 
 ---
 

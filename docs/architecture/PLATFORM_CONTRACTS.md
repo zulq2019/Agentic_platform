@@ -1,8 +1,9 @@
 # Agentic Engineering Platform — Platform Contracts
 
 **Status:** Normative behavioural standard  
-**Version:** 1.0  
+**Version:** 2.0 (extends v1.0; backward compatible)  
 **Effective:** 1 July 2026  
+**Architecture release:** Platform Architecture v2  
 **Authority:** Subordinate to [CONSTITUTION.md](../../CONSTITUTION.md); co-equal with [PLATFORM_PRIMITIVES.md](./PLATFORM_PRIMITIVES.md) on matters of object behaviour  
 **Audience:** API designers, SDK authors, registry engineers, persistence architects, Studio UX leads, governance officers, enterprise integrators
 
@@ -115,7 +116,20 @@ Customer never changes contracts → engines remain compatible
 
 **Business behaviour changes through configuration.** Contracts **never** change for individual customer implementations.
 
-### 2.2 Consistency guarantee
+### 2.2 Configuration over customization (Architecture v2)
+
+The platform philosophy is **configuration over customization**:
+
+| Customization (forbidden) | Configuration (required) |
+|---------------------------|----------------------------|
+| Fork platform source per tenant | Compose metadata objects |
+| Hard-code Provider in orchestrator | Register Provider via Provider Builder |
+| Embed workflow logic in engines | Publish Workflow Platform Object |
+| Patch engines for policy change | Publish Policy Platform Object |
+
+Customers assemble Studios, Capabilities, Providers, Policies, Workflows, Execution Profiles, Solution Packs, and Commercial Packs through **metadata only**. Platform source remains unchanged.
+
+### 2.3 Consistency guarantee
 
 Contracts guarantee that an operator who understands one Platform Object understands **all** Platform Objects at the infrastructure boundary:
 
@@ -127,7 +141,7 @@ Contracts guarantee that an operator who understands one Platform Object underst
 
 Domain-specific Studio UX may add fields and wizards; it may **not** replace contract behaviour.
 
-### 2.3 Failure philosophy
+### 2.4 Failure philosophy
 
 | Principle | Meaning |
 |-----------|---------|
@@ -136,7 +150,7 @@ Domain-specific Studio UX may add fields and wizards; it may **not** replace con
 | **Fail auditable** | Every denial emits audit + metric |
 | **Fail recoverable** | Where contracts allow rollback, rollback is deterministic |
 
-### 2.4 Contract stability
+### 2.5 Contract stability
 
 Contracts version independently of primitive metadata:
 
@@ -923,12 +937,14 @@ Workflow publish fails: `BUSINESS_UNREACHABLE_STATE` — gate without approver r
 | **Metrics** | Prometheus format; mandatory dimensions |
 | **Logs** | Structured JSON |
 | **Traces** | OTLP; span per API and execution |
+| **Audit records** | Immutable audit entries per mutation and execution |
 | **Health** | Aggregate from dependencies |
-| **Usage** | Invocation counters |
-| **Performance** | Latency histograms |
 | **Cost** | Attributed units per execution |
-| **Errors** | Typed error counters |
-| **SLA** | SLO breach counters where SLA declared |
+| **Usage** | Invocation counters and metering |
+| **Performance** | Latency histograms |
+| **Correlation IDs** | Propagated on all signals (§13.4) |
+| **Errors** | Typed error counters (retained) |
+| **SLA** | SLO breach counters where SLA declared (retained) |
 
 ### 13.3 Mandatory dimensions
 
@@ -957,8 +973,10 @@ Bind **human accountability**, **compliance**, and **change management** to meta
 ### 14.2 Responsibilities
 
 - Route approval workflows by risk level
+- Enforce versioning, publishing, rollback, and lifecycle transitions
 - Enforce retention and data classification
 - Record business and technical ownership
+- Validate dependencies and security at publish boundary
 - Block publish without required approvals
 
 ### 14.3 Mandatory fields
@@ -1362,7 +1380,11 @@ Every Platform Object **automatically supports** standard Studio UX patterns wit
 | **Health** | Dependency health rollup |
 | **Relationships** | Graph and table views |
 | **Configuration** | Layer editor with effective preview |
+| **Documentation** | Linked docs and inline help |
+| **Examples** | Reference instances and sample payloads |
 | **Permissions** | RBAC matrix read (admin edit) |
+
+**Architecture v2 inherited surfaces:** Overview, Configuration, Relationships, Execution, Metrics, Audit, History, Permissions, Health, Version, Documentation, Examples — implemented via mandatory tabs in [PLATFORM_UX_MODEL.md](./PLATFORM_UX_MODEL.md) §3.2 (Dependencies and Versions tabs retained from v1).
 
 ### 23.3 UX rules
 
@@ -1397,6 +1419,11 @@ These rules **restate and extend** [PLATFORM_PRIMITIVES.md](./PLATFORM_PRIMITIVE
 | **CR-13** | Published metadata is immutable |
 | **CR-14** | Execution must be entitlement-checked in production |
 | **CR-15** | Validation failure blocks publish |
+| **CR-16** | Providers MUST be discoverable by capability tag — not hard-coded names |
+| **CR-17** | Provider Builder output MUST satisfy Provider Contract without core modification |
+| **CR-18** | Execution Profiles MUST bind model strategy fields at publish time |
+| **CR-19** | Observability Contract signals are mandatory for every primitive |
+| **CR-20** | Governance Contract applies to all lifecycle transitions uniformly |
 
 **All Platform Objects inherit these contracts. No exceptions without Decision Record.**
 

@@ -1,8 +1,9 @@
 # Agentic Engineering Platform — Platform UX Model
 
 **Status:** Normative UX architecture (UX Constitution)  
-**Version:** 1.0  
+**Version:** 2.0 (extends v1.0; backward compatible)  
 **Effective:** 1 July 2026  
+**Architecture release:** Platform Architecture v2  
 **Authority:** Subordinate to [CONSTITUTION.md](../../CONSTITUTION.md); implements [PLATFORM_PRIMITIVES.md](./PLATFORM_PRIMITIVES.md), [PLATFORM_CONTRACTS.md](./PLATFORM_CONTRACTS.md), and [PLATFORM_META_MODEL.md](./PLATFORM_META_MODEL.md)  
 **Audience:** Product design, UX engineering, Studio owners, frontend architects, accessibility leads, enterprise customers
 
@@ -265,6 +266,8 @@ Tabs appear in **fixed order**. Primitive-specific content lives **inside** tabs
 | 12 | **Documentation** | Linked docs, ADRs, examples |
 | 13 | **Examples** | Reference instances, sample payloads |
 
+**Architecture v2 inherited surfaces:** Every Platform Object automatically inherits Overview, Configuration, Relationships, Execution, Metrics, Audit, History, Permissions, Health, Version, Documentation, and Examples. Tabs **Dependencies** (4) and **Versions** (6) are **v1 extensions** retained for backward compatibility — they are not removed or renamed.
+
 **Rule:** No object may add, remove, or rename tabs. Studio-specific **views** are dashboard widgets on Overview or studio home — not alternate object chrome.
 
 ### 3.3 Universal header actions
@@ -503,21 +506,21 @@ See [§13](#13-administration-ux).
 
 ### 6.1 Purpose
 
-Discover, evaluate, install, and lifecycle-manage **metadata packages** — never platform binaries ([PLATFORM_META_MODEL.md](./PLATFORM_META_MODEL.md) §12).
+Discover, evaluate, install, and lifecycle-manage **metadata packages and plugins** — never platform binaries and **never business logic** ([PLATFORM_META_MODEL.md](./PLATFORM_META_MODEL.md) §12).
 
 ### 6.2 Installable categories
 
 | Category | Primitive / packaging |
 |----------|----------------------|
-| Connector Plugins | Provider + Plugin normaliser |
-| Agent Plugins | Capability + Agent registration |
+| Provider Plugins | Connectors, MCP servers, certified agents (`provider_kind` variants) |
 | Workflow Plugins | Workflow templates |
+| Policy Plugins | Policy packs |
 | Execution Profiles | Execution Profile metadata |
-| Policies | Policy packs |
 | Knowledge Packs | Context templates + memory seeds |
 | Solution Packs | Composed multi-primitive bundles |
 | Studio Extensions | Studio metadata + UI Plugin |
 | UI Extensions | Plugin hooks for shell panels |
+| Agent Plugins | *Legacy label* — maps to Provider Plugin (`provider_kind: ai-agent`) |
 
 ### 6.3 Marketplace flows
 
@@ -691,7 +694,30 @@ flowchart TD
 
 ## 10. Connector configuration UX
 
-**Connector** = Provider in UX copy where user-facing; metadata primitive remains Provider.
+**Connector** = Provider Plugin in architecture; **Provider** in UX copy where user-facing; metadata primitive remains Provider.
+
+### 10.0 Provider Builder (Architecture v2)
+
+Customers and partners create new Providers **without platform code changes** through **Provider Builder** — a guided metadata authoring flow that emits validated Provider Platform Objects.
+
+| Template | Authoring focus |
+|----------|-----------------|
+| **AI Agent** | Capability tags, tool bindings, idempotency, cost class |
+| **Connector** | Auth, scopes, capability advertisement, health check |
+| **Human** | Queue, SLA, approval surface bindings |
+| **Script** | Runtime, sandbox, input/output schema |
+| **REST API** | OpenAPI reference, auth, rate limits |
+| **Container** | Image reference, resource class, health probe |
+| **MCP** | Server endpoint, tool manifest, capability mapping |
+| **Marketplace Provider** | Certified template clone with entitlement check |
+| **Partner Provider** | Partner signature and certification metadata |
+
+**Builder invariants:**
+
+- Output is **Draft Provider metadata** — validated by Metadata Engine on publish
+- **Auto-register** capability advertisements on Active (connectors and MCP)
+- Uses identical Platform Object tabs (§3.2) — no builder-specific chrome
+- Install from Marketplace pre-fills builder from package manifest
 
 ### 10.1 Setup wizard (mandatory pattern)
 
@@ -908,6 +934,8 @@ Inspector is **read-only** except quick actions that open modals (clone, favorit
 | **UX-10** | Wizards produce metadata — not local-only state |
 | **UX-11** | Dark mode parity with light mode |
 | **UX-12** | Keyboard shortcuts documented in `?` overlay |
+| **UX-13** | Provider Builder MUST emit Provider metadata — not local-only configuration |
+| **UX-14** | Every object surface MUST expose Architecture v2 inherited tabs (§3.2) |
 
 ### 17.3 Component ownership
 
