@@ -11,6 +11,42 @@ allowed-tools: |
   file: read
 ---
 
+## Phase 0 — Repository Discovery (mandatory)
+
+**Execute before all other steps in this skill.** Repository-agnostic; reusable in any
+software repository. Never hardcode repository names or folder structures. Never fail
+because a document is missing — record `NOT FOUND` and continue with graceful degradation.
+
+**Authority:** Full discovery procedure, bash patterns, and Discovery Record template:
+[`.ai/skills/_shared/REPOSITORY_DISCOVERY.md`](../_shared/REPOSITORY_DISCOVERY.md).
+If the relative path does not resolve, discover via glob: `**/skills/_shared/REPOSITORY_DISCOVERY.md`.
+
+**Auto-detect and record:**
+
+| Item | Action |
+|------|--------|
+| Repository type | Infer from manifests and layout |
+| Architecture documents | Glob/search `ARCHITECTURE*.md`, `PLATFORM_*.md`, architecture doc trees |
+| Platform constitutions | Discover `CONSTITUTION.md`, platform baseline docs — **load automatically if present** |
+| Repository constitution | Discover `CLAUDE.md`, `REPOSITORY_GUIDE.md`, `AGENTS.md`, `CONTRIBUTING.md` |
+| Engineering roadmap | Discover `ROADMAP.md`, `TASKS.md`, implementation-roadmap / program trees |
+| Current PI | Active program folder (`PI-*` or discovered pattern) |
+| Current Sprint | Active section in `SPRINT_PLAN.md` when present |
+| Current Story | In Progress / next Planned from `STATUS.md` + story catalogues |
+| STATUS.md | Nearest program status file |
+| CHANGELOG.md | Root or discovered changelog |
+| METRICS.md | Root or discovered metrics doc |
+| README hierarchy | Root + nested `README.md` files |
+| Skills library | `**/skills/**/SKILL.md` |
+| Prompt library | Command libraries (`commands/`, `.ai/commands/`, etc.) |
+
+**Before proceeding:** Emit a **Discovery Record** per the shared template. If Platform
+Constitution documents exist, confirm they were loaded. Then continue to this skill's
+existing steps unchanged.
+
+---
+
+
 # review-story
 
 **Version:** 2.0 — Architecture v2.0-aware story review  

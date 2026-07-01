@@ -1,7 +1,7 @@
 # implement-story.md
 
 **Command:** `implement-story`  
-**Version:** 5.1 — Architecture Think Mode (reuse-before-build)  
+**Version:** 6.0 — Architecture Decision Engine (ADE)  
 **Skill authority:** `.ai/skills/implement-story/SKILL.md` (full pipeline)  
 **Applies to:** All PIs, all sprints
 
@@ -11,7 +11,8 @@
 
 Use this command to implement a single User Story from specification to production-ready code.
 
-This command is the standard implementation workflow for every engineer and every AI coding agent working on the Agentic Engineering Platform. Before writing production code, behave like a **Principal Engineer + Technical Lead** — discover repository context, load architecture authorities, classify risk, apply approval gates, run **mandatory Architecture Think Mode** (reuse-before-build), then implement with DDD, hexagonal architecture, and metadata-driven patterns.
+This command is the standard implementation workflow for every engineer and every AI coding agent working on the Agentic Engineering Platform. Before writing production code, behave like a **Principal Engineer + Technical Lead** — discover repository context, load architecture authorities, classify risk, apply approval gates, run **mandatory Architecture Decision Engine (ADE)**
+Mode A ("Should we build?") and Mode B ("How should we build?"), then implement with DDD, hexagonal architecture, and metadata-driven patterns.
 
 Execute every phase in order. Do not skip phases. Do not combine phases.
 
@@ -28,26 +29,23 @@ One execution = one User Story. Never more.
 /implement-story next story
 ```
 
-### v5.1 pipeline — 12 enterprise phases + Think Mode
+### v6.0 mature pipeline — Architecture Decision Engine (ADE)
 
 | Phase | Action |
 |-------|--------|
-| 1 | Repository Discovery — auto-discover architecture docs, skills, commands, contracts, repo structure |
-| 2 | Architecture Context — load PLATFORM_*.md, CONSTITUTION, ARCHITECTURE, ADRs, ROADMAP |
-| 3 | Story Resolution — resolve ID, name, current, next; load full PI doc pack |
-| — | Story Readiness + Capability Validation (preserved — hard STOP) |
-| 4 | Architecture Impact Analysis — classify LOW / MEDIUM / HIGH risk |
-| 5 | Risk Based Approval — LOW auto-continue; MEDIUM pause for confirmation; HIGH stop for approval |
-| **5A** | **Architecture Think Mode** — 10 reuse questions; CONTINUE or STOP (Architecture RFC); **no code on STOP** |
-| 6 | Dependency Analysis — Platform Objects, providers, workflows, DB, security, contracts |
-| — | Infrastructure Assessment (preserved) |
-| — | Architecture Validation (preserved — constitution + ADR) |
-| 7 | Implementation Planning — solution overview, design decisions, effort — **no code until approved** |
-| 8 | Implementation — config over customization, composition over hardcoding |
-| 9 | Testing — unit, integration, API, negative, regression, security, performance, metadata + coverage |
-| 10 | Engineering Reviews — architecture, code, security, performance, regression, documentation |
-| 11 | Documentation — STATUS, CHANGELOG, METRICS, ADR, diagrams, implementation notes |
-| 12 | Completion — files changed, tests, coverage, compliance summary, PR draft, next story |
+| 0 | Repository Discovery (common prepend + skill extension) |
+| 1 | Architecture Discovery — PLATFORM_*.md, CONSTITUTION, ARCHITECTURE, ADRs |
+| **2** | **ADE Mode A** — "Should we build?" (5 questions); CONTINUE or STOP (RFC) |
+| **3** | **ADE Mode B** — Architecture Reuse — "How?" (Platform Objects, Providers, Workflows, Policies, Execution Profiles, APIs) |
+| 4 | Story Resolution — resolve ID; load full PI doc pack |
+| 5 | Story Readiness + Capability Validation (hard STOP) |
+| 6 | Risk Assessment — LOW / MEDIUM / HIGH |
+| 7 | Dependencies (+ Infrastructure 7b) |
+| 8 | Architecture Validation — constitution + ADR |
+| 9 | Implementation Plan — **no code yet** |
+| 10 | Approval — after plan; before implementation |
+| 11 | Implementation — only after ADE CONTINUE + Approval |
+| 12–15 | Testing → Reviews → Documentation → Completion |
 
 ### Progress report format
 
@@ -58,7 +56,7 @@ Current Phase:     {phase}
 Progress:          {1-line status}
 Risks:             {LOW / MEDIUM / HIGH}
 Approval Status:   {AUTO-CONTINUE / AWAITING CONFIRMATION / STOPPED}
-Think Mode:        {CONTINUE / STOP — RFC} — Reuse Score: {0-100}
+ADE:               {CONTINUE / STOP — RFC} — Reuse Score: {0-100}
 Next Action:       {single next step}
 ```
 

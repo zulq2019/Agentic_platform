@@ -4,7 +4,7 @@ description: |
   When the engineer types /implement-story <story_ref>, execute the complete
   enterprise Principal Engineer implementation workflow for a single User Story.
   Automatically discovers repository context, analyses architecture impact,
-  applies risk-based approval gates, runs mandatory Architecture Think Mode
+  applies risk-based approval gates, runs mandatory Architecture Decision Engine (ADE)
   (reuse-before-build), then implements with DDD, hexagonal architecture, and
   metadata-driven patterns. One execution = one story.
 allowed-tools: |
@@ -12,10 +12,46 @@ allowed-tools: |
   file: read, write
 ---
 
+## Phase 0 — Repository Discovery (mandatory)
+
+**Execute before all other steps in this skill.** Repository-agnostic; reusable in any
+software repository. Never hardcode repository names or folder structures. Never fail
+because a document is missing — record `NOT FOUND` and continue with graceful degradation.
+
+**Authority:** Full discovery procedure, bash patterns, and Discovery Record template:
+[`.ai/skills/_shared/REPOSITORY_DISCOVERY.md`](../_shared/REPOSITORY_DISCOVERY.md).
+If the relative path does not resolve, discover via glob: `**/skills/_shared/REPOSITORY_DISCOVERY.md`.
+
+**Auto-detect and record:**
+
+| Item | Action |
+|------|--------|
+| Repository type | Infer from manifests and layout |
+| Architecture documents | Glob/search `ARCHITECTURE*.md`, `PLATFORM_*.md`, architecture doc trees |
+| Platform constitutions | Discover `CONSTITUTION.md`, platform baseline docs — **load automatically if present** |
+| Repository constitution | Discover `CLAUDE.md`, `REPOSITORY_GUIDE.md`, `AGENTS.md`, `CONTRIBUTING.md` |
+| Engineering roadmap | Discover `ROADMAP.md`, `TASKS.md`, implementation-roadmap / program trees |
+| Current PI | Active program folder (`PI-*` or discovered pattern) |
+| Current Sprint | Active section in `SPRINT_PLAN.md` when present |
+| Current Story | In Progress / next Planned from `STATUS.md` + story catalogues |
+| STATUS.md | Nearest program status file |
+| CHANGELOG.md | Root or discovered changelog |
+| METRICS.md | Root or discovered metrics doc |
+| README hierarchy | Root + nested `README.md` files |
+| Skills library | `**/skills/**/SKILL.md` |
+| Prompt library | Command libraries (`commands/`, `.ai/commands/`, etc.) |
+
+**Before proceeding:** Emit a **Discovery Record** per the shared template. If Platform
+Constitution documents exist, confirm they were loaded. Then continue to this skill's
+existing steps unchanged.
+
+---
+
+
 # implement-story
 
-**Version:** 5.1 — Enterprise Principal Engineer implementation engine  
-**Backward compatible:** All invocation forms unchanged from v4.0 and v5.0.
+**Version:** 6.0 — Enterprise Principal Engineer implementation engine  
+**Backward compatible:** All invocation forms unchanged from v4.0, v5.0, and v5.1.
 
 <purpose>
 Complete implementation workflow for a single User Story on the Agentic Engineering
@@ -56,49 +92,72 @@ The resolved story must exist in `docs/engineering/implementation-roadmap/{PI}/U
 
 ---
 
-## Enterprise Execution Pipeline — 12 Phases
+## Mature Execution Pipeline (v6.0)
 
-Execute **all phases in order**. Do not write production code until Phase 7
-(Implementation Planning) is complete, Phase 5 (Risk Based Approval) gates are
-satisfied, and Phase 5A (Architecture Think Mode) has a **CONTINUE** decision.
+Execute **all phases in order**. Do not write production code until Phase 9
+(Implementation Plan) is complete, Phase 10 (Approval) gates are satisfied, and the
+**Architecture Decision Engine (Phases 2–3)** returns **CONTINUE**.
 
-### Phase mapping — v5.0 enterprise phases ↔ v4.0 pipeline
+```
+Repository Discovery (Phase 0 + Phase 1 extension)
+        ↓
+Architecture Discovery (Phase 1)
+        ↓
+ADE Mode A — "Should we build this?" (Phase 2)
+        ↓
+ADE Mode B — Architecture Reuse — "How?" (Phase 3)
+        ↓
+Story Resolution (Phase 4)
+        ↓
+Story Readiness & Capability (Phase 5)
+        ↓
+Risk Assessment (Phase 6)
+        ↓
+Dependencies (Phase 7) → Infrastructure (Phase 7b)
+        ↓
+Architecture Validation (Phase 8)
+        ↓
+Implementation Plan (Phase 9)
+        ↓
+Approval (Phase 10)
+        ↓
+Implementation (Phase 11) — only after ADE CONTINUE + Approval
+        ↓
+Testing → Reviews → Documentation → Completion (Phases 12–15)
+```
 
-| v5 Phase | Name | v4 Step(s) | v4 Phase | Notes |
-|----------|------|------------|----------|-------|
-| 1 | Repository Discovery | 1, 2, 4 | Phase 1 | Extended — auto-discover repo structure |
-| 2 | Architecture Context | 1, 2 | Phase 1 | Extended — load all PLATFORM_*.md authorities |
-| 3 | Story Resolution | 3 | Pre-Phase 2 | Extended — locate all PI docs |
-| — | Story Readiness | — | Phase 2 | **Preserved** — hard STOP conditions |
-| — | Capability Validation | — | Phase 2 | **Preserved** — hard STOP conditions |
-| 4 | Architecture Impact Analysis | — | NEW | Classify LOW / MEDIUM / HIGH risk |
-| 5 | Risk Based Approval | — | NEW | Gate before implementation |
-| 5A | Architecture Think Mode | — | NEW v5.1 | **Mandatory** — reuse-before-build; runs before Phase 6 |
-| 6 | Dependency Analysis | 5 | Phase 3 | Extended — all dependency dimensions |
-| — | Infrastructure Assessment | — | Phase 4 | **Preserved** |
-| — | Architecture Validation | — | Phase 5 | **Preserved** — constitution + ADR |
-| 7 | Implementation Planning | 6 | Phase 6 | Extended — solution overview, effort |
-| 8 | Implementation | 7 | Phase 7 | Extended — config/composition principles |
-| 9 | Testing | 8 | Phase 7–8 | Extended — API, security, perf, metadata |
-| 10 | Engineering Reviews | 9 | Phase 8 | Extended — auto-execute all reviews |
-| 11 | Documentation | 10 | Phase 8 | Extended — ADR, diagrams, impl notes |
-| 12 | Completion | 11 | Phase 9 | Extended — compliance + PR summary |
+### Phase mapping — v6.0 ↔ v5.1
+
+| v6 | Name | v5.1 equivalent |
+|----|------|-----------------|
+| 0 | Repository Discovery (common prepend) | Phase 0 |
+| 1 | Architecture Discovery | Phase 2 |
+| 2 | ADE Mode A | Phase 5A (should we build) |
+| 3 | ADE Mode B — Architecture Reuse | Phase 5A (how to build) |
+| 4 | Story Resolution | Phase 3 |
+| 5 | Story Readiness & Capability | Phase 2 preserved |
+| 6 | Risk Assessment | Phase 4 |
+| 7 / 7b | Dependencies / Infrastructure | Phase 6 / Phase 4 preserved |
+| 8 | Architecture Validation | Phase 5 preserved |
+| 9 | Implementation Plan | Phase 7 |
+| 10 | Approval | Phase 5 gates (after plan, before code) |
+| 11–15 | Implementation → Completion | Phases 8–12 |
 
 ### Step mapping — 11-step pipeline (unchanged identifiers)
 
-| Step | Name | v5 Phase |
+| Step | Name | v6 Phase |
 |------|------|----------|
-| 1 | Read Platform Constitution | Phase 1 + Phase 2 |
-| 2 | Read Repository Constitution | Phase 1 + Phase 2 |
-| 3 | Resolve Story | Phase 3 |
-| 4 | Read PI Context | Phase 1 + Phase 3 |
-| 5 | Dependency Analysis | Phase 6 |
-| 6 | Generate Implementation Plan | Phase 7 |
-| 7 | Implement | Phase 8 |
-| 8 | Generate Tests | Phase 9 |
-| 9 | Run Reviews | Phase 10 |
-| 10 | Update Documentation | Phase 11 |
-| 11 | Generate Summary & Handoff | Phase 12 |
+| 1 | Read Platform Constitution | Phase 1 |
+| 2 | Read Repository Constitution | Phase 1 |
+| 3 | Resolve Story | Phase 4 |
+| 4 | Read PI Context | Phase 4 |
+| 5 | Dependency Analysis | Phase 7 |
+| 6 | Generate Implementation Plan | Phase 9 |
+| 7 | Implement | Phase 11 |
+| 8 | Generate Tests | Phase 12 |
+| 9 | Run Reviews | Phase 13 |
+| 10 | Update Documentation | Phase 14 |
+| 11 | Generate Summary & Handoff | Phase 15 |
 
 ---
 
@@ -112,8 +171,8 @@ Current Phase:     {phase number and name}
 Progress:          {1-line status — what was completed or is in progress}
 Risks:             {LOW / MEDIUM / HIGH — or NONE if not yet classified}
 Approval Status:   {AUTO-CONTINUE / AWAITING CONFIRMATION / STOPPED — AWAITING APPROVAL}
-Think Mode:        {CONTINUE / STOP — RFC / PENDING — or N/A before Phase 5A}
-Reuse Score:       {0-100 — or N/A before Phase 5A}
+ADE:        {CONTINUE / STOP — RFC / PENDING — or N/A before ADE (Phases 2–3)}
+Reuse Score:       {0-100 — or N/A before ADE (Phases 2–3)}
 Next Action:       {single concrete next step}
 ```
 
@@ -134,8 +193,8 @@ Behave as a **Principal Engineer + Technical Lead**, never a code generator.
 | **Technical Lead** | Sequence work correctly; ensure tests and documentation ship with code; produce actionable handoff for reviewers |
 
 **Mission:** Before writing production code, understand repository, architecture,
-implementation context, and engineering impact. Run Architecture Think Mode (Phase 5A)
-to validate reuse paths. Only begin coding after Phase 5A CONTINUE and Phase 5
+implementation context, and engineering impact. Run Architecture Decision Engine (ADE) (ADE (Phases 2–3))
+to validate reuse paths. Only begin coding after ADE CONTINUE (Phases 2–3) and Phase 10
 approval requirements are satisfied.
 
 ---
@@ -146,12 +205,12 @@ Every story must pass these gates before Phase 12 (Completion):
 
 | Gate | Check |
 |------|-------|
-| **Architecture Compliance** | No constitutional violations (Phase 5 + Phase 10 Architecture Review) |
+| **Architecture Compliance** | No constitutional violations (Phase 8 + Phase 13 Architecture Review) |
 | **Platform Contracts** | All payloads validate against `contracts/*.schema.json` at boundaries |
 | **Metadata Driven Principles** | Platform Objects use `aep_meta` envelope; no hardcoded business rules |
 | **Config over Customization** | Business logic, tenant rules, workflow definitions from configuration/metadata |
 | **Composition over Hardcoding** | Reuse primitives, registries, extension points — no bespoke forks |
-| **Reuse before Build** | Phase 5A Think Mode — prefer reuse, configuration, composition, metadata over new services |
+| **Reuse before Build** | ADE (Phases 2–3) — prefer reuse, configuration, composition, metadata over new services |
 | **Observability** | OTEL traces, Prometheus metrics, structured logs on all public domain methods |
 | **Auditability** | All agent actions and state changes produce auditable events |
 | **Security** | No credentials in code; `tenant_id` in every query; input validated at boundaries |
@@ -169,8 +228,8 @@ implement-story → generate-tests → regression-review → aep-review
 ```
 
 This skill is the **single implementation entry point**. Do not write code before
-completing Phases 1–7, passing Phase 5A (Think Mode CONTINUE), and satisfying
-Phase 5 approval gates. Do not proceed to `generate-tests` until Phase 12 handoff
+completing Phases 1–9, passing ADE CONTINUE (Phases 2–3), and satisfying
+Phase 10 approval gates. Do not proceed to `generate-tests` until Phase 15 handoff
 is produced.
 
 ---
@@ -209,10 +268,9 @@ ls docs/engineering/implementation-roadmap/ | rg "^{PI_SHORT}"
 
 ---
 
-## Phase 1 — Repository Discovery
+### Repository targets (extends Phase 0)
 
-**Auto-discover repository context before doing anything else. Never fail if optional
-docs are missing — note them as OPTIONAL / NOT FOUND and continue.**
+**Skill-specific discovery after common Phase 0. Never fail if optional docs are missing.**
 
 ### Discovery targets
 
@@ -257,7 +315,7 @@ read. Optional docs (ROADMAP, blueprints, extra PLATFORM_*.md) — note and cont
 
 ---
 
-## Phase 2 — Architecture Context
+## Phase 1 — Architecture Discovery
 
 **Load architecture authorities when available. Extend Steps 1–2.**
 
@@ -296,7 +354,175 @@ stop immediately and report exactly which document is missing.
 
 ---
 
-## Phase 3 — Story Resolution (Step 3)
+## Phase 2 — Architecture Decision Engine — Mode A ("Should we build this?")
+
+**Mandatory for every story. Executes immediately after Phase 1 (Architecture Discovery)
+and before Phase 3 (Architecture Reuse). Uses `{story_ref}` from invocation; full story
+context is confirmed in Phase 4.**
+
+### Purpose (Evaluate Requirement)
+
+Determine whether the requested capability **should be implemented at all**, or whether
+it should be realized through existing Platform Primitives, metadata, configuration,
+composition, workflows, policies, providers, or plugins.
+
+This is an **Architecture Decision** — not an AI brainstorming step. Mode A answers:
+**"Should this exist as new code?"**
+
+### Quality principle
+
+**Prefer:** Reuse, Configuration, Composition, Metadata  
+**Over:** New Services, New Frameworks, Hardcoded Logic, New Microservices
+
+### Discovery commands
+
+```bash
+find . \( -iname 'PLATFORM_PRIMITIVES.md' -o -iname 'PLATFORM_META_MODEL.md' -o -iname 'PLATFORM_CONTRACTS.md' \) ! -path '*/.git/*' 2>/dev/null
+rg -i "{story_ref keywords}" docs/ src/ contracts/ --glob "*.md" --glob "*.py" --glob "*.json" 2>/dev/null | head -40
+```
+
+### Mode A — five mandatory questions
+
+| # | Question | Evidence required |
+|---|----------|-------------------|
+| A1 | Does this **capability already exist**? | Services, APIs, providers, plugins, workflows, contracts, metadata |
+| A2 | Can **metadata** solve it? | Platform Object model, config surfaces, tenant metadata |
+| A3 | Can **configuration** solve it? | Feature flags, policy config, env-driven behaviour |
+| A4 | Can **composition** of existing primitives solve it? | Registries, extension points, composed workflows |
+| A5 | Does building this **violate Platform Primitives** or contracts? | `PLATFORM_PRIMITIVES.md`, `contracts/`, constitutional principles |
+
+Per question output:
+
+```
+A{n}: {short label}
+  Answer:     YES / NO / PARTIAL
+  Evidence:   {paths, object names, or NONE}
+```
+
+### Mode A decision
+
+| Outcome | Condition | Action |
+|---------|-----------|--------|
+| **CONTINUE** | A1–A4 show viable reuse/config/composition path **or** net-new build is justified without primitive violation; A5 = NO | Proceed to Phase 3 (Mode B) |
+| **STOP — Architecture RFC** | No justified net-new path, reuse score for Mode A < 40, or A5 = YES without approved ADR | **STOP** — Architecture RFC (template in Phase 3); **no production code** |
+
+When **STOP**, deliver RFC per Phase 3 template. Do not proceed to Phase 4+ until
+engineer reviews RFC and approves a path forward.
+
+### Mode A summary (required)
+
+```
+Architecture Decision Engine — Mode A:
+  Story ref:              {story_ref}
+  Should we build this?:  YES / NO / PARTIAL — {rationale}
+  Existing capability:      {found / not found}
+  Metadata path:          {viable / not viable}
+  Configuration path:     {viable / not viable}
+  Composition path:       {viable / not viable}
+  Primitive compliance:   COMPLIANT / VIOLATION RISK
+  Mode A decision:        CONTINUE / STOP — ARCHITECTURE RFC
+```
+
+---
+
+## Phase 3 — Architecture Reuse (ADE Mode B — "How should we build it?")
+
+**Mandatory when Mode A = CONTINUE. Executes before Phase 4 (Story Resolution).**
+
+### Purpose (Reuse Analysis → Architecture Compliance → Decision)
+
+If the capability must be built or extended, determine **how** using existing platform
+building blocks. Mode B answers: **"How should we realize this with minimum new surface area?"**
+
+### Mode B — six mandatory questions
+
+| # | Question | Map to |
+|---|----------|--------|
+| B1 | Which **Platform Objects**? | Studios, Capabilities, Resources, Artifacts, metadata envelope |
+| B2 | Which **Providers**? | Provider Framework, provider registry, adapters |
+| B3 | Which **Workflows**? | Workflow templates, state machines, orchestration |
+| B4 | Which **Policies**? | Policy Engine, RBAC, tenant policy configuration |
+| B5 | Which **Execution Profiles**? | Runtime profiles, model routing boundaries |
+| B6 | Which **APIs**? | Existing HTTP/event surfaces to extend vs new endpoints |
+
+Per question output:
+
+```
+B{n}: {short label}
+  Answer:     {specific names / NONE / NEW REQUIRED}
+  Evidence:   {paths, contract names, service names}
+  Reuse:      {what to reuse — or justification for new}
+```
+
+### Architecture Reuse Score (0–100)
+
+| Score | Meaning |
+|-------|---------|
+| 80–100 | Fully realizable via existing objects, metadata, composition |
+| 50–79 | Partial reuse — bounded new code within existing boundaries |
+| 20–49 | Limited reuse — RFC recommended before planning |
+| 0–19 | No viable reuse — **STOP** and RFC mandatory |
+
+Score B1–B6: full reuse = ~17 pts each; partial = ~8; new required = 0. Round average.
+A5 primitive violation caps maximum at 49.
+
+### Combined ADE decision (Mode A + Mode B)
+
+| Outcome | Condition | Action |
+|---------|-----------|--------|
+| **CONTINUE** | Mode A = CONTINUE, Reuse Score ≥ 50, primitive compliance OK | Proceed to Phase 4 — list reused Platform Objects in ADE Summary |
+| **STOP — Architecture RFC** | Mode A STOP, Reuse Score < 50, or unresolved primitive/contract violation | **STOP** — RFC below; no Phase 9+ planning or code |
+
+### Architecture RFC template (when STOP)
+
+Write to `docs/architecture/rfc/RFC-{story_id}-{slug}.md` or deliver inline:
+
+```
+## Architecture RFC: {story_id or story_ref} — {title}
+
+### Business Requirement
+### Problem Statement
+### Existing Platform Capabilities
+### Gap Analysis
+### Alternative Solutions
+### Recommended Architecture
+### Affected Platform Objects
+### Risks
+### Migration Strategy
+### Recommendation
+```
+
+### Architecture Decision Engine — Summary (required)
+
+Produce after Phase 2 + Phase 3 for every story:
+
+```
+Architecture Decision Engine Summary:
+  Story ref:                    {story_ref}
+  Mode A — Should we build?:    {YES/NO/PARTIAL + decision}
+  Mode B — How to build:        {reuse map from B1–B6}
+  Architecture Reuse Score:     {0-100} — {justification}
+  Configuration vs Code:        CONFIGURATION / CODE / HYBRID
+  Composition Recommendation:   {what to compose — or NONE}
+  Platform Objects Reused:      {list — or NONE}
+  Architecture Compliance:      COMPLIANT / VIOLATION RISK
+  Final Recommendation:         CONTINUE / STOP — ARCHITECTURE RFC REQUIRED
+```
+
+Include in progress reports:
+
+```
+ADE:               {CONTINUE / STOP — RFC}
+Reuse Score:       {0-100}
+```
+
+**Only if ADE = CONTINUE** may the pipeline proceed to Story Resolution, Risk Assessment,
+Dependencies, Implementation Plan, Approval, and Implementation.
+
+---
+
+
+## Phase 4 — Story Resolution (Step 3)
 
 **Resolve `{story_id}`, `{story_title}`, and `{PI}` before story readiness validation.**
 
@@ -376,7 +602,7 @@ engineer to disambiguate. Do not guess.
 
 ---
 
-## Phase 2 (Preserved) — Story Readiness
+## Phase 5 — Story Readiness
 
 **Validate before ANY other work. This phase has hard STOP conditions.**
 
@@ -406,7 +632,7 @@ Status:          READY / BLOCKED
 ```
 
 **STOP if Status = BLOCKED.** List every missing or invalid item before stopping.
-Do not continue to Phase 4 until Status = READY.
+Do not continue to Phase 6 until Status = READY.
 
 ### Capability Validation
 
@@ -426,7 +652,10 @@ implemented against a capability with no technical specification.
 
 ---
 
-## Phase 4 — Architecture Impact Analysis (NEW)
+## Phase 6 — Risk Assessment
+
+**Classify story risk after Story Readiness. Principal Engineer behaviour required.**
+
 
 **Classify story risk before planning or coding. Principal Engineer behaviour required.**
 
@@ -489,15 +718,15 @@ When Risk level = **HIGH**, produce this review **before** any implementation co
 
 ---
 
-## Phase 5 — Risk Based Approval (NEW)
+## Phase 10 — Approval
 
-**Gate implementation based on Phase 4 classification. No code until gates pass.**
+**Gate implementation based on Phase 6 risk classification. Executes after Phase 9 (Implementation Plan). No code until gates pass.**
 
 | Risk | Gate behaviour |
 |------|----------------|
-| **LOW** | **Auto-continue** — proceed to Phase 5A (Architecture Think Mode) without pause |
-| **MEDIUM** | Generate implementation plan outline (Phase 7 sections: Solution Overview, Design Decisions, Files, Risks) → **pause** → ask engineer for confirmation before Phase 8 |
-| **HIGH** | Deliver Architecture Review (Phase 4 template) → **STOP** → no code until engineer gives **explicit approval** |
+| **LOW** | **Auto-continue** — record risk; Approval (Phase 10) auto-continues after Implementation Plan |
+| **MEDIUM** | Deliver Phase 9 Implementation Plan outline → **pause** → engineer confirmation before Phase 11 |
+| **HIGH** | Deliver Architecture Review (Phase 6 template) → **STOP** → explicit approval before Phase 9–11 |
 
 ### Approval output
 
@@ -510,171 +739,12 @@ Risk Based Approval:
 
 **STOP if HIGH and no explicit approval received.**  
 **STOP if MEDIUM and engineer declines or requests changes.**  
-Do not proceed to Phase 8 (Implementation) until approval requirements are satisfied.
+Do not proceed to Phase 11 (Implementation) until approval requirements are satisfied.
 
 ---
 
-## Phase 5A — Architecture Think Mode (NEW v5.1)
 
-**Mandatory for every story. Executes after Phase 5 (Risk Based Approval) and
-before Phase 6 (Dependency Analysis) and Phase 7 (Implementation Planning).**
-
-### Purpose
-
-Prevent unnecessary architecture changes, duplicate platform capabilities,
-architecture drift, and bespoke code when existing Platform Primitives can satisfy
-the requirement.
-
-### Quality principle
-
-**Prefer:** Reuse, Configuration, Composition, Metadata  
-**Over:** New Services, New Frameworks, Hardcoded Logic, New Microservices
-
-### Discovery commands
-
-Search the repository for existing capabilities before answering the 10 questions:
-
-```bash
-# Platform primitives and architecture authorities
-cat docs/architecture/PLATFORM_PRIMITIVES.md
-cat docs/architecture/PLATFORM_CONTRACTS.md
-cat docs/architecture/PLATFORM_META_MODEL.md
-
-# Existing services, APIs, workflows, contracts
-ls src/platform/services/ src/shared/ agents/ tools/ workflows/ contracts/ 2>/dev/null
-rg -i "{story_title keywords}" docs/architecture/ docs/engineering/ src/ contracts/ --glob "*.md" --glob "*.py" --glob "*.json" 2>/dev/null | head -50
-
-# Providers, plugins, solution packs (when present)
-rg -i "provider|plugin|solution.pack|execution.profile|entitlement" docs/architecture/ src/ --glob "*.md" 2>/dev/null | head -30
-```
-
-### Think Mode — 10 Questions (all mandatory)
-
-Answer every question with evidence from repository docs, contracts, and code.
-Do not skip or mark N/A without justification.
-
-| # | Question | Check against |
-|---|----------|---------------|
-| 1 | Can the requirement use existing **Platform Primitives**? | Studios, Capabilities, Providers, Execution Profiles, Policies, Workflows, Resources, Artifacts, Plugins, Solution Packs, Commercial Packs, Entitlements |
-| 2 | Does this **already exist**? | Services, APIs, Providers, Plugins, Workflows, Contracts, Metadata |
-| 3 | Can **metadata configuration** satisfy this instead of new code? | `PLATFORM_META_MODEL.md`, PI `DATA_MODEL.md`, config surfaces |
-| 4 | Can **composition** of existing primitives satisfy this instead of a new service? | Registries, extension points, Platform Object relationships |
-| 5 | Can a **Provider** satisfy this instead of a new microservice? | Provider Framework, Provider Contract, Provider Registry |
-| 6 | Can a **Workflow** satisfy this instead of application logic? | `workflows/`, workflow templates, state machines |
-| 7 | Can a **Policy** satisfy this instead of code? | Policy Engine, RBAC, tenant policy configuration |
-| 8 | Can a **Plugin** satisfy this instead of core changes? | Plugin slots, registries, extension points |
-| 9 | Can a **Solution Pack** satisfy this instead of platform changes? | PI-08 Solution Packs, packaged domain capabilities |
-| 10 | Will this implementation **violate Platform Contracts**? | `contracts/*.schema.json`, `PLATFORM_CONTRACTS.md`, constitutional principles |
-
-### Per-question output format
-
-For each of the 10 questions, produce:
-
-```
-Q{n}: {question short label}
-  Answer:        YES / NO / PARTIAL
-  Evidence:      {file paths, contract names, service names, or NONE}
-  Reuse path:    {Platform Object(s) or primitive(s) — or NONE}
-```
-
-### Decision
-
-| Outcome | Condition | Action |
-|---------|-----------|--------|
-| **CONTINUE** | At least one viable reuse path (Q1–Q9) with Architecture Reuse Score ≥ 50, and Q10 = NO (no contract violation) | Proceed to Phase 6 — explain which Platform Objects are reused in Think Mode Summary |
-| **STOP — Architecture RFC** | No viable reuse path, Reuse Score < 50, or Q10 = YES (contract violation without ADR) | **STOP** — generate Architecture RFC (template below); **no production code**; no Phase 6+ until RFC is reviewed and approved |
-
-When **CONTINUE**, the implementation plan (Phase 7) and implementation (Phase 8)
-must explicitly reference reused Platform Objects. Do not introduce new services,
-contracts, or microservices when a reuse path was identified.
-
-### Architecture RFC template (when STOP)
-
-Write to `docs/architecture/rfc/RFC-{story_id}-{slug}.md` (create directory if
-missing) or deliver inline if the engineer requests no file write:
-
-```
-## Architecture RFC: {story_id} — {story_title}
-
-### Business Requirement
-{what the story asks for — from USER_STORIES.md}
-
-### Problem Statement
-{why existing platform capabilities cannot satisfy this requirement as stated}
-
-### Existing Platform Capabilities
-{what was evaluated in Think Mode — primitives, services, contracts found}
-
-### Gap Analysis
-{what is missing — be specific; reference Q1–Q10 answers}
-
-### Alternative Solutions
-| Option | Description | Reuse score | Trade-offs |
-|--------|-------------|-------------|------------|
-| A | {metadata/config only} | {0-100} | {pros/cons} |
-| B | {composition} | {0-100} | {pros/cons} |
-| C | {new service/contract} | {0-100} | {pros/cons} |
-
-### Recommended Architecture
-{preferred option with rationale — align with Quality principle}
-
-### Affected Platform Objects
-{list Studios, Capabilities, Providers, Workflows, Contracts, etc.}
-
-### Risks
-{technical, tenancy, drift, duplication risks}
-
-### Migration Strategy
-{how to adopt if RFC approved — or N/A}
-
-### Recommendation
-{proceed with RFC option / split story / defer / revise requirement — with rationale}
-```
-
-**STOP after delivering the RFC.** Do not proceed to Phase 6 until the engineer
-reviews the RFC and explicitly approves a path forward (may require story revision
-or a new ADR).
-
-### Think Mode Summary (required output)
-
-Produce this block at the end of Phase 5A for every story:
-
-```
-Think Mode Summary:
-  Story:                        {story_id} — {story_title}
-  Architecture Reuse Score:     {0-100} — {brief justification}
-  Configuration vs Code:        {CONFIGURATION / CODE / HYBRID} — {rationale}
-  Composition Recommendation:   {what to compose from existing primitives — or NONE}
-  Platform Objects Reused:      {list — or NONE}
-  Architecture Compliance:      COMPLIANT / VIOLATION RISK — {Q10 evidence}
-  Final Recommendation:         CONTINUE / STOP — ARCHITECTURE RFC REQUIRED
-  Decision:                     {1-2 sentences — which reuse path or why RFC required}
-```
-
-#### Architecture Reuse Score (0–100)
-
-| Score | Meaning |
-|-------|---------|
-| 80–100 | Requirement fully satisfiable via existing primitives, metadata, or composition |
-| 50–79 | Partial reuse — some new code acceptable within existing boundaries |
-| 20–49 | Limited reuse — significant new capability; RFC recommended |
-| 0–19 | No viable reuse — new architecture required; **STOP** and RFC mandatory |
-
-Score each of Q1–Q9: YES = 10 points, PARTIAL = 5, NO = 0. Average and round.
-Q10 violation without approved ADR caps score at 49 maximum.
-
-### Think Mode output in progress reports
-
-Include in the standard progress report block:
-
-```
-Think Mode:        {CONTINUE / STOP — RFC}
-Reuse Score:       {0-100}
-```
-
----
-
-## Phase 6 — Dependency Analysis (Step 5)
+## Phase 7 — Dependencies (Step 5)
 
 **Extend Phase 3 (v4). Verify all dependencies before planning begins.**
 
@@ -727,7 +797,7 @@ required to clear it.
 
 ---
 
-## Phase 4 (Preserved) — Infrastructure Assessment
+## Phase 7b — Infrastructure Assessment
 
 **Determine the minimum infrastructure required by this story's acceptance criteria.**
 
@@ -761,7 +831,7 @@ Clarify the acceptance criteria before proceeding.
 
 ---
 
-## Phase 5 (Preserved) — Architecture Validation
+## Phase 8 — Architecture Validation
 
 **Check ALL of the following against `CONSTITUTION.md` and `ARCHITECTURE.md`.**
 
@@ -813,13 +883,13 @@ architecture.
 
 ---
 
-## Phase 7 — Implementation Planning (Step 6)
+## Phase 9 — Implementation Plan (Step 6)
 
 **Produce this plan before writing any code. Only begin coding after Phase 5
-approval requirements are satisfied and Phase 5A (Think Mode) decision = CONTINUE.**
+approval requirements are satisfied and ADE (Phases 2–3) decision = CONTINUE.**
 
-The plan must reflect Think Mode outcomes: list reused Platform Objects, metadata
-configuration surfaces, and composition paths identified in Phase 5A.
+The plan must reflect Architecture Decision Engine outcomes: list reused Platform Objects, metadata
+configuration surfaces, and composition paths identified in ADE (Phases 2–3).
 
 ```
 ## Implementation Plan: {story_id} — {story_title}
@@ -827,7 +897,7 @@ configuration surfaces, and composition paths identified in Phase 5A.
 ### Solution Overview
 {2-4 sentences: what we are building, why, and how it fits the platform}
 
-### Think Mode Reuse (from Phase 5A)
+### Architecture Decision Engine Reuse (from ADE (Phases 2–3))
 {Platform Objects reused, configuration vs code choice, composition path — or N/A if RFC was required and approved}
 
 ### Design Decisions
@@ -910,7 +980,7 @@ For **HIGH** risk: full plan only after Architecture Review approval (Phase 5).
 
 ---
 
-## Phase 8 — Implementation (Step 7)
+## Phase 11 — Implementation (Step 7)
 
 **Implement exactly what is in the approved plan. Nothing more.**
 
@@ -981,7 +1051,7 @@ Every new service exposes:
 
 ---
 
-## Phase 9 — Testing (Step 8)
+## Phase 12 — Testing (Step 8)
 
 Generate all test categories required by the story. Mark tests with `@pytest.mark.story_{story_id}`.
 
@@ -1021,11 +1091,11 @@ Testing summary:
   Status:              PASS / FAIL
 ```
 
-**Return to Phase 8 if any test or contract validation fails.**
+**Return to Phase 11 if any test or contract validation fails.**
 
 ---
 
-## Phase 10 — Engineering Reviews (Step 9)
+## Phase 13 — Engineering Reviews (Step 9)
 
 **Auto-execute all review passes. Generate findings; fix where possible.**
 
@@ -1075,7 +1145,7 @@ Use PI `REVIEW_CHECKLIST.md` and review skill criteria. Produce a verdict for ea
 - [ ] ADR added if architectural decision made
 - **Verdict:** PASS / FAIL — {findings}
 
-**Return to Phase 8 if any review verdict is FAIL.** Fix findings where possible before re-running reviews.
+**Return to Phase 11 if any review verdict is FAIL.** Fix findings where possible before re-running reviews.
 
 ### Self Validation (Preserved from Phase 8)
 
@@ -1090,7 +1160,7 @@ AC-{n}: {criterion text}
   Status:       SATISFIED / NOT SATISFIED
 ```
 
-**Return to Phase 8 if any criterion is NOT SATISFIED.**
+**Return to Phase 11 if any criterion is NOT SATISFIED.**
 
 #### Definition of Done — Story-Level Gate
 
@@ -1145,11 +1215,11 @@ black --check src/{target_folder}/
 mypy --strict src/{target_folder}/
 ```
 
-**Do not proceed to Phase 12 with any unmet item.**
+**Do not proceed to Phase 15 with any unmet item.**
 
 ---
 
-## Phase 11 — Documentation (Step 10)
+## Phase 14 — Documentation (Step 10)
 
 Update PI tracking documents and architecture artifacts for `{story_id}`:
 
@@ -1169,9 +1239,9 @@ Also update when applicable:
 
 ---
 
-## Phase 12 — Completion (Step 11)
+## Phase 15 — Completion (Step 11)
 
-**Produce this summary when all Phase 10 reviews pass and Phase 11 documentation is updated.**
+**Produce this summary when all Phase 13 reviews pass and Phase 14 documentation is updated.**
 
 ```
 ## Implementation Summary: {story_id} — {story_title}
@@ -1181,7 +1251,7 @@ PI:                {PI}
 Capability:        {CAP-XX} — {name}
 Risk classification: {LOW / MEDIUM / HIGH}
 Approval:          {AUTO-CONTINUE / CONFIRMED / EXPLICITLY APPROVED}
-Think Mode:          {CONTINUE / STOP — RFC} — Reuse Score: {0-100}
+ADE:          {CONTINUE / STOP — RFC} — Reuse Score: {0-100}
 Primitives used:   {list Platform Object types, Providers, etc. or NONE}
 Contracts:         {list contract schemas touched}
 
@@ -1226,7 +1296,7 @@ Contract validation: PASS / FAIL
 ### Infrastructure deferred
 - {component}: {why not needed for this story}
 
-### Review verdicts (Phase 10)
+### Review verdicts (Phase 13)
 | Review | Verdict |
 |--------|---------|
 | Architecture | PASS / FAIL |
@@ -1288,7 +1358,7 @@ Then: /release-story <PR_NUMBER>
 - Never redesign the architecture
 - Never modify `CONSTITUTION.md`, `ARCHITECTURE.md`, `CLAUDE.md`, or PI tracking
   documents (`STATUS.md`, `CHANGELOG.md`, `METRICS.md`) **except** as required by
-  Phase 11 documentation updates for the current story
+  Phase 14 documentation updates for the current story
 - Never introduce new platform capabilities not defined in `CAPABILITIES.md`
 - Never implement more than one story per execution
 - Never provision infrastructure not required by the current story's AC
@@ -1296,7 +1366,7 @@ Then: /release-story <PR_NUMBER>
 - Never hardcode business logic — use configuration, metadata, and Platform Objects
 - Always discover repository context (Phase 1) before architecture load
 - Always classify risk (Phase 4) and satisfy approval gates (Phase 5) before coding
-- Always run Architecture Think Mode (Phase 5A) before Dependency Analysis — mandatory for every story
+- Always run Architecture Decision Engine (Phases 2–3) before Story Resolution — mandatory for every story
 - Always produce production-ready code — assume Principal Engineer review
 - Always stop and report when a required input is missing or a dependency is unmet
 - Always optimise for maintainability over speed
@@ -1306,10 +1376,10 @@ Then: /release-story <PR_NUMBER>
 ## Forbidden Actions
 
 - Skip any phase or reorder phases
-- Skip Phase 5A (Architecture Think Mode) — mandatory for every story
+- Skip ADE (Phases 2–3) — mandatory for every story
 - Proceed past a Stop condition without resolving it
-- Write production code before Phase 5 approval gates are satisfied
-- Write production code when Phase 5A decision = STOP (Architecture RFC required)
+- Write production code before Phase 10 approval gates are satisfied
+- Write production code when ADE decision = STOP (Architecture RFC required)
 - Implement more than one User Story
 - Add infrastructure "for later" — every infrastructure decision must trace to an AC
 - Import vendor SDKs in agent or tool code

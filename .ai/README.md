@@ -37,7 +37,8 @@ With this library:
 ├── commands/       ← The prompt library. One file per engineering operation.
 │
 ├── skills/         ← Authoritative skill definitions (Cursor/Claude). Commands
-│                     reference skills for full pipeline detail.
+│                     reference skills for full pipeline detail. Phase 0 discovery:
+│                     `skills/_shared/REPOSITORY_DISCOVERY.md` (prepended to every skill).
 │
 ├── templates/      ← Starting-point scaffolds. AI uses these to generate new
 │                     services, agents, tools, tests, and migrations.
@@ -65,7 +66,7 @@ Each file defines one reusable engineering operation. A command file contains:
 | File | Skill | Operation |
 |------|-------|-----------|
 | `next.md` | `skills/next/SKILL.md` | **Primary entry point** — discover context, recommend next work item (v1.0 — orchestrator, no code) |
-| `implement-story.md` | `skills/implement-story/SKILL.md` | Implement a User Story end-to-end (v5.1 — Think Mode + enterprise 12-phase pipeline) |
+| `implement-story.md` | `skills/implement-story/SKILL.md` | Implement a User Story end-to-end (v6.0 — ADE + mature 15-phase pipeline) |
 | `generate-tests.md` | `skills/generate-tests/SKILL.md` | Generate test suite for a story (v4.0 — Architecture v2.0-aware) |
 | `review-story.md` | `skills/review-story/SKILL.md` | Review a completed story before PR (v2.0 — Architecture v2.0-aware) |
 | `regression-review.md` | `skills/regression-review/SKILL.md` | Backward-compatibility PR audit (v2.0 — Architecture v2.0-aware, 11 lenses) |
