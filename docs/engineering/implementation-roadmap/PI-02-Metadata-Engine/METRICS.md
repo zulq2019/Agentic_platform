@@ -4,10 +4,12 @@
 
 | Metric | Value |
 |--------|-------|
-| Unit tests (US-02.01) | 10 |
-| Integration tests (US-02.01) | 2 |
+| Unit tests (US-02.01) | 13 |
+| Integration tests (US-02.01) | 4 |
+| Total tests (US-02.01) | 17 |
+| CI job | `story_us_02_01` in `lint-and-test` |
 | Test pass rate | 100% |
-| `aep_meta` line coverage | 94% |
+| `aep_meta` line coverage | 95% |
 | `aep_meta` modules | 12 |
 | Contract schemas (platform) | 1 (`platform-object` v1.0.0) |
 | REST endpoints (metadata-engine) | 4 |

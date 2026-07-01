@@ -71,3 +71,41 @@ async def test_lifecycle_transition_via_api(example_payload: dict) -> None:
         )
         assert transition.status_code == 200
         assert transition.json()["lifecycle"]["state"] == "Review"
+
+
+@pytest.mark.story_us_02_01
+@pytest.mark.asyncio
+async def test_get_returns_404_for_cross_tenant_access(
+    example_payload: dict,
+) -> None:
+    app = create_app()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        created = await client.post("/api/v1/platform-objects", json=example_payload)
+        assert created.status_code == 201
+        body = created.json()
+        object_id = body["identity"]["id"]
+
+        cross_tenant = await client.get(
+            f"/api/v1/platform-objects/{object_id}",
+            params={"tenant_id": "tenant-other-corp"},
+        )
+        assert cross_tenant.status_code == 404
+
+
+@pytest.mark.story_us_02_01
+@pytest.mark.asyncio
+async def test_list_excludes_objects_from_other_tenants(
+    example_payload: dict,
+) -> None:
+    app = create_app()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await client.post("/api/v1/platform-objects", json=example_payload)
+
+        other_tenant_list = await client.get(
+            "/api/v1/platform-objects",
+            params={"tenant_id": "tenant-other-corp"},
+        )
+        assert other_tenant_list.status_code == 200
+        assert other_tenant_list.json() == []

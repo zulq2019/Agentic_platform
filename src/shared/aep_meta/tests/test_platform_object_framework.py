@@ -9,7 +9,7 @@ from aep_meta.application.validation import PlatformObjectValidator
 from aep_meta.domain.enums import LifecycleState, PrimitiveType
 from aep_meta.domain.models import DependencyReference, PlatformObjectDependencies
 from aep_meta.domain.lifecycle import LifecycleStateMachine
-from aep_meta.exceptions import LifecycleTransitionError, ValidationError
+from aep_meta.exceptions import LifecycleTransitionError, NotFoundError, ValidationError
 from aep_meta.factory import build_platform_object
 from aep_meta.infrastructure.in_memory_repository import InMemoryPlatformObjectRepository
 from aep_meta.infrastructure.observability import InMemoryAuditRecorder, InMemoryMetricsRecorder
@@ -85,6 +85,38 @@ def test_validator_detects_dependency_cycle(validator: PlatformObjectValidator) 
     )
     with pytest.raises(ValidationError):
         validator.validate(obj)
+
+
+@pytest.mark.story_us_02_01
+@pytest.mark.asyncio
+async def test_repository_get_returns_none_for_wrong_tenant() -> None:
+    repo = InMemoryPlatformObjectRepository()
+    obj = build_platform_object(tenant_id="tenant-a")
+    saved = await repo.save(obj)
+    assert await repo.get_by_id("tenant-b", saved.identity.id) is None
+
+
+@pytest.mark.story_us_02_01
+@pytest.mark.asyncio
+async def test_repository_list_excludes_other_tenants() -> None:
+    repo = InMemoryPlatformObjectRepository()
+    await repo.save(build_platform_object(tenant_id="tenant-a", name="obj-a"))
+    await repo.save(build_platform_object(tenant_id="tenant-b", name="obj-b"))
+    tenant_a_objects = await repo.list_by_tenant("tenant-a")
+    assert len(tenant_a_objects) == 1
+    assert tenant_a_objects[0].identity.name == "obj-a"
+
+
+@pytest.mark.story_us_02_01
+@pytest.mark.asyncio
+async def test_service_raises_not_found_for_cross_tenant_get(
+    service: PlatformObjectService,
+) -> None:
+    saved = await service.register(
+        build_platform_object(tenant_id="tenant-a"), actor="user:tester"
+    )
+    with pytest.raises(NotFoundError):
+        await service.get("tenant-b", saved.identity.id)
 
 
 @pytest.mark.story_us_02_01
