@@ -3,30 +3,39 @@ name: performance-review
 description: |
   When the engineer types /performance-review <PR_NUMBER> or /performance-review <GitHub PR URL>,
   fetch the PR diff and perform a Principal Performance Engineer level audit of that pull request
-  against the Agentic Engineering Platform. Executes 13 performance and scalability lenses:
-  Database Query Performance → pgvector / Memory Service → Kafka Pipeline Throughput →
-  Redis Performance → Async Execution and Concurrency → Memory Usage → Retry Storms →
-  Latency Profiling → CPU Efficiency → Caching Strategy → OpenTelemetry Coverage →
-  Scalability Assessment → Cost Estimation. Produces SLO-referenced verdicts, back-of-envelope
-  latency budget calculations, and prioritised optimisation recommendations with concrete expected
-  performance impact. This is a deep performance audit — not a surface-level check. It is invoked
-  on PRs touching hot paths, event pipelines, or data access at scale. aep-review Lens 8 is a
-  quick performance check; this skill is a full scalability and performance audit. Critical
-  performance blockers (blocking async calls, N+1 on hot paths, shared mutable state under
-  horizontal scale) always result in REQUEST CHANGES regardless of other lens results.
+  against the Agentic Engineering Platform. Architecture v2.0-aware: automatically loads platform
+  constitution and repository constitution before reviewing. Executes 18 performance and scalability
+  lenses (13 original + 5 Architecture v2.0 extensions): Database Query Performance → pgvector /
+  Memory Service → Kafka Pipeline Throughput → Redis Performance → Async Execution and Concurrency
+  → Memory Usage → Retry Storms → Latency Profiling → CPU Efficiency → Caching Strategy →
+  OpenTelemetry Coverage → Scalability Assessment → Cost Estimation → Metadata Resolution →
+  Registry Lookups → Configuration Resolution → Workflow Execution → Provider Discovery.
+  Evaluates against 15 Architecture v2.0 performance dimensions. Produces SLO-referenced verdicts,
+  back-of-envelope latency budget calculations, optimisation recommendations, and dimension
+  summary table with concrete expected performance impact. This is a deep performance audit — not
+  a surface-level check. It is invoked on PRs touching hot paths, event pipelines, or data access
+  at scale. aep-review Lens 8 is a quick performance check; this skill is a full scalability and
+  performance audit. Critical performance blockers (blocking async calls, N+1 on hot paths, shared
+  mutable state under horizontal scale) always result in REQUEST CHANGES regardless of other lens
+  results.
 allowed-tools: |
   bash: gh git grep rg python jq
 ---
 
 # Performance Review — Principal Performance Engineer Audit
 
+**Version:** 2.0 — Architecture v2.0-aware performance audit  
+**Backward compatible:** `/performance-review 42` and `/performance-review <PR_URL>` work exactly as before.
+
 <purpose>
 Full scalability and performance audit for the Agentic Engineering Platform. Distinct from
 aep-review Lens 8, which performs a surface performance check as one of twelve review dimensions.
-This skill is the authoritative performance deep-dive: 13 lenses, SLO-referenced verdicts,
-back-of-envelope latency budget calculations, and concrete optimisation recommendations with
-expected impact. Invoke this skill on any PR that touches a hot path, event pipeline, data access
-at scale, or any code with explicit latency SLOs in ACCEPTANCE_CRITERIA.md.
+This skill is the authoritative performance deep-dive: 18 lenses (13 original + 5 Architecture
+v2.0 extensions), 15 Architecture v2.0 performance dimensions, SLO-referenced verdicts,
+back-of-envelope latency budget calculations, optimisation recommendations, and a dimension
+summary table with expected impact. Invoke this skill on any PR that touches a hot path, event
+pipeline, data access at scale, metadata resolution, registry lookups, workflow execution,
+provider discovery, or any code with explicit latency SLOs in ACCEPTANCE_CRITERIA.md.
 
 Review only the diff — never invent findings not present in the changed code. Every finding must
 cite an exact file:line from the diff and explain the concrete failure scenario at production load.
@@ -113,36 +122,95 @@ obligations, but findings are weighted accordingly.
 
 ---
 
-## Step 2 — Load Reference Documents
+## Step 2 — Load Reference Documents (automatic)
 
-Read these documents as review context. Do not re-output their full contents. They are the
-authoritative standards this PR is measured against.
+**Read ALL of the following before reviewing any changed file. No exceptions.**
+
+### Platform Constitution (Architecture v2.0 — always required)
 
 ```bash
-# Core platform authorities
+cat docs/architecture/PLATFORM_PRIMITIVES.md
+cat docs/architecture/PLATFORM_CONTRACTS.md
+cat docs/architecture/PLATFORM_META_MODEL.md
+cat docs/architecture/PLATFORM_UX_MODEL.md
+cat docs/architecture/PLATFORM_GLOSSARY.md
+cat docs/architecture/METADATA_DRIVEN_ENTERPRISE_PLATFORM.md
+cat docs/architecture/ARCHITECTURE_BASELINE_V2.md
+```
+
+### Repository Constitution
+
+```bash
 cat CONSTITUTION.md
 cat ARCHITECTURE.md            # Focus: Scalability section, Service boundaries
-cat DECISIONS.md
+cat CLAUDE.md
+cat docs/architecture/ADR/DECISIONS.md
+```
 
-# PI context (substitute {PI} from Step 1)
+### PI context and contracts (substitute {PI} from Step 1)
+
+```bash
 cat docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md   # Primary — SLOs live here
 cat docs/engineering/implementation-roadmap/{PI}/REFERENCE_ARCHITECTURE.md  # Sections 16 (Observability), 18 (Scalability)
 cat docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md
 
 # Contracts (relevant to throughput and event volume)
+ls contracts/
 cat contracts/event-envelope.schema.json
 cat contracts/agent-contract.schema.json
+cat contracts/tool-contract.schema.json
+cat contracts/task-schema.schema.json
+cat contracts/memory-schema.schema.json
+cat contracts/platform-object.schema.json
 ```
 
-**Stop condition:** If `CONSTITUTION.md` or `ARCHITECTURE.md` cannot be read, stop and report.
+Extract and internalise:
+- **Metadata resolution model** from `PLATFORM_META_MODEL.md` and `METADATA_DRIVEN_ENTERPRISE_PLATFORM.md` — field lookup paths, relationship traversal cost
+- **Registry patterns** from `ARCHITECTURE_BASELINE_V2.md` — agent/tool/provider registry lookup semantics and caching expectations
+- **Configuration resolution** from `ARCHITECTURE_BASELINE_V2.md` — tenant config layering, resolution order, cache TTL expectations
+- **Workflow execution model** from `ARCHITECTURE_BASELINE_V2.md` and ADRs — state transitions, gate latency, orchestrator dispatch overhead
+- **Provider discovery** from `ARCHITECTURE_BASELINE_V2.md` — capability-based resolution, provider routing cost
+- **Scalability section** from `ARCHITECTURE.md` — horizontal scaling targets, connection budgets, event throughput
+- **Performance ADRs** from `docs/architecture/ADR/DECISIONS.md` — prior performance decisions that contextualise this PR
+
+**Stop condition:** If platform constitution docs, `CONSTITUTION.md`, or `ARCHITECTURE.md` cannot be read, stop and report.
 The review cannot proceed without these documents — SLOs and platform defaults cannot be validated.
 
 ---
 
-## Step 3 — Execute 13 Performance Lenses
+## Step 2b — Architecture v2.0 Performance Dimension Map
+
+Review the PR against **every applicable dimension** below. Lenses 1–13 cover the
+original audit surface; Lenses 14–18 extend for Architecture v2.0. Dimensions with
+no applicable code in the diff record **N/A**.
+
+| Dimension | Primary lens | What to verify |
+|-----------|--------------|----------------|
+| **Metadata Resolution** | Lens 14 | Platform Object field lookup paths; relationship traversal bounded; no N+1 metadata fetches |
+| **Registry Lookups** | Lens 10, 15 | Agent/tool/provider resolved by capability tag; cached with TTL; no per-request full-table scan |
+| **Configuration Resolution** | Lens 16 | Tenant config layered resolution; validated schema; short-TTL cache; no DB hit per request |
+| **Workflow Execution** | Lens 17 | State machine transitions efficient; gate checks non-blocking; orchestrator dispatch overhead bounded |
+| **Provider Discovery** | Lens 18 | Capability-based provider resolution cached; no vendor SDK round-trip in hot path |
+| **Caching** | Lens 10 | Registry, config, metadata caches bounded with TTL and `maxsize`; hit rate observable |
+| **Database Access** | Lens 1 | Indexed queries; `tenant_id` scoped; paginated; no N+1 |
+| **Connection Pooling** | Lens 5 | Pool size bounded per replica; total connections < DB `max_connections`; pool timeout configured |
+| **Async Processing** | Lens 5 | No blocking calls in `async def`; `asyncio.gather` for parallel ops; semaphores for rate limits |
+| **Event Processing** | Lens 3 | Kafka consumer async; bounded batch; offset commit after processing; DLQ configured |
+| **Scalability** | Lens 12 | Stateless design; idempotent under horizontal scale; no per-process mutable state |
+| **Latency** | Lens 8 | Critical path within SLO; serial ops parallelised where possible; OTEL spans on hot path |
+| **Cost** | Lens 13 | `cost_class` correct; no LLM/embed calls in loops; token budget documented |
+| **Memory Usage** | Lens 6 | Generators over `fetchall()`; bounded caches; large objects by reference not in-process |
+| **Horizontal Scaling** | Lens 12 | Replica-safe; partition-aware Kafka scaling; DB connection budget at planned replica count |
+
+---
+
+## Step 3 — Execute 18 Performance Lenses
 
 Execute every lens. No lens may be skipped if its subject area is present in the diff.
 Lenses whose subject area is not touched may be marked N/A in the results table.
+
+**Lenses 1–13** are the original audit surface (preserved unchanged).  
+**Lenses 14–18** extend for Architecture v2.0 performance dimensions.
 
 ---
 
@@ -698,6 +766,187 @@ vs batching them = the same cost with 10× less API overhead and latency.
 
 ---
 
+### Lens 14 — Metadata Resolution Performance
+
+**Architecture v2.0:** `PLATFORM_META_MODEL.md`, `METADATA_DRIVEN_ENTERPRISE_PLATFORM.md`, `PLATFORM_PRIMITIVES.md` §3
+
+For Platform Object metadata resolution, relationship traversal, and field lookup in changed files:
+
+```bash
+# Metadata resolution paths
+rg "resolve_metadata|get_metadata|metadata_resolver|PlatformObject" <changed_files>
+
+# Relationship traversal
+rg "relationship|traverse|get_related|load_children|load_parent" <changed_files>
+
+# N+1 metadata fetches in loops
+rg "for .* in" -A 10 -- <changed_files> | rg "metadata|get_field|resolve_"
+
+# Schema validation on hot path
+rg "platform-object\.schema|validate.*platform_object" <changed_files>
+```
+
+**Checks:**
+
+- Is metadata resolved in a single batched query or graph fetch — not one DB round-trip per field?
+- Are relationship traversals depth-bounded and result-set limited? (Unbounded graph walks are O(depth × fan-out))
+- Is Platform Object schema validation cached after first parse — not re-validated on every read?
+- Are metadata lookups scoped with `tenant_id` before any join or filter? (Cross-tenant metadata scan is both slow and unsafe)
+- Is frequently accessed metadata (object type definitions, field schemas) cached with short TTL?
+- Does metadata resolution avoid loading full Platform Object envelopes when only specific fields are needed?
+
+**Why it matters:** Resolving metadata for 50 related Platform Objects with one query per object = 50 DB round trips at ~10ms each = 500ms added to every request. Batched resolution with a 60-second schema cache reduces this to one query and ~1ms cache hit.
+
+**Flag as Critical:** N+1 metadata resolution on a hot path (loop over objects with per-item DB fetch)
+**Flag as Major:** Unbounded relationship traversal, full Platform Object load when only ID fields needed, no cache on immutable schema metadata
+
+---
+
+### Lens 15 — Registry Lookup Performance
+
+**Architecture v2.0:** Agent Registry, Tool Registry, Provider Registry — `ARCHITECTURE_BASELINE_V2.md`
+
+For agent, tool, and provider registry resolution in changed files:
+
+```bash
+# Registry lookups
+rg "agent_registry|tool_registry|provider_registry|registry\.get|registry\.resolve|resolve_by_capability" <changed_files>
+
+# Capability tag resolution (not hardcoded IDs)
+rg "capability_tag|capability:|resolve_capability" <changed_files>
+
+# Registry cache usage
+rg "@lru_cache|TTLCache|registry_cache|cached_registry" <changed_files>
+
+# Full table scans on registry tables
+rg "agents\.registrations|tools\.registrations|providers\.registrations" <changed_files>
+```
+
+**Checks:**
+
+- Are registry lookups resolved by capability tag (AG4) — not by iterating all registrations?
+- Is registry data cached with bounded TTL (30–120 seconds)? Registry changes are infrequent relative to lookup frequency
+- Is cache invalidated or short-TTL enough to self-correct after re-registration?
+- Are registry queries indexed on `capability_tag` and `tenant_id`?
+- Is provider registry lookup separate from tool registry — no chained serial lookups when parallel resolution is possible?
+- Is registry lookup observable (cache hit/miss metrics)?
+
+**Why it matters:** At 1000 task dispatches/second without registry caching, the platform executes 1000–3000 DB queries/second against registration tables that change once per deployment. A 60-second TTL cache reduces this by ~3600×.
+
+**Flag as Major:** No caching on registry lookups expected >100 rps, capability resolution via full-table scan, serial agent + tool + provider lookups where `asyncio.gather` would suffice
+**Flag as Minor:** Cache TTL longer than 5 minutes without invalidation hook on registration events
+
+---
+
+### Lens 16 — Configuration Resolution Performance
+
+**Architecture v2.0:** Configuration over Customization — tenant config layering
+
+For tenant configuration, feature flags, and settings resolution in changed files:
+
+```bash
+# Config resolution
+rg "tenant_config|resolve_config|load_settings|get_tenant_settings|config_resolver" <changed_files>
+
+# Per-request config DB hits
+rg "config\.get|settings\.|feature_flag|FEATURE_" <changed_files>
+
+# Config caching
+rg "config_cache|settings_cache|@cache.*config" <changed_files>
+
+# Hardcoded config branches (bypass resolution)
+rg "if tenant\.|if plan ==|if tier ==" <changed_files>
+```
+
+**Checks:**
+
+- Is tenant configuration loaded once per request (or cached) — not re-fetched on every sub-operation within the same request?
+- Is configuration resolution layered (defaults → tenant → environment) with merge done in memory after single fetch?
+- Are immutable platform defaults served from in-process cache without DB round-trip?
+- Is config schema validation done at load time — not on every field access?
+- Are feature flag evaluations cached with short TTL (10–30 seconds)?
+- Does configuration resolution produce observable cache hit/miss metrics?
+
+**Why it matters:** Loading tenant config from DB on every tool invocation inside an agent loop (10 tools × 5 agents × 100 tasks/min) = 5000 config queries/minute for data that changes perhaps once per day.
+
+**Flag as Major:** Config DB query on every sub-operation within a request, no TTL cache on tenant settings, feature flag evaluated from DB without cache
+**Flag as Minor:** Config merge recomputed on every access instead of cached merged result
+
+---
+
+### Lens 17 — Workflow Execution Performance
+
+**Architecture v2.0:** Workflow state machine, orchestrator dispatch — `ARCHITECTURE_BASELINE_V2.md`
+
+For workflow execution, state transitions, and orchestrator dispatch in changed files:
+
+```bash
+# Workflow state transitions
+rg "transition_state|advance_workflow|workflow_run|state_machine|next_state" <changed_files>
+
+# Gate checks on critical path
+rg "gate_enforcer|approval_required|check_gate|wait_for_approval" <changed_files>
+
+# Orchestrator dispatch
+rg "TaskCreated|dispatch_task|orchestrator|workflow_template" <changed_files>
+
+# Synchronous workflow steps
+rg "await.*workflow|workflow.*await" <changed_files>
+```
+
+**Checks:**
+
+- Are state transitions O(1) indexed lookups — not full workflow history scans?
+- Is gate status checked from cache or indexed store — not blocking poll loop on every transition?
+- Does orchestrator dispatch publish `TaskCreated` asynchronously — not synchronously wait for agent completion?
+- Are workflow run queries paginated and indexed on `workflow_run_id`, `tenant_id`, `status`?
+- Is workflow template resolution cached? Templates change infrequently
+- Are serial workflow steps that could run in parallel identified and flagged?
+
+**Why it matters:** A synchronous orchestrator that awaits agent completion before dispatching the next task serialises the entire workflow. A 5-step workflow at 200ms/agent = 1000ms minimum vs event-driven dispatch at ~5ms overhead per step.
+
+**Flag as Critical:** Orchestrator synchronously blocks on agent completion before next dispatch (violates A2 and adds unbounded latency)
+**Flag as Major:** State transition requires full history scan, gate check blocks with polling loop, workflow template loaded from DB on every step
+
+---
+
+### Lens 18 — Provider Discovery Performance
+
+**Architecture v2.0:** Provider Framework — capability-based resolution, `ARCHITECTURE_BASELINE_V2.md`
+
+For provider discovery, capability resolution, and model routing in changed files:
+
+```bash
+# Provider discovery
+rg "provider_discovery|resolve_provider|get_provider|capability_resolution" <changed_files>
+
+# Direct vendor SDK calls in hot path (AP5)
+rg "import (openai|anthropic|boto3|google)" agents/ <changed_files>
+
+# Model router
+rg "model_router|model-router|route_model|cost_class" <changed_files>
+
+# Provider connection setup per request
+rg "Client\(|connect\(|create_client" <changed_files>
+```
+
+**Checks:**
+
+- Is provider resolved by capability tag — not hardcoded provider name or per-request discovery scan?
+- Is provider registration data cached with TTL? Provider topology changes infrequently
+- Are provider HTTP/gRPC clients pooled and reused — not instantiated per invocation?
+- Is model routing decision cached for identical `cost_class` + capability combinations within a task?
+- Does provider discovery avoid serial resolution when multiple capabilities are needed? (`asyncio.gather`)
+- Is provider latency observable via OTEL spans with `provider_id` attribute?
+
+**Why it matters:** Creating a new HTTP client per LLM invocation adds 50–200ms connection setup. At 100 invocations/minute per tenant across 50 tenants, connection churn dominates p99 latency.
+
+**Flag as Critical:** Vendor SDK client created per invocation on hot path
+**Flag as Major:** Provider resolved by full registry scan, no connection pooling for provider clients, serial provider resolution where parallel is possible
+**Flag as Minor:** Model routing recomputed when `cost_class` and capability are unchanged within task scope
+
+---
+
 ## Step 4 — Produce the Review Output
 
 ```
@@ -746,9 +995,55 @@ Verdict: WITHIN BUDGET / AT RISK (margin < 20%) / EXCEEDS SLO (estimate > target
 ---
 
 ### Optimisation Recommendations (priority order)
-1. {recommendation} — expected impact: {latency reduction / throughput increase / cost saving}
-2. {recommendation} — expected impact: {latency reduction / throughput increase / cost saving}
+1. {recommendation} — dimension: {dimension name} — expected impact: {latency reduction / throughput increase / cost saving / memory reduction}
+2. {recommendation} — dimension: {dimension name} — expected impact: {latency reduction / throughput increase / cost saving / memory reduction}
 3. ...
+
+---
+
+### Performance Lens Summary
+| Lens | Status | Findings |
+|------|--------|---------|
+| 1 Database Query | ✅ PASS / ⚠️ WARN / ❌ FAIL / — N/A | {one-line summary} |
+| 2 pgvector / Memory | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 3 Kafka Pipeline | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 4 Redis | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 5 Async / Concurrency | ✅ / ⚠️ / ❌ / — | {summary} |
+| 6 Memory Usage | ✅ / ⚠️ / ❌ / — | {summary} |
+| 7 Retry Storms | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 8 Latency Budget | ✅ / ⚠️ / ❌ / — | {SLO verdict} |
+| 9 CPU Efficiency | ✅ / ⚠️ / ❌ / — | {summary} |
+| 10 Caching | ✅ / ⚠️ / ❌ / — | {summary} |
+| 11 Observability | ✅ / ⚠️ / ❌ / — | {summary} |
+| 12 Scalability | ✅ / ⚠️ / ❌ / — | {summary} |
+| 13 Cost | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 14 Metadata Resolution | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 15 Registry Lookups | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 16 Configuration Resolution | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 17 Workflow Execution | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 18 Provider Discovery | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+
+---
+
+### Architecture v2.0 Dimension Summary
+
+| Dimension | Risk | Primary lens | Notes |
+|-----------|------|--------------|-------|
+| Metadata Resolution | HIGH/MED/LOW/N/A | 14 | {finding summary or "No issues found"} |
+| Registry Lookups | HIGH/MED/LOW/N/A | 10, 15 | {summary} |
+| Configuration Resolution | HIGH/MED/LOW/N/A | 16 | {summary} |
+| Workflow Execution | HIGH/MED/LOW/N/A | 17 | {summary} |
+| Provider Discovery | HIGH/MED/LOW/N/A | 18 | {summary} |
+| Caching | HIGH/MED/LOW/N/A | 10 | {summary} |
+| Database Access | HIGH/MED/LOW/N/A | 1 | {summary} |
+| Connection Pooling | HIGH/MED/LOW/N/A | 5 | {summary} |
+| Async Processing | HIGH/MED/LOW/N/A | 5 | {summary} |
+| Event Processing | HIGH/MED/LOW/N/A | 3 | {summary} |
+| Scalability | HIGH/MED/LOW/N/A | 12 | {summary} |
+| Latency | HIGH/MED/LOW/N/A | 8 | {SLO verdict} |
+| Cost | HIGH/MED/LOW/N/A | 13 | {summary} |
+| Memory Usage | HIGH/MED/LOW/N/A | 6 | {summary} |
+| Horizontal Scaling | HIGH/MED/LOW/N/A | 12 | {summary} |
 
 ---
 
@@ -805,7 +1100,8 @@ NEEDS DISCUSSION — at-risk performance requiring load testing or further analy
 
 **`APPROVE`** — only when:
 
-- All 13 lenses executed with no Critical or Major findings, OR all Major findings have documented mitigations accepted by the team
+- All 18 lenses executed with no Critical or Major findings, OR all Major findings have documented mitigations accepted by the team
+- All applicable Architecture v2.0 dimensions are LOW risk or N/A
 - Critical path estimate is WITHIN BUDGET (SLO margin ≥ 20%)
 - No blocking calls in async hot-path functions
 - No N+1 patterns on high-volume tables
@@ -818,11 +1114,15 @@ NEEDS DISCUSSION — at-risk performance requiring load testing or further analy
 
 Before declaring the review complete, confirm:
 
-- [ ] All 13 lenses executed (or explicitly marked N/A with justification)
+- [ ] Platform constitution loaded (Step 2)
+- [ ] All 18 lenses executed (or explicitly marked N/A with justification)
+- [ ] All 15 Architecture v2.0 dimensions assessed in dimension summary table
 - [ ] SLO reference documented (story-specific or platform default — source stated)
 - [ ] Critical path estimate produced with operation-level breakdown
 - [ ] Every Critical finding has: file:line reference, concrete failure scenario at scale, specific fix with expected performance impact
-- [ ] Optimisation recommendations prioritised by expected impact
+- [ ] Optimisation recommendations prioritised by expected impact with dimension mapping
+- [ ] Performance Lens Summary table complete (18 lenses)
+- [ ] Architecture v2.0 Dimension Summary table complete (15 dimensions)
 - [ ] Performance Risk Assessment table complete with evidence for every dimension
 - [ ] Merge recommendation is unambiguous
 - [ ] Verdict is one of: APPROVE / REQUEST CHANGES / NEEDS DISCUSSION
@@ -844,6 +1144,7 @@ Before declaring the review complete, confirm:
 11. Never accept unbounded memory usage or unbounded key growth
 12. Never approve without confirming scalability under the planned horizontal replica count
 13. If a lens has no findings and the subject area is not present in the diff, mark it N/A — do not fabricate findings
+14. Never skip platform constitution loading (Step 2) — Architecture v2.0 dimensions depend on it
 
 ---
 
@@ -857,3 +1158,4 @@ Before declaring the review complete, confirm:
 - **Never approve** without confirming the implementation is correct under horizontal scale (>1 replica)
 - **Never review** style issues, naming conventions, or business logic — performance and scalability only
 - **Never invent** findings not present in the changed code — if the diff does not touch a Kafka consumer, Lens 3 is N/A
+- **Never skip** platform constitution loading — Architecture v2.0 performance dimensions require it
