@@ -8,7 +8,7 @@ from pathlib import Path
 
 SKILL = Path(__file__).resolve().parents[1] / ".ai/skills/implement-story/SKILL.md"
 
-ADE_MODE_A_B = '''
+ADE_MODE_A_B = """
 ## Phase 2 — Architecture Decision Engine — Mode A ("Should we build this?")
 
 **Mandatory for every story. Executes immediately after Phase 1 (Architecture Discovery)
@@ -176,7 +176,7 @@ Dependencies, Implementation Plan, Approval, and Implementation.
 
 ---
 
-'''
+"""
 
 # Phase header renames (order matters — longer patterns first)
 HEADER_RENAMES = [
@@ -186,15 +186,24 @@ HEADER_RENAMES = [
     (r"## Phase 9 — Testing", "## Phase 12 — Testing"),
     (r"## Phase 8 — Implementation", "## Phase 11 — Implementation"),
     (r"## Phase 7 — Implementation Planning", "## Phase 9 — Implementation Plan"),
-    (r"## Phase 5 \(Preserved\) — Architecture Validation", "## Phase 8 — Architecture Validation"),
-    (r"## Phase 4 \(Preserved\) — Infrastructure Assessment", "## Phase 7 — Infrastructure Assessment"),
+    (
+        r"## Phase 5 \(Preserved\) — Architecture Validation",
+        "## Phase 8 — Architecture Validation",
+    ),
+    (
+        r"## Phase 4 \(Preserved\) — Infrastructure Assessment",
+        "## Phase 7 — Infrastructure Assessment",
+    ),
     (r"## Phase 6 — Dependency Analysis", "## Phase 7 — Dependencies"),
     (r"## Phase 5 — Risk Based Approval", "## Phase 10 — Approval"),
     (r"## Phase 4 — Architecture Impact Analysis", "## Phase 6 — Risk Assessment"),
     (r"## Phase 2 \(Preserved\) — Story Readiness", "## Phase 5 — Story Readiness"),
     (r"## Phase 3 — Story Resolution", "## Phase 4 — Story Resolution"),
     (r"## Phase 2 — Architecture Context", "## Phase 1 — Architecture Discovery"),
-    (r"## Phase 1 — Repository Discovery", "## Phase 1 — Repository Discovery (skill extension)"),
+    (
+        r"## Phase 1 — Repository Discovery",
+        "## Phase 1 — Repository Discovery (skill extension)",
+    ),
 ]
 
 # Fix duplicate Phase 7 — Infrastructure should be 7a or renumber
@@ -208,8 +217,14 @@ HEADER_RENAMES_FIXED = [
     (r"## Phase 9 — Testing", "## Phase 12 — Testing"),
     (r"## Phase 8 — Implementation", "## Phase 11 — Implementation"),
     (r"## Phase 7 — Implementation Planning", "## Phase 9 — Implementation Plan"),
-    (r"## Phase 5 \(Preserved\) — Architecture Validation", "## Phase 8 — Architecture Validation"),
-    (r"## Phase 4 \(Preserved\) — Infrastructure Assessment", "## Phase 7b — Infrastructure Assessment"),
+    (
+        r"## Phase 5 \(Preserved\) — Architecture Validation",
+        "## Phase 8 — Architecture Validation",
+    ),
+    (
+        r"## Phase 4 \(Preserved\) — Infrastructure Assessment",
+        "## Phase 7b — Infrastructure Assessment",
+    ),
     (r"## Phase 6 — Dependency Analysis", "## Phase 7 — Dependencies"),
     (r"## Phase 5 — Risk Based Approval", "## Phase 10 — Approval"),
     (r"## Phase 4 — Architecture Impact Analysis", "## Phase 6 — Risk Assessment"),
@@ -223,11 +238,11 @@ PHASE_5A_PATTERN = re.compile(
     re.DOTALL,
 )
 
-APPROVAL_INSERT = '''
+APPROVAL_INSERT = """
 **Approval executes after Phase 9 (Implementation Plan) and before Phase 11 (Implementation).**
 Phase 6 classifies risk; Phase 10 enforces the approval gate immediately before coding.
 
-'''
+"""
 
 
 def main() -> None:
@@ -344,31 +359,61 @@ Completion (Phase 15)
         ("Think Mode:", "ADE:"),
         ("Think Mode ", "Architecture Decision Engine "),
         ("Architecture Think Mode", "Architecture Decision Engine"),
-        ("Phase 5A (Architecture Think Mode)", "Phases 2–3 (Architecture Decision Engine)"),
+        (
+            "Phase 5A (Architecture Think Mode)",
+            "Phases 2–3 (Architecture Decision Engine)",
+        ),
         ("Phase 5A (Think Mode CONTINUE)", "ADE CONTINUE (Phases 2–3)"),
         ("Phase 5A (Think Mode)", "ADE (Phases 2–3)"),
         ("Phase 5A", "ADE (Phases 2–3)"),
         ("before Phase 5A", "before ADE (Phases 2–3)"),
         ("Phase 5A decision", "ADE decision"),
-        ("Think Mode Reuse (from Phase 5A)", "Architecture Reuse (from ADE Phases 2–3)"),
+        (
+            "Think Mode Reuse (from Phase 5A)",
+            "Architecture Reuse (from ADE Phases 2–3)",
+        ),
         ("Think Mode Summary", "Architecture Decision Engine Summary"),
         ("Reuse Score:", "Reuse Score:"),
         ("proceed to Phase 5A", "proceed to Phase 2 (ADE Mode A)"),
         ("Skip Phase 5A", "Skip ADE (Phases 2–3)"),
-        ("Always run Architecture Think Mode (Phase 5A)", "Always run Architecture Decision Engine (Phases 2–3)"),
-        ("completing Phases 1–7, passing Phase 5A (Think Mode CONTINUE), and satisfying\nPhase 5 approval gates",
-         "completing Phases 1–9, passing ADE CONTINUE (Phases 2–3), and satisfying\nPhase 10 approval gates"),
-        ("Do not continue to Phase 4 until Status = READY.", "Do not continue to Phase 6 until Status = READY."),
-        ("Do not proceed to Phase 8 (Implementation)", "Do not proceed to Phase 11 (Implementation)"),
-        ("Only begin coding after Phase 5A CONTINUE and Phase 5", "Only begin coding after ADE CONTINUE and Phase 10"),
-        ("Phase 5\napproval requirements are satisfied and Phase 5A (Think Mode) decision = CONTINUE",
-         "Phase 10 approval requirements are satisfied and ADE decision = CONTINUE"),
+        (
+            "Always run Architecture Think Mode (Phase 5A)",
+            "Always run Architecture Decision Engine (Phases 2–3)",
+        ),
+        (
+            "completing Phases 1–7, passing Phase 5A (Think Mode CONTINUE), and satisfying\nPhase 5 approval gates",
+            "completing Phases 1–9, passing ADE CONTINUE (Phases 2–3), and satisfying\nPhase 10 approval gates",
+        ),
+        (
+            "Do not continue to Phase 4 until Status = READY.",
+            "Do not continue to Phase 6 until Status = READY.",
+        ),
+        (
+            "Do not proceed to Phase 8 (Implementation)",
+            "Do not proceed to Phase 11 (Implementation)",
+        ),
+        (
+            "Only begin coding after Phase 5A CONTINUE and Phase 5",
+            "Only begin coding after ADE CONTINUE and Phase 10",
+        ),
+        (
+            "Phase 5\napproval requirements are satisfied and Phase 5A (Think Mode) decision = CONTINUE",
+            "Phase 10 approval requirements are satisfied and ADE decision = CONTINUE",
+        ),
         ("Phase 12 handoff", "Phase 15 handoff"),
-        ("all Phase 10 reviews pass and Phase 11 documentation", "all Phase 13 reviews pass and Phase 14 documentation"),
+        (
+            "all Phase 10 reviews pass and Phase 11 documentation",
+            "all Phase 13 reviews pass and Phase 14 documentation",
+        ),
         ("### Review verdicts (Phase 10)", "### Review verdicts (Phase 13)"),
-        ("Do not proceed to Phase 12 with any unmet item.", "Do not proceed to Phase 15 with any unmet item."),
-        ("| **LOW** | **Auto-continue** — proceed to Phase 2 (ADE Mode A) without pause |",
-         "| **LOW** | **Auto-continue** — record risk; Approval (Phase 10) auto-continues after plan |"),
+        (
+            "Do not proceed to Phase 12 with any unmet item.",
+            "Do not proceed to Phase 15 with any unmet item.",
+        ),
+        (
+            "| **LOW** | **Auto-continue** — proceed to Phase 2 (ADE Mode A) without pause |",
+            "| **LOW** | **Auto-continue** — record risk; Approval (Phase 10) auto-continues after plan |",
+        ),
     ]
     for old, new in replacements:
         text = text.replace(old, new)
