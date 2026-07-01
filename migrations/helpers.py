@@ -20,11 +20,16 @@ PLATFORM_TABLES: tuple[tuple[str, str], ...] = (
     ("tools", "registrations"),
     ("memory", "entries"),
     ("approval", "approval_records"),
+)
+
+METADATA_TABLES: tuple[tuple[str, str], ...] = (
     ("metadata", "platform_objects"),
     ("metadata", "platform_object_relationships"),
     ("metadata", "platform_object_audit"),
     ("metadata", "platform_object_versions"),
 )
+
+APP_ROLE = "aep_app"
 
 
 def create_schemas() -> None:
@@ -50,6 +55,20 @@ def enable_tenant_rls(schema: str, table: str) -> None:
             USING (tenant_id = current_setting('app.current_tenant_id'))
             WITH CHECK (tenant_id = current_setting('app.current_tenant_id'))
         """)
+
+
+def grant_app_role_on_tables(tables: tuple[tuple[str, str], ...]) -> None:
+    """Grant tenant-scoped DML on tables to the application role."""
+    for schema, table in tables:
+        qualified = f"{schema}.{table}"
+        op.execute(f"GRANT SELECT, INSERT, UPDATE, DELETE ON {qualified} TO {APP_ROLE}")
+
+
+def revoke_app_role_on_tables(tables: tuple[tuple[str, str], ...]) -> None:
+    """Revoke application role access from tables."""
+    for schema, table in reversed(tables):
+        qualified = f"{schema}.{table}"
+        op.execute(f"REVOKE ALL ON {qualified} FROM {APP_ROLE}")
 
 
 def disable_tenant_rls(schema: str, table: str) -> None:

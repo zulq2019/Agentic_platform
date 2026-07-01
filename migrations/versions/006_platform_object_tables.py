@@ -11,7 +11,13 @@ from typing import Sequence, Union
 
 from alembic import op
 
-from helpers import disable_tenant_rls, enable_tenant_rls
+from helpers import (
+    METADATA_TABLES,
+    disable_tenant_rls,
+    enable_tenant_rls,
+    grant_app_role_on_tables,
+    revoke_app_role_on_tables,
+)
 
 revision: str = "006_platform_object_tables"
 down_revision: Union[str, None] = "005_app_role_grants"
@@ -85,8 +91,12 @@ def upgrade() -> None:
         """)
     enable_tenant_rls("metadata", "platform_object_versions")
 
+    grant_app_role_on_tables(METADATA_TABLES)
+
 
 def downgrade() -> None:
+    revoke_app_role_on_tables(METADATA_TABLES)
+
     disable_tenant_rls("metadata", "platform_object_versions")
     op.execute("DROP TABLE IF EXISTS metadata.platform_object_versions")
 

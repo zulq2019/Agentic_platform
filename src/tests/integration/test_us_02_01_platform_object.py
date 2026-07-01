@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from metadata_engine.dependencies import build_platform_object_service, reset_service_for_tests
+from metadata_engine.dependencies import reset_service_for_tests
 from metadata_engine.main import create_app
 
 ROOT = Path(__file__).resolve().parents[3]

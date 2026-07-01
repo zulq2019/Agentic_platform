@@ -6,10 +6,20 @@ All notable changes to the Agentic Engineering Platform are documented here.
 
 ### Added
 
+- **ENG-SKILLS-V3** — Skills Release V3: Architecture v2.0 engineering skill library under `.ai/`
+  - `implement-story` v5.1: 12 enterprise phases, risk-based approval, Architecture Think Mode
+  - `review-story`, `generate-tests`, `security-review`, `performance-review`, `regression-review`, `release-story`: v2.0/v4.0 Architecture v2.0 extensions
+  - `next` v1.0: repository-agnostic engineering orchestrator
+  - `health-check` v1.0: read-only engineering governance auditor (35 checks, 8 scores, 7 reports)
 - US-01.01: 16-service platform bootstrap with `/health/live`, `/health/ready`, `/metrics`, `/info`
 - Shared `aep_common` library: health probes, metrics, structured logging, app factory
 - Docker Compose stack for local development (Postgres, Redis, Kafka, 16 services)
 - CI workflow: lint, format check, unit tests for US-01.01
+
+### Fixed
+
+- Migration `005_app_role_grants` no longer grants on metadata tables before they exist; `006_platform_object_tables` grants `aep_app` access after table creation
+- CI lint: remove unused import in `test_us_02_01_platform_object.py`
 
 ### Changed
 

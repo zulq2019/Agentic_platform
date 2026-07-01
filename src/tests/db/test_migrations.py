@@ -26,9 +26,13 @@ EXPECTED_TABLES: tuple[tuple[str, str], ...] = (
     ("tools", "registrations"),
     ("memory", "entries"),
     ("approval", "approval_records"),
+    ("metadata", "platform_objects"),
+    ("metadata", "platform_object_relationships"),
+    ("metadata", "platform_object_audit"),
+    ("metadata", "platform_object_versions"),
 )
 
-MIGRATION_HEAD_REVISION = "005_app_role_grants"
+MIGRATION_HEAD_REVISION = "006_platform_object_tables"
 
 
 def _run_migrations() -> int:
