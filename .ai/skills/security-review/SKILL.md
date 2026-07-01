@@ -3,21 +3,21 @@ name: security-review
 description: |
   When the engineer types /security-review <PR_NUMBER> or /security-review <GitHub PR URL>,
   perform a Principal Security Engineer level security audit of a pull request against
-  the Agentic Engineering Platform. This skill executes 13 security lenses covering
-  authentication, authorisation, secrets management, RBAC/Policy/Secrets separation,
-  tenant isolation, input validation, output encoding, API security, container security,
-  dependency vulnerabilities, least privilege, auditability, and human gate integrity.
-  It is invoked separately from aep-review on high-risk PRs — those touching auth,
-  secrets, tenant data, agent execution, tool invocations, or external integrations.
-  Where aep-review Lens 7 performs a surface security check, this skill is a full
-  OWASP-aligned enterprise security audit. Constitution S-series and H-series violations
-  are always Critical and block merge unconditionally. Never approve a PR with an
-  unresolved Critical security finding.
+  the Agentic Engineering Platform. Architecture v2.0-aware: automatically loads platform
+  constitution and repository constitution before reviewing. Executes 20 security lenses
+  covering authentication, authorisation, secrets, RBAC/Policy/Secrets separation, tenant
+  isolation, metadata security, configuration security, execution profiles, provider
+  isolation, plugin/marketplace security, compliance, OWASP, supply chain, and human
+  gate integrity. Invoked separately from aep-review on high-risk PRs. Constitution
+  S-series and H-series violations are always Critical and block merge unconditionally.
 allowed-tools: |
   bash: gh git grep rg python jq
 ---
 
 # AEP Security Review
+
+**Version:** 2.0 — Architecture v2.0-aware security audit  
+**Backward compatible:** `/security-review 42` and `/security-review <PR_URL>` work exactly as before.
 
 <purpose>
 Principal Security Engineer level security audit for the Agentic Engineering Platform.
@@ -28,13 +28,14 @@ Distinction from aep-review Lens 7:
   ~10 minutes and covers 12 dimensions of code quality including a basic credential scan
   and tenant isolation spot-check.
 - security-review is a dedicated, deep security audit. It runs automated pre-checks,
-  classifies every changed file into a security zone, and then executes 13 specialised
-  lenses aligned to OWASP Top 10 and the platform's own constitutional security principles
-  (S-series, H-series). It is the difference between a code reviewer noting "check for
+  classifies every changed file into a security zone, and then executes 20 specialised
+  lenses (13 original + 7 Architecture v2.0) aligned to OWASP Top 10, platform
+  constitutional security principles (S-series, H-series), and Architecture v2.0
+  dimensions. It is the difference between a code reviewer noting "check for
   SQL injection" and a penetration tester actually tracing the injection surface end-to-end.
 
 Every lens must be executed in order. A Critical finding in Lens 1 is not cancelled by
-a clean result in Lens 13. Review only the diff — never invent findings not present in
+a clean result in Lens 20. Review only the diff — never invent findings not present in
 the changed code.
 </purpose>
 
@@ -121,32 +122,83 @@ Record the zone classification table. If no files fall into a zone, mark it `(no
 
 ---
 
-## Step 2 — Load Reference Documents
+## Step 2 — Load Reference Documents (automatic)
 
-Read these documents as audit context. Do not re-output their contents. They are the authoritative standards this PR is measured against.
+**Read ALL of the following before reviewing any changed file. No exceptions.**
+
+### Platform Constitution (Architecture v2.0 — always required)
 
 ```bash
-# Platform authorities
+cat docs/architecture/PLATFORM_PRIMITIVES.md
+cat docs/architecture/PLATFORM_CONTRACTS.md
+cat docs/architecture/PLATFORM_META_MODEL.md
+cat docs/architecture/PLATFORM_UX_MODEL.md
+cat docs/architecture/PLATFORM_GLOSSARY.md
+cat docs/architecture/METADATA_DRIVEN_ENTERPRISE_PLATFORM.md
+cat docs/architecture/ARCHITECTURE_BASELINE_V2.md
+```
+
+### Repository Constitution
+
+```bash
 cat CONSTITUTION.md
 cat ARCHITECTURE.md
-cat DECISIONS.md
+cat CLAUDE.md
+cat docs/architecture/ADR/DECISIONS.md
+```
 
-# All contract schemas — these define the input/output surfaces to audit
+### Contract schemas — input/output surfaces to audit
+
+```bash
 ls contracts/
 cat contracts/event-envelope.schema.json
 cat contracts/agent-contract.schema.json
 cat contracts/tool-contract.schema.json
 cat contracts/task-schema.schema.json
 cat contracts/memory-schema.schema.json
+cat contracts/platform-object.schema.json
 ```
 
 Extract and internalise:
+- **Platform Object envelope** from `PLATFORM_PRIMITIVES.md` §3 — identity, lifecycle, versioning, audit
+- **Platform Contracts** from `PLATFORM_CONTRACTS.md` — boundary validation, contract versioning
+- **Metadata model** from `PLATFORM_META_MODEL.md` — field-level access, relationship integrity
+- **Execution Profile model** from `ARCHITECTURE_BASELINE_V2.md` and ADR-012/027
+- **Provider Framework** from `ARCHITECTURE_BASELINE_V2.md` — capability resolution, isolation
 - **S-series principles** from `CONSTITUTION.md` — SR1 through SR6 are the mandatory security rules
 - **H-series principles** — H2 (human gate integrity) is the hardest security requirement
 - **Security Architecture section** from `ARCHITECTURE.md` — authentication flows, tenant isolation model, secrets issuance pattern
-- **Security ADRs** from `DECISIONS.md` — any prior security decisions that contextualise this PR
+- **Security ADRs** from `docs/architecture/ADR/DECISIONS.md` — prior security decisions that contextualise this PR
 
-**Stop condition:** If `CONSTITUTION.md` or `ARCHITECTURE.md` cannot be read, stop and report. Security audit cannot proceed without the authoritative reference.
+**Stop condition:** If platform constitution docs, `CONSTITUTION.md`, or `ARCHITECTURE.md` cannot be read, stop and report. Security audit cannot proceed without the authoritative reference.
+
+---
+
+## Step 2b — Architecture v2.0 Security Dimension Map
+
+Review the PR against **every applicable dimension** below. Lenses 1–13 cover the
+original audit surface; Lenses 14–20 extend for Architecture v2.0. Dimensions with
+no applicable code in the diff record **N/A**.
+
+| Dimension | Primary lens | What to verify |
+|-----------|--------------|----------------|
+| **Platform Contracts** | Lens 6, 14 | JSON Schema validation at boundaries; `platform-object.schema.json` compliance |
+| **RBAC** | Lens 2, 4 | Role checks via `rbac-service`; no inline permission logic |
+| **Least Privilege** | Lens 11 | Minimum scope on tools, tokens, ACLs, IAM |
+| **Secrets** | Lens 3, 4 | Vault via `secrets-service`; no credentials in code or logs |
+| **Authentication** | Lens 1 | JWT validation; `tenant_id` from token only |
+| **Authorization** | Lens 2 | Policy via `policy-engine`; IDOR prevention |
+| **Metadata Security** | Lens 14 | Platform Object field access; no metadata injection |
+| **Configuration Security** | Lens 15 | Tenant config validated; no hardcoded business rules |
+| **Execution Profiles** | Lens 16 | Profile schema enforced; runtime hooks cannot escalate |
+| **Provider Isolation** | Lens 17 | Capability resolution scoped; no cross-provider data leaks |
+| **Tenant Isolation** | Lens 5 | `tenant_id` on every query, key, event, vector search |
+| **Audit** | Lens 12 | State changes produce auditable events |
+| **Compliance** | Lens 18 | Retention, PII handling, regulatory audit trail |
+| **OWASP** | Lenses 1–13 | Top 10 categories mapped per lens |
+| **Supply Chain** | Lens 9, 10 | Container scan, dependency audit, pinned versions |
+| **Plugin Security** | Lens 19 | Plugin manifest validation, sandbox boundaries |
+| **Marketplace Security** | Lens 20 | Package signing, scope ceiling, install isolation |
 
 ---
 
@@ -195,9 +247,12 @@ Any FINDINGS result in the pre-checks constitutes a Critical finding that must a
 
 ---
 
-## Step 4 — Execute 13 Security Lenses
+## Step 4 — Execute 20 Security Lenses
 
 Execute every applicable lens in order. Skip a lens only if its zone has zero changed files — and document the skip explicitly in the lens table.
+
+**Lenses 1–13** are the original audit surface (preserved unchanged).  
+**Lenses 14–20** extend for Architecture v2.0 security dimensions.
 
 ---
 
@@ -808,6 +863,253 @@ rg "transition_state|advance_workflow|next_state" <changed_files> -A 10
 
 ---
 
+### Lens 14 — Metadata Security
+
+**Applicable zone:** Zone TENANT, Zone AGENT, any code producing or consuming Platform Objects  
+**OWASP:** A03 Injection, A01 Broken Access Control  
+**Architecture v2.0:** `PLATFORM_META_MODEL.md`, `PLATFORM_PRIMITIVES.md` §3
+
+```bash
+# Platform Object envelope usage
+rg "platform_object|PlatformObject|object_type|lifecycle_state" <changed_files>
+
+# Metadata field access without tenant scoping
+rg "metadata\[|\.metadata\.|get_metadata" <changed_files>
+
+# Hardcoded metadata instead of schema-driven fields
+rg "object_type\s*=\s*['\"]|lifecycle_state\s*=\s*['\"]" <changed_files>
+
+# Platform Object schema validation
+rg "platform-object\.schema|validate.*platform_object" <changed_files>
+```
+
+**Check every item:**
+- [ ] Every Platform Object produced or consumed validates against `contracts/platform-object.schema.json`
+- [ ] Metadata fields are schema-defined — no arbitrary key injection via unvalidated dict merges
+- [ ] Lifecycle state transitions follow the FSM in `PLATFORM_META_MODEL.md` — no skip transitions
+- [ ] Relationship edges between Platform Objects enforce tenant boundaries — no cross-tenant relationship creation
+- [ ] Version fields are monotonic — no downgrade or overwrite without explicit versioning rules
+- [ ] Sensitive metadata fields (PII, credentials references) are not exposed in API responses or event payloads beyond authorised scope
+
+**Flag as Critical when:**
+- Platform Object created or mutated without schema validation at boundary
+- Cross-tenant metadata relationship possible
+- Arbitrary metadata injection via unvalidated user input
+
+**Flag as Major when:**
+- Lifecycle FSM transition bypassed
+- Sensitive metadata field exposed in public API response
+
+---
+
+### Lens 15 — Configuration Security
+
+**Applicable zone:** All services with tenant config, feature flags, or environment-driven business rules  
+**OWASP:** A05 Security Misconfiguration  
+**Architecture v2.0:** Configuration over Customization principle
+
+```bash
+# Hardcoded business rules that should be config
+rg "if tenant\.|if plan ==|if tier ==" <changed_files>
+
+# Feature flags without validation
+rg "feature_flag|FEATURE_|enable_.*=" <changed_files>
+
+# Tenant config loaded without validation
+rg "tenant_config|load_config|get_settings" <changed_files>
+
+# Config values in logs
+rg "log.*config|logger.*settings" <changed_files>
+```
+
+**Check every item:**
+- [ ] Tenant configuration loaded through validated schema — not raw JSON/YAML without Pydantic validation
+- [ ] Feature flags cannot enable security-weakening behaviour without RBAC check (e.g. disabling audit)
+- [ ] No business rules hardcoded as `if tenant_id == "special-tenant"` branches — use metadata/config
+- [ ] Configuration changes produce auditable events when they affect security posture
+- [ ] Default configuration values are secure-by-default — no permissive defaults (open CORS, disabled auth)
+- [ ] Environment variables for security settings use fail-closed semantics (`os.environ["KEY"]`, not permissive defaults)
+
+**Flag as Critical when:**
+- Security control disabled via unvalidated config input
+- Tenant-specific code fork bypassing isolation controls
+
+**Flag as Major when:**
+- Business rule hardcoded instead of configuration-driven
+- Insecure default in configuration schema
+
+---
+
+### Lens 16 — Execution Profile Security
+
+**Applicable zone:** Zone AGENT, execution framework code, profile schema handlers  
+**OWASP:** A01 Broken Access Control, A04 Insecure Design  
+**Architecture v2.0:** ADR-012, ADR-027, Execution Profile model
+
+```bash
+# Execution profile loading and application
+rg "execution_profile|ExecutionProfile|profile_id" <changed_files>
+
+# Profile fields that escalate privileges
+rg "max_tokens|timeout|allowed_tools|network_access|shell_access" <changed_files>
+
+# Profile mutation at runtime
+rg "profile\[|update_profile|set_profile" <changed_files>
+```
+
+**Check every item:**
+- [ ] Execution Profiles validated against schema before application — no partial profile merge
+- [ ] Profile cannot grant broader tool scope than the agent's registered capabilities
+- [ ] Runtime hooks cannot modify `approval_required`, `cost_class`, or security boundaries
+- [ ] Profile `network_access` and `shell_access` flags enforced — no bypass via agent output
+- [ ] Profile selection scoped to tenant — tenant A cannot load tenant B's execution profile
+- [ ] Profile version pinned — no silent upgrade to a profile with expanded permissions
+
+**Flag as Critical when:**
+- Execution profile allows privilege escalation beyond agent contract
+- Profile loaded without tenant scoping
+- Runtime modification of security-critical profile fields
+
+**Flag as Major when:**
+- Profile schema validation missing at boundary
+- Profile version not checked before application
+
+---
+
+### Lens 17 — Provider Isolation
+
+**Applicable zone:** Zone TOOL, Zone AGENT, provider framework code  
+**OWASP:** A01 Broken Access Control  
+**Architecture v2.0:** Provider Framework, capability-based resolution
+
+```bash
+# Direct vendor SDK imports in agents (AP5 violation)
+rg "import (openai|anthropic|boto3|google)" agents/ <changed_files>
+
+# Provider resolution without capability tag
+rg "provider_name|get_provider\(|resolve_provider" <changed_files>
+
+# Cross-provider credential sharing
+rg "shared.*credential|provider.*token" <changed_files>
+```
+
+**Check every item:**
+- [ ] Providers resolved by capability tag, not hardcoded provider name (AG4, AP5)
+- [ ] No vendor SDK imports in agent code — tools only via Tool Registry
+- [ ] Provider credentials scoped to tenant — no shared provider token across tenants
+- [ ] Provider failure does not leak another tenant's provider configuration
+- [ ] Provider registration validates scope ceiling — cannot register provider with broader scope than contract allows
+- [ ] Outbound calls from providers use allowlisted endpoints — no SSRF via user-controlled URL in provider config
+
+**Flag as Critical when:**
+- Vendor SDK imported directly in agent code
+- Provider credential shared across tenants
+- SSRF vector via unvalidated provider endpoint URL
+
+**Flag as Major when:**
+- Provider resolved by name instead of capability tag
+- Provider registration missing scope validation
+
+---
+
+### Lens 18 — Compliance
+
+**Applicable zone:** Zone AUTH, Zone TENANT, Zone AGENT, audit and data retention code  
+**OWASP:** A09 Security Logging and Monitoring Failures
+
+```bash
+# PII in logs or responses
+rg "email|phone|ssn|national_id|date_of_birth" <changed_files>
+
+# Data retention or deletion
+rg "retention|purge|delete_after|ttl_days" <changed_files>
+
+# Consent or legal basis tracking
+rg "consent|legal_basis|data_subject" <changed_files>
+```
+
+**Check every item:**
+- [ ] PII fields not logged at INFO level or above — hash or redact in structured logs
+- [ ] Data retention policies enforced — no indefinite storage without documented exception
+- [ ] Right-to-erasure paths do not leave orphaned references in audit trail (audit retains hash, not raw PII)
+- [ ] Cross-border data handling documented if provider routes data outside tenant region
+- [ ] Security-relevant events retained per platform retention policy — not silently dropped
+
+**Flag as Critical when:**
+- PII logged in cleartext at INFO or higher
+- Tenant data deletion leaves accessible cross-tenant references
+
+**Flag as Major when:**
+- No retention TTL on sensitive data store
+- Audit events missing for compliance-relevant state changes
+
+---
+
+### Lens 19 — Plugin Security
+
+**Applicable zone:** Plugin framework, extension points, dynamic loading code  
+**OWASP:** A06 Vulnerable Components, A03 Injection
+
+```bash
+# Dynamic import or plugin loading
+rg "importlib|__import__|load_plugin|plugin_manifest" <changed_files>
+
+# Plugin permissions or capabilities
+rg "plugin_id|plugin_scope|plugin_permissions" <changed_files>
+
+# Unsigned or unvalidated plugin manifests
+rg "manifest\.json|plugin\.yaml|register_plugin" <changed_files>
+```
+
+**Check every item:**
+- [ ] Plugin manifests validated against schema before registration — no arbitrary code execution paths
+- [ ] Plugins run with least-privilege scope — cannot access other tenants' data or platform internals
+- [ ] Dynamic imports restricted to allowlisted plugin directories — no user-controlled import paths
+- [ ] Plugin installation requires RBAC authorisation and produces audit event
+- [ ] Plugin cannot modify core platform configuration, RBAC rules, or gate settings
+- [ ] Plugin network access sandboxed — outbound calls via Tool Registry only
+
+**Flag as Critical when:**
+- User-controlled import path enables arbitrary code execution
+- Plugin runs without scope ceiling or tenant isolation
+
+**Flag as Major when:**
+- Plugin manifest not schema-validated
+- Plugin installation not audited
+
+---
+
+### Lens 20 — Marketplace Security
+
+**Applicable zone:** Marketplace, package registry, solution pack installation code  
+**OWASP:** A06 Vulnerable Components, A08 Software and Data Integrity Failures
+
+```bash
+# Package installation without signature verification
+rg "install_package|marketplace|solution_pack|download_pack" <changed_files>
+
+# Package scope or permissions
+rg "pack_scope|package_permissions|marketplace_item" <changed_files>
+```
+
+**Check every item:**
+- [ ] Marketplace packages verified by signature or checksum before installation
+- [ ] Package scope ceiling enforced — installed pack cannot exceed declared capabilities
+- [ ] Installation isolated per tenant — tenant A cannot install pack into tenant B's namespace
+- [ ] Package updates require re-authorisation — no silent auto-update of security-sensitive packs
+- [ ] Malicious package indicators checked (known bad hashes, revoked signatures)
+- [ ] Uninstall removes all pack-created resources without orphaning security controls
+
+**Flag as Critical when:**
+- Package installed without signature or integrity verification
+- Cross-tenant package installation possible
+
+**Flag as Major when:**
+- Package scope exceeds declared capabilities
+- Silent auto-update of marketplace packages enabled
+
+---
+
 ## Step 5 — Produce the Security Review Output
 
 ```
@@ -877,6 +1179,35 @@ Zone DEPS:    {files or "(none)"}
 | 11 Least Privilege | ✅ / ⚠️ / ❌ / — | {summary} |
 | 12 Auditability | ✅ / ⚠️ / ❌ / — | {summary} |
 | 13 Gate Integrity | ✅ / ⚠️ / ❌ / — | {summary} |
+| 14 Metadata Security | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 15 Configuration Security | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 16 Execution Profile | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 17 Provider Isolation | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 18 Compliance | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 19 Plugin Security | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+| 20 Marketplace Security | ✅ / ⚠️ / ❌ / — N/A | {summary} |
+
+### Architecture v2.0 Dimension Summary
+
+| Dimension | Status | Lens | Notes |
+|-----------|--------|------|-------|
+| Platform Contracts | PASS/WARN/FAIL/N/A | 6, 14 | {summary} |
+| RBAC | PASS/WARN/FAIL/N/A | 2, 4 | {summary} |
+| Least Privilege | PASS/WARN/FAIL/N/A | 11 | {summary} |
+| Secrets | PASS/WARN/FAIL/N/A | 3, 4 | {summary} |
+| Authentication | PASS/WARN/FAIL/N/A | 1 | {summary} |
+| Authorization | PASS/WARN/FAIL/N/A | 2 | {summary} |
+| Metadata Security | PASS/WARN/FAIL/N/A | 14 | {summary} |
+| Configuration Security | PASS/WARN/FAIL/N/A | 15 | {summary} |
+| Execution Profiles | PASS/WARN/FAIL/N/A | 16 | {summary} |
+| Provider Isolation | PASS/WARN/FAIL/N/A | 17 | {summary} |
+| Tenant Isolation | PASS/WARN/FAIL/N/A | 5 | {summary} |
+| Audit | PASS/WARN/FAIL/N/A | 12 | {summary} |
+| Compliance | PASS/WARN/FAIL/N/A | 18 | {summary} |
+| OWASP | PASS/WARN/FAIL/N/A | 1–13 | {summary} |
+| Supply Chain | PASS/WARN/FAIL/N/A | 9, 10 | {summary} |
+| Plugin Security | PASS/WARN/FAIL/N/A | 19 | {summary} |
+| Marketplace Security | PASS/WARN/FAIL/N/A | 20 | {summary} |
 
 ---
 
@@ -901,7 +1232,7 @@ Zone DEPS:    {files or "(none)"}
 security-cleared. Reference Constitution principles for any Critical findings.}
 
 ### Verdict
-APPROVE — all 13 lenses clear, no security findings
+APPROVE — all 20 lenses clear, no security findings
 REQUEST CHANGES — {N} critical and/or {N} major findings require resolution
 NEEDS DISCUSSION — accepted risk with conditions: {condition}
 ```
@@ -929,10 +1260,11 @@ NEEDS DISCUSSION — accepted risk with conditions: {condition}
 
 **`APPROVE`** — only when:
 
-- All 13 lenses pass or are explicitly N/A (with justification)
+- All 20 lenses pass or are explicitly N/A (with justification)
 - All pre-checks clean
 - No Critical or Major findings remain unresolved
 - No Constitution or contract violations
+- All applicable Architecture v2.0 dimensions pass or are N/A
 
 ---
 
@@ -947,8 +1279,9 @@ NEEDS DISCUSSION — accepted risk with conditions: {condition}
 7. RBAC/Policy/Secrets separation violations are always Critical — never Minor
 8. Gate bypass is always Critical — there is no acceptable risk exception at the code level
 9. Skip a lens only if its zone has zero changed files — document every skip explicitly
-10. Maximum 20 findings in the output — prioritise by severity, then by blast radius, then by exploitability
+10. Maximum 25 findings in the output — prioritise by severity, then by blast radius, then by exploitability
 11. Never approve a PR with an unresolved Critical security finding, regardless of business pressure
+12. Never skip platform constitution loading (Step 2) — Architecture v2.0 dimensions depend on it
 
 ---
 

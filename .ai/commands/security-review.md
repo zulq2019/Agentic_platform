@@ -1,19 +1,28 @@
 # security-review.md
 
 **Command:** `security-review`  
-**Version:** 1.0  
-**Library:** `.ai/commands/`  
+**Version:** 2.0 — Architecture v2.0-aware  
+**Skill authority:** `.ai/skills/security-review/SKILL.md` (full pipeline)  
 **Applies to:** All PIs, all sprints — mandatory on stories touching auth, data, secrets, or tenant isolation
 
 ---
 
 ## Purpose
 
-Use this command to perform a focused security review of a completed implementation.
+Use this command to perform a Principal Security Engineer level security audit of a pull request.
 
-This command is narrower and deeper than `review-story.md`. It specialises in six security domains: credential management, tenant isolation, input validation, network boundaries, audit trail completeness, and dependency vulnerabilities.
+Before reviewing, this command **automatically loads** platform constitution, repository constitution, and contract schemas. It executes 20 security lenses (13 original + 7 Architecture v2.0 extensions) covering credentials, tenant isolation, metadata security, configuration security, execution profiles, provider isolation, plugin/marketplace security, compliance, OWASP, and supply chain. Produces findings, remediation plan, and merge recommendation.
 
-Run this command on every story that touches authentication, secrets, database access, tool integration, or multi-tenant data.
+Run this command on every PR touching authentication, secrets, database access, tool integration, multi-tenant data, Platform Objects, providers, plugins, or marketplace packages.
+
+### Invocation (unchanged)
+
+```
+/security-review 42
+/security-review https://github.com/org/Agentic_platform/pull/42
+```
+
+See `.ai/skills/security-review/SKILL.md` for the complete authoritative workflow.
 
 ---
 
@@ -21,12 +30,19 @@ Run this command on every story that touches authentication, secrets, database a
 
 | Input | Location | Required |
 |-------|----------|----------|
-| Constitution — Security principles | `CONSTITUTION.md` (S-series principles) | Mandatory |
-| Architecture — Security section | `docs/architecture/REFERENCE_ARCHITECTURE.md` (Section 14) | Mandatory |
-| Architecture — Multi-tenancy | `docs/architecture/REFERENCE_ARCHITECTURE.md` (Section 20) | If story touches data |
-| AI implementation rules | `CLAUDE.md` (Security Rules section) | Mandatory |
-| ADRs — Security decisions | `DECISIONS.md` | Mandatory |
-| Changed files | `git diff main` | Mandatory |
+| Platform primitives | `docs/architecture/PLATFORM_PRIMITIVES.md` | Mandatory (v2) |
+| Platform contracts | `docs/architecture/PLATFORM_CONTRACTS.md` | Mandatory (v2) |
+| Meta model | `docs/architecture/PLATFORM_META_MODEL.md` | Mandatory (v2) |
+| UX model | `docs/architecture/PLATFORM_UX_MODEL.md` | Mandatory (v2) |
+| Glossary | `docs/architecture/PLATFORM_GLOSSARY.md` | Mandatory (v2) |
+| Metadata-driven architecture | `docs/architecture/METADATA_DRIVEN_ENTERPRISE_PLATFORM.md` | Mandatory (v2) |
+| Architecture baseline v2 | `docs/architecture/ARCHITECTURE_BASELINE_V2.md` | Mandatory (v2) |
+| Constitution — Security principles | `CONSTITUTION.md` (S-series, H-series) | Mandatory |
+| Architecture | `ARCHITECTURE.md` | Mandatory |
+| AI implementation rules | `CLAUDE.md` | Mandatory |
+| ADRs — Security decisions | `docs/architecture/ADR/DECISIONS.md` | Mandatory |
+| Contract schemas | `contracts/` (including `platform-object.schema.json`) | Mandatory |
+| PR diff | `gh pr diff <NUMBER>` | Mandatory |
 | Container scan results | `trivy image {image}` output | If Dockerfile changed |
 | Dependency audit | `pip-audit` or `npm audit` output | Mandatory |
 | Secrets scan | `detect-secrets scan` output | Mandatory |
@@ -34,6 +50,7 @@ Run this command on every story that touches authentication, secrets, database a
 **Substitutions required:**
 
 ```
+{pr_number}      = GitHub pull request number
 {service_name}   = service under review
 {target_folder}  = src/{location}
 {tenant_id_var}  = the variable name used for tenant isolation
@@ -43,149 +60,89 @@ Run this command on every story that touches authentication, secrets, database a
 
 ## Preconditions
 
-- [ ] Implementation is complete
+- [ ] PR is open and diff is fetchable via `gh pr diff`
 - [ ] `detect-secrets scan` output is available
 - [ ] `pip-audit` output is available
 - [ ] `trivy image` output available if Dockerfile was changed
-- [ ] Database migration files available if story touches schema
+- [ ] Database migration files available if PR touches schema
 
 ---
 
 ## Execution Steps
 
-### Step 1 — Credential scan
+### Step 1 — Fetch PR metadata and classify security zones
 
-Read every changed file. Search for:
+See `.ai/skills/security-review/SKILL.md` Step 1. Classify every changed file into security zones (AUTH, RBAC, POLICY, SECRETS, TENANT, AGENT, TOOL, INFRA, DEPS).
 
-| Pattern | Severity |
-|---------|---------|
-| Strings matching API key patterns: `sk-`, `Bearer `, `token=`, `password=` | BLOCKER |
-| Hardcoded hostnames or IP addresses | BLOCKER |
-| Hardcoded database connection strings | BLOCKER |
-| Any value that should come from environment variables | BLOCKER |
-| `os.environ.get("KEY", "default-secret")` — default is a secret | BLOCKER |
+### Step 2 — Load platform and repository constitution (automatic)
 
-For every finding, record:
-```
-CREDENTIAL FINDING
-File: {filename}:{line}
-Pattern: {what was found}
-Severity: BLOCKER
-Required action: Move to environment variable. Reference via Pydantic Settings.
-```
+Load all platform constitution docs and repository constitution before reviewing any changed file. See skill Step 2.
 
-Confirm that `detect-secrets scan` reports zero findings.
+### Step 3 — Run automated pre-checks
 
-### Step 2 — Tenant isolation audit
+Execute `detect-secrets`, `pip-audit`, credential patterns, gate bypass scan, dangerous functions, and SQL injection vectors against changed files only.
 
-For every database query in changed files:
+### Step 4 — Execute 20 security lenses
 
-- [ ] Does the query include `tenant_id` in the `WHERE` clause or rely on RLS policy?
-- [ ] Is `current_setting('app.current_tenant_id')` set before the query?
-- [ ] Are there any raw SQL strings that bypass the ORM and might miss the RLS context?
-- [ ] Is there any aggregation that spans multiple tenants?
+**Lenses 1–13 (preserved):** Authentication, Authorisation/RBAC, Secrets, RBAC/Policy/Secrets Separation, Tenant Isolation, Input Validation, Output Encoding, API Security, Container Security, Dependencies, Least Privilege, Auditability, Human Gate Integrity.
 
-For every Kafka message produced:
-- [ ] Does the `EventEnvelope` include `tenant_id`?
+**Lenses 14–20 (Architecture v2.0):** Metadata Security, Configuration Security, Execution Profile Security, Provider Isolation, Compliance, Plugin Security, Marketplace Security.
 
-For every Redis key used:
-- [ ] Does the key follow the pattern `aep:{tenant_id}:*`?
-
-For every pgvector query:
-- [ ] Does the query include a `tenant_id` metadata filter alongside the vector similarity search?
-
-Record all violations as BLOCKER.
-
-### Step 3 — Input validation audit
-
-For every API endpoint and Kafka consumer in changed files:
-
-- [ ] Is input validated against a schema before processing?
-- [ ] Are Pydantic models used for all request bodies?
-- [ ] Are `task_id`, `workflow_run_id`, and `tenant_id` validated as UUIDs, not plain strings?
-- [ ] Is there protection against excessively large payloads?
-- [ ] Are SQL injection vectors eliminated by ORM usage?
-- [ ] Is there no string interpolation in SQL queries?
-
-### Step 4 — Network boundary check
-
-Cross-reference changed files against the Network Policy Matrix in `docs/architecture/REFERENCE_ARCHITECTURE.md` (Section 10):
-
-- [ ] Does the code introduce any direct HTTP calls between services that are marked DENY?
-- [ ] Specifically: does `agent-runtime` call `orchestrator-service` directly?
-- [ ] Specifically: does `agent-runtime` call another `agent-runtime` instance?
-- [ ] Does any service access Vault directly instead of through `secrets-service`?
-- [ ] Are all new Kafka producers using SASL credentials from environment variables?
-
-### Step 5 — Secrets management audit
-
-For every place a credential or token is used:
-
-- [ ] Is the token fetched from `secrets-service` at invocation time (not cached permanently)?
-- [ ] Is the token TTL ≤ 15 minutes for tool invocations?
-- [ ] Is the token scope limited to the minimum required (read vs write vs admin)?
-- [ ] Is the token never logged, even at DEBUG level?
-- [ ] Is the token never included in API response bodies?
-
-### Step 6 — Audit trail completeness
-
-For every significant action in the changed code:
-
-- [ ] Does the action publish an event to Kafka that will be consumed by `audit-service`?
-- [ ] Does the event include enough information to reconstruct the action from the audit log alone?
-- [ ] For human approval decisions: is the approver name, timestamp, and decision captured?
-- [ ] Are failed authentication attempts logged?
-
-### Step 7 — Dependency vulnerability check
-
-Review `pip-audit` output:
-- [ ] Zero critical vulnerabilities
-- [ ] Zero high vulnerabilities
-- [ ] All medium vulnerabilities reviewed and either accepted (with written rationale) or remediated
-
-Review `trivy image` output (if Dockerfile changed):
-- [ ] Zero critical CVEs in base image
-- [ ] Zero high CVEs in base image
-- [ ] Base image is the latest approved version
-
-### Step 8 — Three-control separation check (Constitution S1)
-
-Verify that RBAC, Policy Engine, and Secrets remain three separate services:
-
-- [ ] No new code in `rbac-service` that performs policy evaluation
-- [ ] No new code in `policy-engine` that issues credentials
-- [ ] No new code in `secrets-service` that performs access control decisions
-- [ ] No new shared module that merges any two of these concerns
-
-### Step 9 — Produce security review report
+### Step 5 — Produce security review report
 
 ```
-## Security Review Report: {service_name}
+## Security Review: PR #{N} — {title}
 
-### Verdict: PASS | FAIL | PASS WITH CONDITIONS
+### Pre-check Results
+{automated scan summary}
 
-### Critical Findings (must fix before merge)
-1. ...
+### Security Zone Classification
+{zone table}
 
-### High Findings (must fix before merge)
-1. ...
+### Critical / Major / Minor Findings
+{file:line findings with attack scenario and specific fix}
 
-### Medium Findings (should fix, tracked in TASKS.md)
-1. ...
+### Security Findings Summary
+{20-lens status table}
 
-### Domain Results
-Credential scan:         PASS | FAIL
-Tenant isolation:        PASS | FAIL
-Input validation:        PASS | FAIL
-Network boundaries:      PASS | FAIL
-Secrets management:      PASS | FAIL
-Audit trail:             PASS | FAIL
-Dependencies:            PASS | FAIL
-Three-control separation: PASS | FAIL
+### Architecture v2.0 Dimension Summary
+{17-dimension status table}
 
-### Summary
-{one paragraph}
+### Remediation Plan
+Priority 1 — Critical (must resolve before merge)
+Priority 2 — Major (resolve before or immediately after merge)
+Priority 3 — Minor (track in TASKS.md)
+
+### Merge Recommendation
+{1-2 sentences}
+
+### Verdict
+APPROVE | REQUEST CHANGES | NEEDS DISCUSSION
 ```
+
+---
+
+## Architecture v2.0 Review Dimensions
+
+| Dimension | Primary lens |
+|-----------|--------------|
+| Platform Contracts | 6, 14 |
+| RBAC | 2, 4 |
+| Least Privilege | 11 |
+| Secrets | 3, 4 |
+| Authentication | 1 |
+| Authorization | 2 |
+| Metadata Security | 14 |
+| Configuration Security | 15 |
+| Execution Profiles | 16 |
+| Provider Isolation | 17 |
+| Tenant Isolation | 5 |
+| Audit | 12 |
+| Compliance | 18 |
+| OWASP | 1–13 |
+| Supply Chain | 9, 10 |
+| Plugin Security | 19 |
+| Marketplace Security | 20 |
 
 ---
 
@@ -193,34 +150,35 @@ Three-control separation: PASS | FAIL
 
 | Artifact | Description |
 |----------|-------------|
-| Security review report | Structured report with verdict, findings by severity, domain results |
-| Remediation list | Ordered list of required fixes with file and line references |
+| Security review report | Structured report with verdict, 20-lens summary, v2.0 dimension summary |
+| Remediation plan | Ordered Priority 1–3 fixes with file and line references |
 
 ---
 
 ## Quality Gates
 
+- [ ] Platform constitution loaded before review (Step 2)
 - [ ] `detect-secrets scan` reports zero findings
 - [ ] `pip-audit` reports zero critical/high vulnerabilities
 - [ ] Every database query verified to include tenant isolation
 - [ ] Every new API key or token confirmed to come from `secrets-service`
 - [ ] Three-control separation (RBAC/Policy/Secrets) confirmed intact
 - [ ] No direct service-to-service HTTP calls introduced for denied pairs
+- [ ] All applicable Architecture v2.0 dimensions reviewed
 
 ---
 
 ## Completion Checklist
 
 ```
-[ ] Credential scan complete — zero findings
-[ ] Tenant isolation audit complete — all queries verified
-[ ] Input validation audit complete — all endpoints validated
-[ ] Network boundary check complete — no policy violations
-[ ] Secrets management audit complete — TTL + scope verified
-[ ] Audit trail completeness verified
-[ ] Dependency vulnerability check complete
-[ ] Three-control separation verified
-[ ] Security review report produced with clear verdict
+[ ] Platform constitution loaded
+[ ] PR diff fetched and security zones classified
+[ ] Automated pre-checks complete
+[ ] Lenses 1–13 executed (or N/A documented)
+[ ] Lenses 14–20 executed (or N/A documented)
+[ ] Architecture v2.0 dimension summary produced
+[ ] Remediation plan produced with Priority 1–3
+[ ] Verdict issued (APPROVE | REQUEST CHANGES | NEEDS DISCUSSION)
 ```
 
 ---
@@ -229,6 +187,7 @@ Three-control separation: PASS | FAIL
 
 The AI executing this command must NEVER:
 
+- Skip platform constitution loading (Step 2)
 - Accept a credential finding as "acceptable" without explicit written approval
 - Skip the tenant isolation check because "it was checked before"
 - Ignore a critical or high CVE because "it is unlikely to be exploited"
@@ -237,4 +196,5 @@ The AI executing this command must NEVER:
 - Merge RBAC, Policy, or Secrets logic into a single module
 - Accept a Vault bypass as a "temporary" solution
 - Skip the three-control separation check
+- Approve a gate bypass under any circumstances
 - Modify the Constitution's security principles
