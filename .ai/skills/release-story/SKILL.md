@@ -2,21 +2,26 @@
 name: release-story
 description: |
   When the engineer types /release-story <PR_NUMBER> or /release-story <GitHub PR URL>,
-  fetch the PR diff and execute the final release gate before merge. This is not a
-  correctness review (aep-review) nor a security review (security-review) nor a
-  regression review (regression-review) — it is a ship-readiness gate. Executes 11
-  release lenses in sequence: Test Completeness → CI Pipeline → Docker Readiness →
+  fetch the PR diff and execute the final release gate before merge. Architecture v2.0-aware:
+  automatically loads platform constitution and repository constitution before reviewing.
+  Runs Pre-Release Verification (architecture, contracts, documentation, tests, security,
+  performance, observability, metrics, audit, version, CHANGELOG, STATUS, METRICS) then
+  executes 11 release lenses in sequence: Test Completeness → CI Pipeline → Docker Readiness →
   Migration Safety → Rollback Strategy → Release Notes → Versioning → Contract Integrity
-  → Documentation → Definition of Done → Deployment Safety. Produces a Final Merge
-  Checklist with ordered deployment steps and rollback procedure. Verdicts are
-  APPROVE, REQUEST CHANGES, or READY FOR RELEASE. Never approve a PR with failing CI,
-  an unresolved Critical finding, or an acceptance criterion without a corresponding test.
+  → Documentation → Definition of Done → Deployment Safety. Produces Release Notes,
+  Deployment Checklist, Rollback Plan, Known Risks, Next Story recommendation, and a Final
+  Merge Checklist. Verdicts are APPROVE, REQUEST CHANGES, or READY FOR RELEASE. Never approve
+  a PR with failing CI, an unresolved Critical finding, or an acceptance criterion without
+  a corresponding test.
 allowed-tools: |
   bash: gh, git, grep, rg, python, jq
   file: read
 ---
 
 # Release Story — Final Release Gate
+
+**Version:** 2.0 — Architecture v2.0-aware release gate  
+**Backward compatible:** `/release-story 42` and `/release-story <PR_URL>` work exactly as before.
 
 <purpose>
 This is the final human gate before a story is merged and deployed. Its job is not to
@@ -97,36 +102,129 @@ Critical and proceed with lenses for completeness, but the Verdict MUST be REQUE
 
 ---
 
-## Step 2 — Load Reference Documents
+## Step 2 — Load Reference Documents (automatic)
 
-Read these documents as release context. Do not re-output their contents. They are the
-standards against which release readiness is measured.
+**Read ALL of the following before executing Pre-Release Verification or any lens. No exceptions.**
+
+### Platform Constitution (Architecture v2.0 — always required)
 
 ```bash
-# Platform authorities
+cat docs/architecture/PLATFORM_PRIMITIVES.md
+cat docs/architecture/PLATFORM_CONTRACTS.md
+cat docs/architecture/PLATFORM_META_MODEL.md
+cat docs/architecture/PLATFORM_UX_MODEL.md
+cat docs/architecture/PLATFORM_GLOSSARY.md
+cat docs/architecture/METADATA_DRIVEN_ENTERPRISE_PLATFORM.md
+cat docs/architecture/ARCHITECTURE_BASELINE_V2.md
+```
+
+### Repository Constitution
+
+```bash
 cat CONSTITUTION.md
 cat ARCHITECTURE.md
+cat CLAUDE.md
+cat docs/architecture/ADR/DECISIONS.md
 cat CHANGELOG.md
+```
 
-# PI context (substitute {PI} from Step 1)
+### PI context (substitute {PI} from Step 1)
+
+```bash
 cat docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md
 cat docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md
 cat docs/engineering/implementation-roadmap/{PI}/TESTING.md
+cat docs/engineering/implementation-roadmap/{PI}/STATUS.md
+cat docs/engineering/implementation-roadmap/{PI}/METRICS.md
+```
 
-# Contract schemas
+### Contract schemas
+
+```bash
 ls contracts/
 cat contracts/event-envelope.schema.json
 cat contracts/agent-contract.schema.json
 cat contracts/tool-contract.schema.json
 cat contracts/task-schema.schema.json
 cat contracts/memory-schema.schema.json
+cat contracts/platform-object.schema.json
+```
 
-# Environment baseline
+### Environment baseline
+
+```bash
 cat .env.example 2>/dev/null || echo ".env.example not found"
 ```
 
-**Stop condition:** If `DEFINITION_OF_DONE.md` or `ACCEPTANCE_CRITERIA.md` cannot be read,
-flag as Critical — release gate cannot execute without DoD and AC documents.
+Extract and internalise:
+- **Platform Object envelope** from `PLATFORM_PRIMITIVES.md` §3 — identity, lifecycle, versioning, audit
+- **Platform Contracts** from `PLATFORM_CONTRACTS.md` — boundary validation, contract versioning
+- **Metadata model** from `PLATFORM_META_MODEL.md` — field-level access, relationship integrity
+- **Execution Profile and Provider models** from `ARCHITECTURE_BASELINE_V2.md` and relevant ADRs
+- **Constitutional principles** from `CONSTITUTION.md` — A-series, S-series, H-series, M-series
+- **Forbidden patterns** from `CLAUDE.md` — gate bypass, agent-to-agent calls, credentials in code
+- **PI progress** from `STATUS.md` and `METRICS.md` — story completion state and measurable outcomes
+
+**Stop condition:** If platform constitution docs, `CONSTITUTION.md`, `ARCHITECTURE.md`,
+`DEFINITION_OF_DONE.md`, or `ACCEPTANCE_CRITERIA.md` cannot be read, stop and report.
+Release gate cannot execute without these authorities.
+
+---
+
+## Step 2b — Pre-Release Verification Gate
+
+**Execute this gate immediately after Step 2 and before Step 3 (11 lenses).** Every dimension
+must be assessed PASS, FAIL, or N/A with evidence. A FAIL on any mandatory dimension is a
+**Critical** finding — the Verdict MUST be REQUEST CHANGES regardless of later lens results.
+
+Cross-check prior review verdicts from PR comments and review history:
+
+```bash
+gh pr view <NUMBER> --json reviews,comments | jq '.reviews[] | {author: .author.login, state: .state}'
+gh pr view <NUMBER> --json comments | jq '.comments[] | select(.body | test("Verdict|APPROVE|REQUEST CHANGES|READY FOR RELEASE"; "i")) | .body' | head -20
+```
+
+| Dimension | Mandatory | What to verify | Evidence source |
+|-----------|-----------|----------------|-----------------|
+| **Architecture Compliance** | Yes | No A1–A6, H2, S1–S6, M2–M4 violations in diff; service boundaries respected; no forbidden patterns in `CLAUDE.md` | Diff + `CONSTITUTION.md` + `ARCHITECTURE_BASELINE_V2.md` |
+| **Platform Contracts** | Yes | `python scripts/validate_contract.py contracts/` exits 0; Platform Object compliance if metadata touched; `schema_version` bumped on breaking changes | `contracts/`, Lens 8 pre-check |
+| **Documentation** | Yes | API spec, `.env.example`, event catalogue, `ARCHITECTURE.md` updated for new surfaces; ADR for architectural decisions | Lens 9 sweep |
+| **Tests** | Yes | Every AC has `test_ac_{id}_*`; coverage ≥ 80% on new code; integration test for primary event flow; cross-tenant test if data layer touched | Lens 1 + CI |
+| **Security** | Yes (if high-risk) | `security-review` verdict APPROVE or READY FOR RELEASE when PR touches auth/secrets/tenant data | PR review comments |
+| **Performance** | Yes (if SLOs) | `performance-review` verdict APPROVE when story has latency/throughput SLOs in AC | PR review comments + `ACCEPTANCE_CRITERIA.md` |
+| **Observability** | Yes | OTEL traces on domain methods; Prometheus metrics (`aep_{service}_*`); structured JSON logs with `task_id`, `tenant_id`, `workflow_run_id` | Diff + deployment notes |
+| **Metrics** | Yes | Service/platform metrics defined and scrapeable; PI `METRICS.md` reflects new counts if story changes measurable outcomes | `METRICS.md` + code |
+| **Audit** | Yes | State changes and human decisions publish auditable events with full `EventEnvelope` | Diff + `audit-service` consumers |
+| **Version** | Yes | Semver bumped appropriately; API/contract/agent versions incremented on breaking changes | Lens 7 |
+| **CHANGELOG** | Yes | Repo `CHANGELOG.md` updated under `[Unreleased]` with story ID; PI changelog or release notes section updated if PI-level release | `CHANGELOG.md`, PI docs |
+| **STATUS** | Yes | PI `STATUS.md` marks `{story_id}` complete (or documents partial completion with explicit blocker) | `STATUS.md` |
+| **METRICS** | Yes | PI `METRICS.md` updated with test counts, coverage, endpoints, or other story deliverable metrics | `METRICS.md` |
+
+**Pre-Release Verification output block (required before lenses):**
+
+```
+### Pre-Release Verification
+| Dimension | Status | Evidence |
+|-----------|--------|----------|
+| Architecture Compliance | PASS / FAIL / N/A | {principle IDs checked; violations or clean} |
+| Platform Contracts | PASS / FAIL / N/A | validate_contract.py exit {code} |
+| Documentation | PASS / FAIL / N/A | {API spec, .env.example, ARCHITECTURE.md} |
+| Tests | PASS / FAIL / N/A | AC coverage {N}/{N}; CI unit tests {status} |
+| Security | PASS / FAIL / SKIPPED | {security-review verdict or skip reason} |
+| Performance | PASS / FAIL / SKIPPED | {performance-review verdict or skip reason} |
+| Observability | PASS / FAIL / N/A | {traces, metrics, logs evidence} |
+| Metrics | PASS / FAIL / N/A | {Prometheus metrics + METRICS.md} |
+| Audit | PASS / FAIL / N/A | {audit events on state changes} |
+| Version | PASS / FAIL / N/A | {version bumps or N/A — no versioned artefact changed} |
+| CHANGELOG | PASS / FAIL / N/A | {repo and/or PI changelog entry} |
+| STATUS | PASS / FAIL / N/A | {story marked complete in STATUS.md} |
+| METRICS (PI) | PASS / FAIL / N/A | {METRICS.md updated} |
+
+Pre-Release Gate: {N}/{N} mandatory dimensions PASS
+```
+
+**Stop condition:** If Pre-Release Gate has any mandatory FAIL, proceed with lenses for
+completeness but Verdict MUST be REQUEST CHANGES.
 
 ---
 
@@ -834,6 +932,9 @@ without additional context — the engineer who clicks "Merge" must be able to f
 Story: {story_id} | PI: {PI} | Author: {author}
 Rollback Risk: LOW / MEDIUM / HIGH
 
+### Pre-Release Verification
+{paste the Pre-Release Verification table from Step 2b}
+
 ### CI Status
 Lint:                ✅ PASS / ❌ FAIL / ⏳ PENDING
 Type Check:          ✅ PASS / ❌ FAIL / ⏳ PENDING
@@ -886,6 +987,30 @@ Overall:             🟢 GREEN / 🔴 RED / 🟡 PENDING
 
 ---
 
+### Release Notes
+{Human-readable release notes for this story — suitable for CHANGELOG and team communication.
+Reference {story_id}, what shipped, why it matters, breaking changes marked **BREAKING**,
+new env vars and API endpoints listed. Distinct from raw commit messages.}
+
+### Deployment Checklist
+{Ordered, executable deployment steps extracted from Step 4 — env vars → migration → Kafka topic
+→ service deploy → health check → smoke tests. Self-contained for the engineer clicking Merge.}
+
+### Rollback Plan
+{Rollback risk classification (LOW/MEDIUM/HIGH) and numbered rollback procedure from Step 4.
+Include go/no-go decision point for HIGH-risk deployments.}
+
+### Known Risks
+{Residual risks after merge: MEDIUM rollback risk, deferred Major findings tracked in TASKS.md,
+coordination windows, feature flags, or monitoring watch items. State "None identified" only
+when all 11 lenses pass with zero Major findings and LOW rollback risk.}
+
+### Next Story Recommendation
+{From PI USER_STORIES.md and STATUS.md: recommend the next story ID to implement, with one
+sentence rationale based on dependency order, PI objectives, and what this story unblocks.}
+
+---
+
 ### Merge Recommendation
 {1-3 sentences stating what must be resolved before merge, or confirming the story
 meets every release gate and is ready to ship. Name specific findings that block merge
@@ -906,6 +1031,7 @@ READY FOR RELEASE — all 11 lenses pass, no Critical or Major findings, full me
 **`REQUEST CHANGES`** — required when any of the following are present, regardless of other lens results:
 
 - Any Critical finding in any lens
+- Any mandatory FAIL in Pre-Release Verification (Step 2b)
 - Overall CI is RED or PENDING (any check not GREEN)
 - Any acceptance criterion has no corresponding test
 - Any mandatory DoD Story-Level Gate item is NOT MET with no N/A justification
@@ -925,6 +1051,7 @@ READY FOR RELEASE — all 11 lenses pass, no Critical or Major findings, full me
 
 **`READY FOR RELEASE`** — the highest verdict; only when:
 
+- Pre-Release Verification: all mandatory dimensions PASS
 - All 11 lenses produce ✅ PASS or documented N/A
 - Zero Critical findings
 - Zero Major findings (all resolved — not deferred)
@@ -957,6 +1084,10 @@ The following actions are **absolutely prohibited** regardless of circumstance:
 8. **Never produce a merge checklist with steps out of order.** Migrations must come
    before service deployments. Environment variables must be set before service start.
    Out-of-order steps cause the deployment to fail.
+9. **Never skip Pre-Release Verification (Step 2b).** All 13 dimensions must be assessed
+   with evidence before executing lenses or issuing a verdict.
+10. **Never skip platform constitution loading (Step 2).** Architecture v2.0 release gates
+    depend on platform primitives, contracts, and baseline documents.
 
 ---
 
@@ -964,6 +1095,8 @@ The following actions are **absolutely prohibited** regardless of circumstance:
 
 Before stating the Verdict, confirm:
 
+- [ ] Platform constitution and repository constitution loaded (Step 2)
+- [ ] Pre-Release Verification completed — all 13 dimensions assessed (Step 2b)
 - [ ] CI status parsed and reported (all checks enumerated)
 - [ ] All 11 lenses executed (no lens skipped)
 - [ ] Rollback risk classified: LOW / MEDIUM / HIGH
@@ -972,6 +1105,7 @@ Before stating the Verdict, confirm:
 - [ ] Rollback procedure is actionable without additional context
 - [ ] Verdict stated as exactly one of: APPROVE / REQUEST CHANGES / READY FOR RELEASE
 - [ ] If REQUEST CHANGES: every Critical and blocking Major finding is named in the Merge Recommendation
+- [ ] Release Notes, Deployment Checklist, Rollback Plan, Known Risks, and Next Story recommendation produced
 
 ---
 
@@ -991,3 +1125,5 @@ Before stating the Verdict, confirm:
 9. Maximum 15 findings total — prioritise by deployment risk, then data risk, then operational risk
 10. The merge checklist is the single source of truth for the merge decision — it must be
     self-contained and executable by the engineer who clicks "Merge"
+11. Never skip platform constitution loading or Pre-Release Verification — Architecture v2.0
+    release readiness depends on both gates completing before lenses

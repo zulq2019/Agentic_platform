@@ -1,17 +1,26 @@
 # release-story.md
 
 **Command:** `release-story`  
-**Version:** 1.0  
-**Library:** `.ai/commands/`  
+**Version:** 2.0 — Architecture v2.0-aware  
+**Skill authority:** `.ai/skills/release-story/SKILL.md` (full pipeline)  
 **Applies to:** All PIs — run when a story is complete and ready for merge and deployment to a target environment
 
 ---
 
 ## Purpose
 
-Use this command to prepare a completed User Story for release: verify all quality gates are met, produce the release artefacts, update the changelog, and ensure the deployment is safe and observable.
+Use this command to prepare a completed User Story for release: verify all quality gates are met, run Pre-Release Verification against Architecture v2.0 dimensions, execute 11 release lenses, produce release artefacts, update the changelog, and ensure the deployment is safe and observable.
 
 This command is the final checkpoint before merge. It does not merge or deploy — it validates that the implementation is ready for a human to approve and merge.
+
+Before reviewing, this command **automatically loads** platform constitution, repository constitution, PI context (including `STATUS.md` and `METRICS.md`), and contract schemas. See `.ai/skills/release-story/SKILL.md` for the complete authoritative workflow.
+
+### Invocation (unchanged)
+
+```
+/release-story 42
+/release-story https://github.com/org/Agentic_platform/pull/42
+```
 
 ---
 
@@ -19,18 +28,31 @@ This command is the final checkpoint before merge. It does not merge or deploy �
 
 | Input | Location | Required |
 |-------|----------|----------|
+| Platform primitives | `docs/architecture/PLATFORM_PRIMITIVES.md` | Mandatory (v2) |
+| Platform contracts | `docs/architecture/PLATFORM_CONTRACTS.md` | Mandatory (v2) |
+| Meta model | `docs/architecture/PLATFORM_META_MODEL.md` | Mandatory (v2) |
+| UX model | `docs/architecture/PLATFORM_UX_MODEL.md` | Mandatory (v2) |
+| Glossary | `docs/architecture/PLATFORM_GLOSSARY.md` | Mandatory (v2) |
+| Metadata-driven architecture | `docs/architecture/METADATA_DRIVEN_ENTERPRISE_PLATFORM.md` | Mandatory (v2) |
+| Architecture baseline v2 | `docs/architecture/ARCHITECTURE_BASELINE_V2.md` | Mandatory (v2) |
 | Constitution | `CONSTITUTION.md` | Mandatory |
+| Architecture | `ARCHITECTURE.md` | Mandatory |
 | AI implementation rules | `CLAUDE.md` | Mandatory |
+| ADRs | `docs/architecture/ADR/DECISIONS.md` | Mandatory |
 | Definition of Done | `docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md` | Mandatory |
 | Review Checklist | `docs/engineering/implementation-roadmap/{PI}/REVIEW_CHECKLIST.md` | Mandatory |
 | User Story | `docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md` — implemented story | Mandatory |
 | Acceptance Criteria | `docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md` | Mandatory |
+| PI status | `docs/engineering/implementation-roadmap/{PI}/STATUS.md` | Mandatory (v2) |
+| PI metrics | `docs/engineering/implementation-roadmap/{PI}/METRICS.md` | Mandatory (v2) |
 | Review report | Output of `review-story.md` — must be PASS | Mandatory |
 | Security review report | Output of `security-review.md` | If story touches auth/data/secrets |
 | Performance review report | Output of `performance-review.md` | If story has latency SLOs |
+| Regression review report | Output of `regression-review.md` | If PR touches shared zones |
 | Test output | `pytest` run — all tests passing | Mandatory |
 | Lint output | `ruff check` + `black --check` + `mypy --strict` | Mandatory |
-| `git diff main` | All changes since branching from main | Mandatory |
+| PR diff | `gh pr diff <NUMBER>` | Mandatory |
+| Changelog | `CHANGELOG.md` (repo) and PI release notes if applicable | Mandatory |
 
 **Substitutions required:**
 
@@ -42,6 +64,7 @@ This command is the final checkpoint before merge. It does not merge or deploy �
 {target_version}  = e.g. 1.2.0 (semver)
 {target_env}      = dev | staging | production
 {pr_branch}       = feature/PI-05-US-03-tool-capability-discovery
+{pr_number}       = GitHub pull request number
 ```
 
 ---
@@ -54,14 +77,46 @@ This command is the final checkpoint before merge. It does not merge or deploy �
 - [ ] Type check clean: `mypy --strict src/{target_folder}/` exits 0
 - [ ] Security review complete (if required)
 - [ ] Performance review complete (if required)
+- [ ] Regression review complete (if required)
 - [ ] No unresolved BLOCKER findings from any review
 - [ ] Branch is up to date with `main`
+- [ ] PR is open and fetchable via `gh pr view` / `gh pr diff`
 
 ---
 
 ## Execution Steps
 
-### Step 1 — Final Definition of Done sweep
+### Step 1 — Fetch PR metadata and CI status
+
+See `.ai/skills/release-story/SKILL.md` Step 1. Parse story ID, PI, and CI rollup before proceeding.
+
+### Step 2 — Load platform and repository constitution (automatic)
+
+Load all platform constitution docs, repository constitution, PI context (`STATUS.md`, `METRICS.md`), and contract schemas. See skill Step 2.
+
+### Step 2b — Pre-Release Verification gate
+
+Assess all 13 Architecture v2.0 release dimensions before executing lenses:
+
+| Dimension | Mandatory |
+|-----------|-----------|
+| Architecture Compliance | Yes |
+| Platform Contracts | Yes |
+| Documentation | Yes |
+| Tests | Yes |
+| Security | Yes (if high-risk PR) |
+| Performance | Yes (if SLOs defined) |
+| Observability | Yes |
+| Metrics | Yes |
+| Audit | Yes |
+| Version | Yes |
+| CHANGELOG | Yes |
+| STATUS | Yes |
+| METRICS (PI) | Yes |
+
+Any mandatory FAIL blocks READY FOR RELEASE. See skill Step 2b for evidence requirements.
+
+### Step 3 — Final Definition of Done sweep
 
 Work through every item in `docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md`. For each item:
 - Mark as MET with evidence, or
@@ -78,16 +133,18 @@ DoD Check: {story_id}
 [ ] Performance review complete            — RESULT: {PASS|SKIPPED — reason}
 [ ] Documentation updated                  — update-documentation.md: COMPLETE
 [ ] Observability wired                    — traces: YES, metrics: YES, logs: YES
-[ ] Changelog updated                      — see Step 2
+[ ] Changelog updated                      — see Step 4
+[ ] STATUS.md updated                      — story marked complete
+[ ] METRICS.md updated                     — measurable outcomes recorded
 [ ] .env.example updated                   — YES | NO change needed
-[ ] PR description written                 — see Step 3
+[ ] PR description written                 — see Step 5
 [ ] No TODO/FIXME in production paths      — grep: CLEAN
 [ ] No hardcoded secrets                   — detect-secrets: CLEAN
 ```
 
 If any mandatory DoD item is NOT MET, STOP. Resolve the item before proceeding.
 
-### Step 2 — Update the changelog
+### Step 4 — Update the changelog
 
 Update `CHANGELOG.md` at the repository root:
 
@@ -109,7 +166,9 @@ Update `CHANGELOG.md` at the repository root:
 
 If `CHANGELOG.md` does not exist, create it with the standard Keep a Changelog format.
 
-### Step 3 — Write the pull request description
+Update PI `STATUS.md` and `METRICS.md` when this story completes a deliverable or changes measurable PI outcomes.
+
+### Step 5 — Write the pull request description
 
 Produce a PR description in this format:
 
@@ -160,6 +219,7 @@ All applicable CONSTITUTION.md principles verified:
 - Code review: PASS — {reviewer or self-review}
 - Security review: {PASS | N/A — reason}
 - Performance review: {PASS | N/A — reason}
+- Regression review: {PASS | N/A — reason}
 
 ### Deployment notes
 
@@ -167,7 +227,13 @@ All applicable CONSTITUTION.md principles verified:
 {If none: "No special deployment steps required."}
 ```
 
-### Step 4 — Final secrets check
+### Step 6 — Execute 11 release lenses
+
+See `.ai/skills/release-story/SKILL.md` Step 3. Lenses 1–11 are preserved unchanged:
+Test Completeness → CI Pipeline → Docker Readiness → Migration Safety → Rollback Strategy →
+Release Notes → Versioning → Contract Integrity → Documentation → Definition of Done → Deployment Safety.
+
+### Step 7 — Final secrets check
 
 Run and verify:
 ```
@@ -176,7 +242,7 @@ detect-secrets scan src/{target_folder}/ --baseline .secrets.baseline
 
 Confirm: zero new findings.
 
-### Step 5 — Final dependency check
+### Step 8 — Final dependency check
 
 ```
 pip-audit --requirement requirements.txt
@@ -184,7 +250,7 @@ pip-audit --requirement requirements.txt
 
 Confirm: zero critical or high vulnerabilities.
 
-### Step 6 — Verify migration safety
+### Step 9 — Verify migration safety
 
 If the story includes a database migration:
 - [ ] Migration is reversible (`downgrade` function present)
@@ -193,7 +259,7 @@ If the story includes a database migration:
 - [ ] Migration does not lock tables for longer than 1 second
 - [ ] Column additions use `nullable=True` or have a safe `server_default`
 
-### Step 7 — Verify observability completeness
+### Step 10 — Verify observability completeness
 
 Confirm the following metrics are present in Prometheus scrape output (or code):
 - `aep_{service_name}_requests_total` — counter by status
@@ -206,12 +272,16 @@ Confirm the following log events are emitted:
 - Kafka event published: `event.published`
 - Kafka event consumed: `event.processed` or `event.processing_failed`
 
-### Step 8 — Produce release readiness report
+### Step 11 — Produce release readiness report
 
 ```
-## Release Readiness Report: {story_id} — {story_title}
+## Release Story Review: PR #{N} — {title}
+Story: {story_id} | PI: {PI}
 
-### Verdict: READY FOR MERGE | NOT READY
+### Pre-Release Verification
+{13-dimension table from Step 2b}
+
+### Verdict: APPROVE | REQUEST CHANGES | READY FOR RELEASE
 
 ### Definition of Done
 All {N} items: MET | {N} NOT MET (list blocking items)
@@ -228,18 +298,28 @@ Deps audit:  CLEAN (zero critical/high CVEs)
 Code review:        PASS
 Security review:    PASS | N/A
 Performance review: PASS | N/A
+Regression review:  PASS | N/A
 
-### Migration safety
-Database migration: SAFE | N/A
-Feature flags:      REQUIRED ({flag_name}) | NOT REQUIRED
+### Release Readiness Matrix
+{11-lens status table — see skill Step 5}
 
-### Deployment environment
-Target environment: {target_env}
-Deployment order:   {if migration: "Run migration before deploying service"}
-Rollback plan:      {run downgrade migration and redeploy previous version}
+### Release Notes
+{human-readable notes for CHANGELOG and team communication}
 
-### PR description
-{paste the full PR description from Step 3}
+### Deployment Checklist
+{ordered deployment steps}
+
+### Rollback Plan
+{risk level + numbered procedure}
+
+### Known Risks
+{residual risks or "None identified"}
+
+### Next Story Recommendation
+{next story ID from USER_STORIES.md with rationale}
+
+### Final Merge Checklist
+{full checklist from skill Step 4}
 ```
 
 ---
@@ -248,15 +328,24 @@ Rollback plan:      {run downgrade migration and redeploy previous version}
 
 | Artifact | Description |
 |----------|-------------|
+| Pre-Release Verification table | 13-dimension Architecture v2.0 gate with evidence |
 | Definition of Done sweep | Completed DoD checklist with evidence for every item |
 | Updated `CHANGELOG.md` | Story entry under `[Unreleased]` |
+| Updated `STATUS.md` / `METRICS.md` | PI progress and measurable outcomes (when applicable) |
 | PR description | Complete PR description ready to paste |
-| Release readiness report | Verdict with evidence |
+| Release Notes | Human-readable summary for team and changelog |
+| Deployment Checklist | Ordered, executable deployment steps |
+| Rollback Plan | Risk classification and rollback procedure |
+| Known Risks | Residual risks and monitoring watch items |
+| Next Story recommendation | Suggested next story ID with rationale |
+| Release readiness report | Verdict with 11-lens matrix and merge checklist |
 
 ---
 
 ## Quality Gates
 
+- [ ] Platform constitution loaded before review (Step 2)
+- [ ] Pre-Release Verification complete — all mandatory dimensions PASS
 - [ ] Every DoD item is MET or has a documented exception
 - [ ] No unresolved BLOCKER from any review
 - [ ] `detect-secrets` is clean
@@ -264,20 +353,27 @@ Rollback plan:      {run downgrade migration and redeploy previous version}
 - [ ] Migration is reversible (if applicable)
 - [ ] PR description is complete and accurate
 - [ ] Observability metrics and logs confirmed present
+- [ ] All 11 release lenses executed (see skill)
 
 ---
 
 ## Completion Checklist
 
 ```
+[ ] Platform constitution loaded
+[ ] Pre-Release Verification complete — mandatory dimensions PASS
+[ ] PR metadata and CI status parsed
 [ ] Definition of Done sweep complete — all items MET
 [ ] Changelog updated under [Unreleased]
+[ ] STATUS.md and METRICS.md updated (if applicable)
 [ ] PR description written — all sections complete
+[ ] 11 release lenses executed — matrix produced
 [ ] Final secrets check — zero findings
 [ ] Final dependency audit — zero critical/high CVEs
 [ ] Migration safety verified (if applicable)
 [ ] Observability confirmed — metrics, traces, logs
-[ ] Release readiness report produced with READY FOR MERGE verdict
+[ ] Release Notes, Deployment Checklist, Rollback Plan, Known Risks, Next Story produced
+[ ] Release readiness report produced with verdict
 ```
 
 ---
@@ -286,7 +382,8 @@ Rollback plan:      {run downgrade migration and redeploy previous version}
 
 The AI executing this command must NEVER:
 
-- Declare a story READY FOR MERGE with unresolved BLOCKERs
+- Skip platform constitution loading (Step 2) or Pre-Release Verification (Step 2b)
+- Declare a story READY FOR RELEASE with unresolved BLOCKERs or Pre-Release FAILs
 - Skip the Definition of Done sweep
 - Write a PR description that does not reference acceptance criteria
 - Accept "tests will be added in the next sprint" as meeting DoD
@@ -296,3 +393,5 @@ The AI executing this command must NEVER:
 - Merge the PR directly — this command produces artefacts for human review and approval only
 - Approve a story that has a gate bypass mechanism (Constitution H2 violation)
 - Mark performance or security review as N/A without a written justification
+- Issue READY FOR RELEASE when any mandatory Pre-Release dimension FAILs
+- Skip any of the 11 release lenses (see skill Forbidden Actions)
