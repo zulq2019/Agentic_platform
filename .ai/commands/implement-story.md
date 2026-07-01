@@ -1,8 +1,8 @@
 # implement-story.md
 
 **Command:** `implement-story`  
-**Version:** 3.0  
-**Library:** `.ai/commands/`  
+**Version:** 4.0 — Architecture v2.0-aware  
+**Skill authority:** `.ai/skills/implement-story/SKILL.md` (full pipeline)  
 **Applies to:** All PIs, all sprints
 
 ---
@@ -11,11 +11,39 @@
 
 Use this command to implement a single User Story from specification to production-ready code.
 
-This command is the standard implementation workflow for every engineer and every AI coding agent working on the Agentic Engineering Platform. It is capability-driven, infrastructure-aware, and implementation-focused.
+This command is the standard implementation workflow for every engineer and every AI coding agent working on the Agentic Engineering Platform. It is **architecture-aware** for v2.0: before coding, it automatically builds complete execution context from the platform constitution, repository constitution, PI context pack, and dependency graph.
 
 Execute every phase in order. Do not skip phases. Do not combine phases.
 
 One execution = one User Story. Never more.
+
+### Invocation (unchanged UX)
+
+```
+/implement-story US-01.03
+/implement-story PI-02 US-02.01
+/implement-story US-02.01
+/implement-story Platform Object Framework
+/implement-story current story
+/implement-story next story
+```
+
+### v2.0 pipeline (11 steps → phases 1–9)
+
+| Step | Action |
+|------|--------|
+| 1–2 | Read Platform + Repository constitution |
+| 3 | Resolve story (ID, name, current, next) |
+| 4 | Read full PI context pack + contracts |
+| 5 | Dependency analysis (architecture, Platform Objects, providers, workflows, …) |
+| 6 | Implementation plan (design, risks, rollback) — **no code until complete** |
+| 7 | Implement (DDD, SOLID, hexagonal, metadata-driven) |
+| 8 | Generate unit, integration, contract, regression tests |
+| 9 | Inline architecture, security, performance, regression, documentation reviews |
+| 10 | Update `STATUS.md`, `CHANGELOG.md`, `METRICS.md`, diagrams, ADR |
+| 11 | Implementation summary, PR summary, next story recommendation |
+
+See `.ai/skills/implement-story/SKILL.md` for the complete authoritative workflow.
 
 ---
 
@@ -25,17 +53,36 @@ Read every item in this list before doing anything else. Stop and report what is
 
 | Input | Location | Required |
 |-------|----------|----------|
+| Platform primitives | `docs/architecture/PLATFORM_PRIMITIVES.md` | Mandatory (v2) |
+| Platform contracts | `docs/architecture/PLATFORM_CONTRACTS.md` | Mandatory (v2) |
+| Meta model | `docs/architecture/PLATFORM_META_MODEL.md` | Mandatory (v2) |
+| UX model | `docs/architecture/PLATFORM_UX_MODEL.md` | Mandatory (v2) |
+| Glossary | `docs/architecture/PLATFORM_GLOSSARY.md` | Mandatory (v2) |
+| Metadata-driven architecture | `docs/architecture/METADATA_DRIVEN_ENTERPRISE_PLATFORM.md` | Mandatory (v2) |
+| Architecture baseline v2 | `docs/architecture/ARCHITECTURE_BASELINE_V2.md` | Mandatory (v2) |
 | Constitution | `CONSTITUTION.md` | Mandatory |
 | Architecture | `ARCHITECTURE.md` | Mandatory |
 | AI implementation rules | `CLAUDE.md` | Mandatory |
+| ADRs | `docs/architecture/ADR/DECISIONS.md` | Mandatory |
 | PI README | `docs/engineering/implementation-roadmap/{PI}/README.md` | Mandatory |
+| Objectives | `docs/engineering/implementation-roadmap/{PI}/OBJECTIVES.md` | Mandatory |
 | Capabilities | `docs/engineering/implementation-roadmap/{PI}/CAPABILITIES.md` | Mandatory |
+| Features | `docs/engineering/implementation-roadmap/{PI}/FEATURES.md` | Mandatory |
 | User Stories | `docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md` | Mandatory |
 | Acceptance Criteria | `docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md` | Mandatory |
 | Implementation Guide | `docs/engineering/implementation-roadmap/{PI}/IMPLEMENTATION.md` | Mandatory |
+| API Spec | `docs/engineering/implementation-roadmap/{PI}/API_SPEC.md` | If story exposes APIs |
+| Data Model | `docs/engineering/implementation-roadmap/{PI}/DATA_MODEL.md` | If story touches data |
+| Testing | `docs/engineering/implementation-roadmap/{PI}/TESTING.md` | Mandatory |
 | Prompt Mapping | `docs/engineering/implementation-roadmap/{PI}/PROMPT_MAPPING.md` | Mandatory |
-| Contract schemas | `contracts/` — schemas relevant to this story | If story produces or consumes events, registers an agent or tool |
-| Existing implementation | `src/{target_folder}/` — code already written for this service | If the service has been started in a prior story |
+| Sprint Plan | `docs/engineering/implementation-roadmap/{PI}/SPRINT_PLAN.md` | Mandatory |
+| Definition of Done | `docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md` | Mandatory |
+| Review Checklist | `docs/engineering/implementation-roadmap/{PI}/REVIEW_CHECKLIST.md` | Mandatory |
+| STATUS | `docs/engineering/implementation-roadmap/{PI}/STATUS.md` | Mandatory |
+| CHANGELOG | `docs/engineering/implementation-roadmap/{PI}/CHANGELOG.md` | Read before; update after |
+| METRICS | `docs/engineering/implementation-roadmap/{PI}/METRICS.md` | Read before; update after |
+| Contract schemas | `contracts/` — schemas relevant to this story | If story produces or consumes events/objects |
+| Existing implementation | `src/{target_folder}/` | If the service has been started in a prior story |
 
 **Substitutions required before executing:**
 

@@ -61,7 +61,7 @@ Each file defines one reusable engineering operation. A command file contains:
 
 | File | Operation |
 |------|-----------|
-| `implement-story.md` | Implement a User Story end-to-end |
+| `implement-story.md` | Implement a User Story end-to-end (v4.0 — Architecture v2.0-aware) |
 | `review-story.md` | Review implementation for correctness and compliance |
 | `generate-tests.md` | Generate unit, integration, and contract tests |
 | `security-review.md` | Security-focused review: credentials, RLS, scope, injection |
