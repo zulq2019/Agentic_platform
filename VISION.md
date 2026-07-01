@@ -1,9 +1,10 @@
 # Agentic Engineering Platform — Vision
 
 **Status:** Living document  
-**Version:** 1.0  
-**Last updated:** 27 June 2026  
-**Derived from:** [CONSTITUTION.md](CONSTITUTION.md) · Reference Architecture v1.0
+**Version:** 1.1 (extends Architecture Baseline v2.0)  
+**Last updated:** 1 July 2026  
+**Derived from:** [CONSTITUTION.md](CONSTITUTION.md) · Reference Architecture v1.0  
+**Philosophy:** [docs/architecture/METADATA_DRIVEN_ENTERPRISE_PLATFORM.md](docs/architecture/METADATA_DRIVEN_ENTERPRISE_PLATFORM.md)
 
 ---
 
@@ -14,6 +15,10 @@ The Agentic Engineering Platform is the **coordination layer** for enterprise so
 It does not replace those systems. It orchestrates them — through specialist agents, durable workflows, non-bypassable human gates, and an immutable audit trail — so that AI-assisted engineering scales from a five-agent pilot to a thousand-engineer organisation without architectural change.
 
 **In one sentence:** A vendor-neutral, multi-agent engineering platform where humans approve, agents propose, and every decision is reconstructable.
+
+### Metadata-driven enterprise platform (Baseline v2.0)
+
+From Architecture Baseline v2.0, the platform is a **metadata-driven enterprise orchestration product**. Customers compose their **Engineering Operating System** — Workflows, Providers, Policies, Execution Profiles, and Solution Packs — **without modifying platform source code**. Engines are shared; metadata is tenant-owned. See [docs/architecture/ARCHITECTURE_BASELINE_V2.md](docs/architecture/ARCHITECTURE_BASELINE_V2.md).
 
 ---
 

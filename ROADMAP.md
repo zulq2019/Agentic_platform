@@ -1,9 +1,18 @@
 # Agentic Engineering Platform — Roadmap
 
 **Status:** Living document  
-**Version:** 1.0  
-**Last updated:** 27 June 2026  
-**Derived from:** Reference Architecture v1.0 Section 14 · [CONSTITUTION.md](CONSTITUTION.md) · [VISION.md](./VISION.md)
+**Version:** 1.1 (extends Architecture Baseline v2.0)  
+**Last updated:** 1 July 2026  
+**Derived from:** Reference Architecture v1.0 Section 14 · [CONSTITUTION.md](CONSTITUTION.md) · [VISION.md](./VISION.md)  
+**Baseline:** [docs/architecture/ARCHITECTURE_BASELINE_V2.md](docs/architecture/ARCHITECTURE_BASELINE_V2.md)
+
+---
+
+## Architecture Baseline v2.0 milestone
+
+**Completed (July 2026):** Architecture stabilisation before implementation resume — Platform Primitives, Contracts, Meta Model, UX Model, Glossary, philosophy whitepaper, Baseline v2, changelog, implementation readiness. See [docs/architecture/ARCHITECTURE_CHANGELOG_V2.md](docs/architecture/ARCHITECTURE_CHANGELOG_V2.md).
+
+**Next:** PI-01 spine completion → PI-02+ per phases below. Metadata Engine, Provider Builder, and Marketplace land in PI-08–PI-10 per baseline gap register.
 
 ---
 

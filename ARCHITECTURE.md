@@ -1,9 +1,12 @@
 # Agentic Engineering Platform — Architecture
 
 **Status:** Living document  
-**Version:** 1.0  
-**Last updated:** 27 June 2026  
-**Derived from:** Reference Architecture v1.0 · [CONSTITUTION.md](CONSTITUTION.md)
+**Version:** 1.1 (container topology; extends Architecture Baseline v2.0)  
+**Last updated:** 1 July 2026  
+**Derived from:** Reference Architecture v1.0 · [CONSTITUTION.md](CONSTITUTION.md)  
+**Implementation baseline:** [docs/architecture/ARCHITECTURE_BASELINE_V2.md](docs/architecture/ARCHITECTURE_BASELINE_V2.md) — **master reference for platform ontology** (Platform Objects, Provider Model, Execution Profiles, Metadata Engine)
+
+> **Architecture Baseline v2.0:** Customer-facing behaviour is expressed as **metadata** (Platform Objects), not platform source forks. This document describes **deployable containers and services**. For primitives, contracts, and metadata architecture, see [docs/architecture/](docs/architecture/).
 
 ---
 
@@ -113,8 +116,8 @@ flowchart TB
 | **Agent Runtime** | Hosts specialist agent executions; publishes lifecycle events | Agent task volume (horizontal replicas) |
 | **Event Bus** | Publish/subscribe backbone for all inter-container communication | Event throughput |
 | **Task Queue & Workflow Engine** | Durable task state, workflow transitions, saga compensation | Task volume |
-| **Agent Registry** | Dynamic agent discovery by capability tag | Registry size (not traffic) |
-| **Tool Registry** | External system integration resolution by capability tag | Registry size |
+| **Agent Registry** | Dynamic **Provider** discovery by capability tag (`ai-agent` Providers) | Registry size (not traffic) |
+| **Tool Registry** | **Provider** resolution for integrations (`connector` / `rest-api` Providers) by capability tag | Registry size |
 | **Memory Store** | Working context (short-lived) + long-term memory (vector + metadata) | Storage + query volume |
 | **Audit Store** | Immutable, append-only action and decision record | Write volume (append-only) |
 | **Platform Services** | Human Approval Checkpoint, Model Router, Policy Engine, Secrets Vault, Observability | Service-specific |
@@ -673,10 +676,14 @@ Contract schema: [contracts/task-schema.schema.json](./contracts/task-schema.sch
 | Document | Relationship |
 |----------|---------------|
 | [CONSTITUTION.md](./CONSTITUTION.md) | Immutable principles governing this architecture |
+| [docs/architecture/ARCHITECTURE_BASELINE_V2.md](docs/architecture/ARCHITECTURE_BASELINE_V2.md) | **Implementation baseline v2** — ontology and gap register |
+| [docs/architecture/PLATFORM_PRIMITIVES.md](docs/architecture/PLATFORM_PRIMITIVES.md) | Platform Object model and thirteen primitives |
+| [docs/architecture/PLATFORM_GLOSSARY.md](docs/architecture/PLATFORM_GLOSSARY.md) | Official vocabulary |
 | [contracts/](./contracts/) | JSON Schema definitions for all platform contracts |
 | [workflows/](./workflows/) | Versioned workflow state machine templates |
 | [VISION.md](./VISION.md) | Product vision this architecture realises |
 | [ROADMAP.md](./ROADMAP.md) | Phased delivery of architecture components |
+| [docs/architecture/IMPLEMENTATION_READINESS.md](docs/architecture/IMPLEMENTATION_READINESS.md) | Readiness gate before full v2 realisation |
 | [DECISIONS.md](./DECISIONS.md) | ADRs for architectural decisions |
 | [CLAUDE.md](./CLAUDE.md) | Implementation rules for AI-assisted development |
 

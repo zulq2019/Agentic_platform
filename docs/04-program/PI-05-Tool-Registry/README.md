@@ -2,11 +2,12 @@
 
 **Status:** `PLANNED`  
 **Depends on:** PI-02 complete (ToolClient stub replaced)  
-**Target:** Sprint 16–19 (weeks 31–38)
+**Target:** Sprint 16–19 (weeks 31–38)  
+**Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Tool Registry is the **typed index for `connector` and `rest-api` Providers** (Provider Model v2).
 
 ## What This PI Delivers
 
-- `tool-registry` resolves agent requests by capability tag to the correct vendor tool
+- `tool-registry` resolves agent requests by capability tag to the correct vendor tool (**Provider** binding)
 - `secrets-service` issues short-lived, scoped tokens per tool invocation (TTL 15 min)
 - First 3 production tool connectors: `github-tool`, `jira-tool`, `confluence-tool`
 - Every tool response is normalised to the common response shape (vendor-neutral)

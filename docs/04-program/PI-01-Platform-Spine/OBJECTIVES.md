@@ -1,5 +1,7 @@
 # PI-01 — Objectives
 
+**Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md) · Terminology: [PLATFORM_GLOSSARY.md](../../architecture/PLATFORM_GLOSSARY.md)
+
 ## O1. Every service has a runnable skeleton
 
 Every one of the 16 platform services must boot, pass its liveness probe, and return `200 OK` from `GET /health/live` and `GET /health/ready` before PI-01 closes.

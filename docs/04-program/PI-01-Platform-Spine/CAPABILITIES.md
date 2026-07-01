@@ -1,5 +1,7 @@
 # PI-01 — Capabilities
 
+> **Architecture Baseline v2.0:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). PI-01 establishes the **container spine**; metadata-driven Platform Objects and Metadata Engine are defined in architecture docs and delivered in PI-08/09.
+
 > This document defines what PI-01 builds: what each capability is, what it delivers,
 > and the technical contracts it establishes. Implementation guidance lives in `IMPLEMENTATION.md`.
 > Stories and acceptance criteria live in `USER_STORIES.md` and `ACCEPTANCE_CRITERIA.md`.
