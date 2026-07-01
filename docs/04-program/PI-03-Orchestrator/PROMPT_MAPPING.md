@@ -1,5 +1,7 @@
 ﻿# PI-03-Orchestrator — Prompt Mapping
 
+> **Architecture Baseline v2.0:** Orchestrator = **Planner**; resolve **Providers** by capability tag. See [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md).
+
 > This file does not contain prompts.
 > It maps each User Story to reusable commands in \`.ai/commands/\`.
 > The prompt library lives in \`.ai/\`. This file is a reference index only.

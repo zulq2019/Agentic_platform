@@ -1,5 +1,7 @@
 # PI-03 — Objectives
 
+**Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Orchestrator implements the **Planner** role; **Provider** resolution by capability tag (not agent name).
+
 ## O1. Greenfield workflow runs end-to-end
 A POST to `/api/v1/workflows` with a valid request body results in a complete workflow execution with all states traversed and a terminal state recorded.  
 **Measure:** `test_greenfield_workflow_e2e.py` passes.
