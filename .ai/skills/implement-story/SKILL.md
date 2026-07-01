@@ -112,6 +112,8 @@ Current Phase:     {phase number and name}
 Progress:          {1-line status — what was completed or is in progress}
 Risks:             {LOW / MEDIUM / HIGH — or NONE if not yet classified}
 Approval Status:   {AUTO-CONTINUE / AWAITING CONFIRMATION / STOPPED — AWAITING APPROVAL}
+Think Mode:        {CONTINUE / STOP — RFC / PENDING — or N/A before Phase 5A}
+Reuse Score:       {0-100 — or N/A before Phase 5A}
 Next Action:       {single concrete next step}
 ```
 
@@ -132,8 +134,9 @@ Behave as a **Principal Engineer + Technical Lead**, never a code generator.
 | **Technical Lead** | Sequence work correctly; ensure tests and documentation ship with code; produce actionable handoff for reviewers |
 
 **Mission:** Before writing production code, understand repository, architecture,
-implementation context, and engineering impact. Only begin coding after approval
-requirements in Phase 5 are satisfied.
+implementation context, and engineering impact. Run Architecture Think Mode (Phase 5A)
+to validate reuse paths. Only begin coding after Phase 5A CONTINUE and Phase 5
+approval requirements are satisfied.
 
 ---
 
@@ -511,6 +514,166 @@ Do not proceed to Phase 8 (Implementation) until approval requirements are satis
 
 ---
 
+## Phase 5A — Architecture Think Mode (NEW v5.1)
+
+**Mandatory for every story. Executes after Phase 5 (Risk Based Approval) and
+before Phase 6 (Dependency Analysis) and Phase 7 (Implementation Planning).**
+
+### Purpose
+
+Prevent unnecessary architecture changes, duplicate platform capabilities,
+architecture drift, and bespoke code when existing Platform Primitives can satisfy
+the requirement.
+
+### Quality principle
+
+**Prefer:** Reuse, Configuration, Composition, Metadata  
+**Over:** New Services, New Frameworks, Hardcoded Logic, New Microservices
+
+### Discovery commands
+
+Search the repository for existing capabilities before answering the 10 questions:
+
+```bash
+# Platform primitives and architecture authorities
+cat docs/architecture/PLATFORM_PRIMITIVES.md
+cat docs/architecture/PLATFORM_CONTRACTS.md
+cat docs/architecture/PLATFORM_META_MODEL.md
+
+# Existing services, APIs, workflows, contracts
+ls src/platform/services/ src/shared/ agents/ tools/ workflows/ contracts/ 2>/dev/null
+rg -i "{story_title keywords}" docs/architecture/ docs/engineering/ src/ contracts/ --glob "*.md" --glob "*.py" --glob "*.json" 2>/dev/null | head -50
+
+# Providers, plugins, solution packs (when present)
+rg -i "provider|plugin|solution.pack|execution.profile|entitlement" docs/architecture/ src/ --glob "*.md" 2>/dev/null | head -30
+```
+
+### Think Mode — 10 Questions (all mandatory)
+
+Answer every question with evidence from repository docs, contracts, and code.
+Do not skip or mark N/A without justification.
+
+| # | Question | Check against |
+|---|----------|---------------|
+| 1 | Can the requirement use existing **Platform Primitives**? | Studios, Capabilities, Providers, Execution Profiles, Policies, Workflows, Resources, Artifacts, Plugins, Solution Packs, Commercial Packs, Entitlements |
+| 2 | Does this **already exist**? | Services, APIs, Providers, Plugins, Workflows, Contracts, Metadata |
+| 3 | Can **metadata configuration** satisfy this instead of new code? | `PLATFORM_META_MODEL.md`, PI `DATA_MODEL.md`, config surfaces |
+| 4 | Can **composition** of existing primitives satisfy this instead of a new service? | Registries, extension points, Platform Object relationships |
+| 5 | Can a **Provider** satisfy this instead of a new microservice? | Provider Framework, Provider Contract, Provider Registry |
+| 6 | Can a **Workflow** satisfy this instead of application logic? | `workflows/`, workflow templates, state machines |
+| 7 | Can a **Policy** satisfy this instead of code? | Policy Engine, RBAC, tenant policy configuration |
+| 8 | Can a **Plugin** satisfy this instead of core changes? | Plugin slots, registries, extension points |
+| 9 | Can a **Solution Pack** satisfy this instead of platform changes? | PI-08 Solution Packs, packaged domain capabilities |
+| 10 | Will this implementation **violate Platform Contracts**? | `contracts/*.schema.json`, `PLATFORM_CONTRACTS.md`, constitutional principles |
+
+### Per-question output format
+
+For each of the 10 questions, produce:
+
+```
+Q{n}: {question short label}
+  Answer:        YES / NO / PARTIAL
+  Evidence:      {file paths, contract names, service names, or NONE}
+  Reuse path:    {Platform Object(s) or primitive(s) — or NONE}
+```
+
+### Decision
+
+| Outcome | Condition | Action |
+|---------|-----------|--------|
+| **CONTINUE** | At least one viable reuse path (Q1–Q9) with Architecture Reuse Score ≥ 50, and Q10 = NO (no contract violation) | Proceed to Phase 6 — explain which Platform Objects are reused in Think Mode Summary |
+| **STOP — Architecture RFC** | No viable reuse path, Reuse Score < 50, or Q10 = YES (contract violation without ADR) | **STOP** — generate Architecture RFC (template below); **no production code**; no Phase 6+ until RFC is reviewed and approved |
+
+When **CONTINUE**, the implementation plan (Phase 7) and implementation (Phase 8)
+must explicitly reference reused Platform Objects. Do not introduce new services,
+contracts, or microservices when a reuse path was identified.
+
+### Architecture RFC template (when STOP)
+
+Write to `docs/architecture/rfc/RFC-{story_id}-{slug}.md` (create directory if
+missing) or deliver inline if the engineer requests no file write:
+
+```
+## Architecture RFC: {story_id} — {story_title}
+
+### Business Requirement
+{what the story asks for — from USER_STORIES.md}
+
+### Problem Statement
+{why existing platform capabilities cannot satisfy this requirement as stated}
+
+### Existing Platform Capabilities
+{what was evaluated in Think Mode — primitives, services, contracts found}
+
+### Gap Analysis
+{what is missing — be specific; reference Q1–Q10 answers}
+
+### Alternative Solutions
+| Option | Description | Reuse score | Trade-offs |
+|--------|-------------|-------------|------------|
+| A | {metadata/config only} | {0-100} | {pros/cons} |
+| B | {composition} | {0-100} | {pros/cons} |
+| C | {new service/contract} | {0-100} | {pros/cons} |
+
+### Recommended Architecture
+{preferred option with rationale — align with Quality principle}
+
+### Affected Platform Objects
+{list Studios, Capabilities, Providers, Workflows, Contracts, etc.}
+
+### Risks
+{technical, tenancy, drift, duplication risks}
+
+### Migration Strategy
+{how to adopt if RFC approved — or N/A}
+
+### Recommendation
+{proceed with RFC option / split story / defer / revise requirement — with rationale}
+```
+
+**STOP after delivering the RFC.** Do not proceed to Phase 6 until the engineer
+reviews the RFC and explicitly approves a path forward (may require story revision
+or a new ADR).
+
+### Think Mode Summary (required output)
+
+Produce this block at the end of Phase 5A for every story:
+
+```
+Think Mode Summary:
+  Story:                        {story_id} — {story_title}
+  Architecture Reuse Score:     {0-100} — {brief justification}
+  Configuration vs Code:        {CONFIGURATION / CODE / HYBRID} — {rationale}
+  Composition Recommendation:   {what to compose from existing primitives — or NONE}
+  Platform Objects Reused:      {list — or NONE}
+  Architecture Compliance:      COMPLIANT / VIOLATION RISK — {Q10 evidence}
+  Final Recommendation:         CONTINUE / STOP — ARCHITECTURE RFC REQUIRED
+  Decision:                     {1-2 sentences — which reuse path or why RFC required}
+```
+
+#### Architecture Reuse Score (0–100)
+
+| Score | Meaning |
+|-------|---------|
+| 80–100 | Requirement fully satisfiable via existing primitives, metadata, or composition |
+| 50–79 | Partial reuse — some new code acceptable within existing boundaries |
+| 20–49 | Limited reuse — significant new capability; RFC recommended |
+| 0–19 | No viable reuse — new architecture required; **STOP** and RFC mandatory |
+
+Score each of Q1–Q9: YES = 10 points, PARTIAL = 5, NO = 0. Average and round.
+Q10 violation without approved ADR caps score at 49 maximum.
+
+### Think Mode output in progress reports
+
+Include in the standard progress report block:
+
+```
+Think Mode:        {CONTINUE / STOP — RFC}
+Reuse Score:       {0-100}
+```
+
+---
+
 ## Phase 6 — Dependency Analysis (Step 5)
 
 **Extend Phase 3 (v4). Verify all dependencies before planning begins.**
@@ -653,13 +816,19 @@ architecture.
 ## Phase 7 — Implementation Planning (Step 6)
 
 **Produce this plan before writing any code. Only begin coding after Phase 5
-approval requirements are satisfied.**
+approval requirements are satisfied and Phase 5A (Think Mode) decision = CONTINUE.**
+
+The plan must reflect Think Mode outcomes: list reused Platform Objects, metadata
+configuration surfaces, and composition paths identified in Phase 5A.
 
 ```
 ## Implementation Plan: {story_id} — {story_title}
 
 ### Solution Overview
 {2-4 sentences: what we are building, why, and how it fits the platform}
+
+### Think Mode Reuse (from Phase 5A)
+{Platform Objects reused, configuration vs code choice, composition path — or N/A if RFC was required and approved}
 
 ### Design Decisions
 {key choices with rationale — alternatives considered for MEDIUM/HIGH risk}
@@ -1012,6 +1181,7 @@ PI:                {PI}
 Capability:        {CAP-XX} — {name}
 Risk classification: {LOW / MEDIUM / HIGH}
 Approval:          {AUTO-CONTINUE / CONFIRMED / EXPLICITLY APPROVED}
+Think Mode:          {CONTINUE / STOP — RFC} — Reuse Score: {0-100}
 Primitives used:   {list Platform Object types, Providers, etc. or NONE}
 Contracts:         {list contract schemas touched}
 
@@ -1126,6 +1296,7 @@ Then: /release-story <PR_NUMBER>
 - Never hardcode business logic — use configuration, metadata, and Platform Objects
 - Always discover repository context (Phase 1) before architecture load
 - Always classify risk (Phase 4) and satisfy approval gates (Phase 5) before coding
+- Always run Architecture Think Mode (Phase 5A) before Dependency Analysis — mandatory for every story
 - Always produce production-ready code — assume Principal Engineer review
 - Always stop and report when a required input is missing or a dependency is unmet
 - Always optimise for maintainability over speed
@@ -1135,8 +1306,10 @@ Then: /release-story <PR_NUMBER>
 ## Forbidden Actions
 
 - Skip any phase or reorder phases
+- Skip Phase 5A (Architecture Think Mode) — mandatory for every story
 - Proceed past a Stop condition without resolving it
 - Write production code before Phase 5 approval gates are satisfied
+- Write production code when Phase 5A decision = STOP (Architecture RFC required)
 - Implement more than one User Story
 - Add infrastructure "for later" — every infrastructure decision must trace to an AC
 - Import vendor SDKs in agent or tool code

@@ -1,7 +1,7 @@
 # implement-story.md
 
 **Command:** `implement-story`  
-**Version:** 5.0 — Enterprise Principal Engineer implementation engine  
+**Version:** 5.1 — Architecture Think Mode (reuse-before-build)  
 **Skill authority:** `.ai/skills/implement-story/SKILL.md` (full pipeline)  
 **Applies to:** All PIs, all sprints
 
@@ -11,7 +11,7 @@
 
 Use this command to implement a single User Story from specification to production-ready code.
 
-This command is the standard implementation workflow for every engineer and every AI coding agent working on the Agentic Engineering Platform. Before writing production code, behave like a **Principal Engineer + Technical Lead** — discover repository context, load architecture authorities, classify risk, apply approval gates, then implement with DDD, hexagonal architecture, and metadata-driven patterns.
+This command is the standard implementation workflow for every engineer and every AI coding agent working on the Agentic Engineering Platform. Before writing production code, behave like a **Principal Engineer + Technical Lead** — discover repository context, load architecture authorities, classify risk, apply approval gates, run **mandatory Architecture Think Mode** (reuse-before-build), then implement with DDD, hexagonal architecture, and metadata-driven patterns.
 
 Execute every phase in order. Do not skip phases. Do not combine phases.
 
@@ -28,7 +28,7 @@ One execution = one User Story. Never more.
 /implement-story next story
 ```
 
-### v5.0 pipeline — 12 enterprise phases
+### v5.1 pipeline — 12 enterprise phases + Think Mode
 
 | Phase | Action |
 |-------|--------|
@@ -38,6 +38,7 @@ One execution = one User Story. Never more.
 | — | Story Readiness + Capability Validation (preserved — hard STOP) |
 | 4 | Architecture Impact Analysis — classify LOW / MEDIUM / HIGH risk |
 | 5 | Risk Based Approval — LOW auto-continue; MEDIUM pause for confirmation; HIGH stop for approval |
+| **5A** | **Architecture Think Mode** — 10 reuse questions; CONTINUE or STOP (Architecture RFC); **no code on STOP** |
 | 6 | Dependency Analysis — Platform Objects, providers, workflows, DB, security, contracts |
 | — | Infrastructure Assessment (preserved) |
 | — | Architecture Validation (preserved — constitution + ADR) |
@@ -57,6 +58,7 @@ Current Phase:     {phase}
 Progress:          {1-line status}
 Risks:             {LOW / MEDIUM / HIGH}
 Approval Status:   {AUTO-CONTINUE / AWAITING CONFIRMATION / STOPPED}
+Think Mode:        {CONTINUE / STOP — RFC} — Reuse Score: {0-100}
 Next Action:       {single next step}
 ```
 

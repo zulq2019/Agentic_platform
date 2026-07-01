@@ -65,7 +65,7 @@ Each file defines one reusable engineering operation. A command file contains:
 | File | Skill | Operation |
 |------|-------|-----------|
 | `next.md` | `skills/next/SKILL.md` | **Primary entry point** — discover context, recommend next work item (v1.0 — orchestrator, no code) |
-| `implement-story.md` | `skills/implement-story/SKILL.md` | Implement a User Story end-to-end (v5.0 — Enterprise Principal Engineer, 12-phase pipeline with risk-based approval gates) |
+| `implement-story.md` | `skills/implement-story/SKILL.md` | Implement a User Story end-to-end (v5.1 — Think Mode + enterprise 12-phase pipeline) |
 | `generate-tests.md` | `skills/generate-tests/SKILL.md` | Generate test suite for a story (v4.0 — Architecture v2.0-aware) |
 | `review-story.md` | `skills/review-story/SKILL.md` | Review a completed story before PR (v2.0 — Architecture v2.0-aware) |
 | `regression-review.md` | `skills/regression-review/SKILL.md` | Backward-compatibility PR audit (v2.0 — Architecture v2.0-aware, 11 lenses) |
