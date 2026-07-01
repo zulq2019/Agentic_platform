@@ -36,6 +36,9 @@ With this library:
 .ai/
 ├── commands/       ← The prompt library. One file per engineering operation.
 │
+├── skills/         ← Authoritative skill definitions (Cursor/Claude). Commands
+│                     reference skills for full pipeline detail.
+│
 ├── templates/      ← Starting-point scaffolds. AI uses these to generate new
 │                     services, agents, tools, tests, and migrations.
 │
@@ -59,16 +62,17 @@ Each file defines one reusable engineering operation. A command file contains:
 
 **Standard command set (populated at PI-01):**
 
-| File | Operation |
-|------|-----------|
-| `implement-story.md` | Implement a User Story end-to-end (v4.0 — Architecture v2.0-aware) |
-| `generate-tests.md` | Generate test suite for a story (v4.0 — Architecture v2.0-aware) |
-| `review-story.md` | Review a completed story before PR (v2.0 — Architecture v2.0-aware) |
-| `regression-review.md` | Backward-compatibility PR audit (v2.0 — Architecture v2.0-aware, 11 lenses) |
-| `security-review.md` | Security-focused PR audit (v2.0 — Architecture v2.0-aware, 20 lenses) |
-| `performance-review.md` | Latency, throughput, and resource usage review (v2.0 — Architecture v2.0-aware, 18 lenses) |
-| `update-documentation.md` | Update service README, API spec, and ARCHITECTURE.md |
-| `release-story.md` | Final release gate before merge (v2.0 — Architecture v2.0-aware, Pre-Release Verification + 11 lenses) |
+| File | Skill | Operation |
+|------|-------|-----------|
+| `next.md` | `skills/next/SKILL.md` | **Primary entry point** — discover context, recommend next work item (v1.0 — orchestrator, no code) |
+| `implement-story.md` | `skills/implement-story/SKILL.md` | Implement a User Story end-to-end (v4.0 — Architecture v2.0-aware) |
+| `generate-tests.md` | `skills/generate-tests/SKILL.md` | Generate test suite for a story (v4.0 — Architecture v2.0-aware) |
+| `review-story.md` | `skills/review-story/SKILL.md` | Review a completed story before PR (v2.0 — Architecture v2.0-aware) |
+| `regression-review.md` | `skills/regression-review/SKILL.md` | Backward-compatibility PR audit (v2.0 — Architecture v2.0-aware, 11 lenses) |
+| `security-review.md` | `skills/security-review/SKILL.md` | Security-focused PR audit (v2.0 — Architecture v2.0-aware, 20 lenses) |
+| `performance-review.md` | `skills/performance-review/SKILL.md` | Latency, throughput, and resource usage review (v2.0 — Architecture v2.0-aware, 18 lenses) |
+| `update-documentation.md` | — | Update service README, API spec, and ARCHITECTURE.md |
+| `release-story.md` | `skills/release-story/SKILL.md` | Final release gate before merge (v2.0 — Architecture v2.0-aware, Pre-Release Verification + 11 lenses) |
 
 ### `templates/` — Scaffolding templates
 
@@ -160,6 +164,10 @@ All names are **kebab-case**, **lowercase**, **descriptive**, and **action-orien
 ---
 
 ## How Engineers Use This Library
+
+### Step 0 — Start with `/next`
+
+Type `/next` (or `/next PI-02`) to discover the current PI, sprint, story, and the recommended next command. This orchestrator never writes code — it points you to the right skill.
 
 ### Step 1 — Find the right command
 
