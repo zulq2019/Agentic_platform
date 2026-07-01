@@ -27,11 +27,15 @@ def example_payload() -> dict:
 
 @pytest.mark.story_us_02_01
 @pytest.mark.asyncio
-async def test_register_and_fetch_platform_object_via_api(example_payload: dict) -> None:
+async def test_register_and_fetch_platform_object_via_api(
+    example_payload: dict,
+) -> None:
     app = create_app()
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        create_response = await client.post("/api/v1/platform-objects", json=example_payload)
+        create_response = await client.post(
+            "/api/v1/platform-objects", json=example_payload
+        )
         assert create_response.status_code == 201
         body = create_response.json()
         object_id = body["identity"]["id"]

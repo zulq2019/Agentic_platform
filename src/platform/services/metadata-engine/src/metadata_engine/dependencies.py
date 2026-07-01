@@ -7,7 +7,9 @@ from pathlib import Path
 
 from aep_meta.application.platform_object_service import PlatformObjectService
 from aep_meta.application.validation import PlatformObjectValidator
-from aep_meta.infrastructure.in_memory_repository import InMemoryPlatformObjectRepository
+from aep_meta.infrastructure.in_memory_repository import (
+    InMemoryPlatformObjectRepository,
+)
 from aep_meta.infrastructure.observability import (
     InMemoryAuditRecorder,
     InMemoryMetricsRecorder,
@@ -24,13 +26,19 @@ def get_settings() -> Settings:
     return Settings()
 
 
-def build_platform_object_service(settings: Settings | None = None) -> PlatformObjectService:
+def build_platform_object_service(
+    settings: Settings | None = None,
+) -> PlatformObjectService:
     global _service
     if _service is not None:
         return _service
 
     cfg = settings or get_settings()
-    schema_path = Path(cfg.platform_object_schema_path) if cfg.platform_object_schema_path else None
+    schema_path = (
+        Path(cfg.platform_object_schema_path)
+        if cfg.platform_object_schema_path
+        else None
+    )
     validator = PlatformObjectValidator(JsonSchemaValidator(schema_path))
     _service = PlatformObjectService(
         repository=InMemoryPlatformObjectRepository(),

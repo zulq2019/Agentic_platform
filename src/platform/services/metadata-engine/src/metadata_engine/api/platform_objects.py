@@ -37,7 +37,9 @@ async def register_platform_object(
         saved = await service.register(obj, actor=actor)
         return saved.to_contract_dict()
     except ValidationError as exc:
-        raise HTTPException(status_code=422, detail={"message": str(exc), "errors": exc.errors}) from exc
+        raise HTTPException(
+            status_code=422, detail={"message": str(exc), "errors": exc.errors}
+        ) from exc
     except PlatformObjectError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -84,6 +86,8 @@ async def transition_platform_object(
     except NotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValidationError as exc:
-        raise HTTPException(status_code=422, detail={"message": str(exc), "errors": exc.errors}) from exc
+        raise HTTPException(
+            status_code=422, detail={"message": str(exc), "errors": exc.errors}
+        ) from exc
     except PlatformObjectError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
