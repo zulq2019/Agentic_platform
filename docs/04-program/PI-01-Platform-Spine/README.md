@@ -5,6 +5,14 @@
 **Target completion:** Sprint 4 (end of week 8)  
 **Owner:** Platform Engineering Lead
 
+## Architecture v2 alignment
+
+| Field | Value |
+|-------|-------|
+| **Classification** | Unchanged (minor Extended) |
+| **Report** | [ARCHITECTURE_ALIGNMENT_REPORT.md](../../engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) |
+| **Migration note** | Spine deliverables unchanged. Reserve Metadata Engine container slot in baseline only — not a PI-01 story. |
+
 ---
 
 ## What This PI Delivers

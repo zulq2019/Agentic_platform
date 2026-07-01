@@ -14,6 +14,8 @@
 
 **Next:** PI-01 spine completion → PI-02+ per phases below. Metadata Engine, Provider Builder, and Marketplace land in PI-08–PI-10 per baseline gap register.
 
+**Engineering alignment:** [docs/engineering/ARCHITECTURE_ALIGNMENT_REPORT.md](docs/engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) — PI-by-PI v2 classification, renamed capabilities, story impacts, and implementation order.
+
 ---
 
 ## Release Phases Overview

@@ -570,6 +570,8 @@ Detail: [PLATFORM_META_MODEL.md](./PLATFORM_META_MODEL.md) §13.
 | PI-09 | Builders, Object Explorer, Developer Experience |
 | PI-10 | GA, partner ecosystem |
 
+**Engineering roadmap alignment:** [ARCHITECTURE_ALIGNMENT_REPORT.md](../engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) — PI classifications, story impacts, implementation order.
+
 ---
 
 ## 33. Future evolution

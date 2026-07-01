@@ -5,6 +5,17 @@
 **Target:** Sprint 20–25 (weeks 39–50)  
 **Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Specialist agents are **`ai-agent` Providers** registered via Agent Registry; tools resolved as **connector Providers** by capability tag.
 
+## Architecture v2 alignment
+
+| Field | Value |
+|-------|-------|
+| **Classification** | Extended |
+| **v2 concept** | ai-agent Provider catalog |
+| **Report** | [ARCHITECTURE_ALIGNMENT_REPORT.md](../../engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) |
+| **Migration note** | aep-agent-sdk unchanged. Execution Profile refs additive when PI-09 schema lands. |
+
+---
+
 ## What This PI Delivers
 
 All 15 specialist agents that power the platform's engineering workflows:

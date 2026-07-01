@@ -5,6 +5,14 @@
 **Target:** Sprint 26–29 (weeks 51–58)  
 **Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Implements **Governance Contract** (versioning, approval, audit, lifecycle) for all Platform Objects at runtime.
 
+## Architecture v2 alignment
+
+| Field | Value |
+|-------|-------|
+| **Classification** | Extended |
+| **Report** | [ARCHITECTURE_ALIGNMENT_REPORT.md](../../engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) |
+| **Migration note** | Metadata publish/approve audit hooks added at PI-09 boundary. RBAC ≠ Policy ≠ Secrets unchanged. |
+
 ## What This PI Delivers
 
 - `policy-engine` (OPA-backed) governs every agent action before execution

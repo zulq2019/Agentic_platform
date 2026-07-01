@@ -5,6 +5,17 @@
 **Target:** Sprint 16–19 (weeks 31–38)  
 **Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Tool Registry is the **typed index for `connector` and `rest-api` Providers** (Provider Model v2).
 
+## Architecture v2 alignment
+
+| Field | Value |
+|-------|-------|
+| **Classification** | Renamed (conceptual) + Extended |
+| **v2 concept** | Plugin Framework |
+| **Report** | [ARCHITECTURE_ALIGNMENT_REPORT.md](../../engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) |
+| **Migration note** | tool-contract valid until Provider Contract unifies in PI-09 (G-02). |
+
+---
+
 ## What This PI Delivers
 
 - `tool-registry` resolves agent requests by capability tag to the correct vendor tool (**Provider** binding)

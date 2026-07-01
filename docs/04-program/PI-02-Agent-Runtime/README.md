@@ -5,6 +5,17 @@
 **Target:** Sprint 5–8 (weeks 9–16)  
 **Owner:** Agent Runtime Lead
 
+## Architecture v2 alignment
+
+| Field | Value |
+|-------|-------|
+| **Classification** | Renamed (conceptual) + Extended |
+| **v2 concept** | Provider Framework — hosts `provider_kind: ai-agent` |
+| **Report** | [ARCHITECTURE_ALIGNMENT_REPORT.md](../../engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) |
+| **Migration note** | Service paths unchanged. O3 evolves to Execution Profile resolution when PI-09 delivers schema (G-04). |
+
+---
+
 ## What This PI Delivers
 
 The Agent Runtime is the execution host for all specialist agents. By the end of PI-02:

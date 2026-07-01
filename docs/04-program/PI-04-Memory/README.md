@@ -4,6 +4,16 @@
 **Depends on:** PI-02 complete (MemoryClient stub replaced with real service)  
 **Target:** Sprint 13–15 (weeks 25–30)
 
+## Architecture v2 alignment
+
+| Field | Value |
+|-------|-------|
+| **Classification** | Unchanged |
+| **Report** | [ARCHITECTURE_ALIGNMENT_REPORT.md](../../engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) |
+| **Migration note** | Memory primitives and constitutional constraints (M1–M4) unchanged in v2. |
+
+---
+
 ## What This PI Delivers
 
 - `memory-service` manages two completely separate memory layers

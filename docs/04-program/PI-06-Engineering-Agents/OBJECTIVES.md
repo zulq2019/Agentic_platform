@@ -1,5 +1,7 @@
 # PI-06-Engineering-Agents — Objectives
 
+**Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Specialist agents are **`ai-agent` Providers**; Execution Profile binding added when schema lands (PI-09).
+
 ## O1. Core Functionality Operational
 All services listed in scope are running, passing health checks, and handling their primary event flow.
 **Measure:** Integration test suite 100% passing.

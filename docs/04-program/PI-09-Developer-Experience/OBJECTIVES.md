@@ -1,5 +1,7 @@
 # PI-09-Developer-Experience — Objectives
 
+**Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Delivers **Platform UX Framework**, Metadata Engine MVP, Provider Builder, and Provider Contract schemas (G-01, G-02, G-05, G-07).
+
 ## O1. Core Functionality Operational
 All services listed in scope are running, passing health checks, and handling their primary event flow.
 **Measure:** Integration test suite 100% passing.

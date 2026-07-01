@@ -4,6 +4,14 @@
 **Depends on:** All PI-01 through PI-09 complete  
 **Target:** Sprint 39–44 (weeks 77–88)
 
+## Architecture v2 alignment
+
+| Field | Value |
+|-------|-------|
+| **Classification** | Extended |
+| **Report** | [ARCHITECTURE_ALIGNMENT_REPORT.md](../../engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) |
+| **Migration note** | Marketplace certification soak test added when G-06 completes. Core GA criteria unchanged. |
+
 ## What This PI Delivers
 
 PI-10 is the hardening, performance, and release readiness programme. No new features — only confidence.

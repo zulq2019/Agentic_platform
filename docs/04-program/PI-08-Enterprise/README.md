@@ -5,6 +5,14 @@
 **Target:** Sprint 30–33 (weeks 59–66)  
 **Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Owns **Entitlements**, configuration hierarchy, and Marketplace preparation per Baseline v2.
 
+## Architecture v2 alignment
+
+| Field | Value |
+|-------|-------|
+| **Classification** | Extended |
+| **Report** | [ARCHITECTURE_ALIGNMENT_REPORT.md](../../engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) |
+| **Migration note** | config-service = ME Phase 1. Entitlement runtime checks (G-10). Marketplace prep — full pipeline in PI-09/10. |
+
 ## What This PI Delivers
 
 - Full 3-layer multi-tenancy (data isolation, policy isolation, resource isolation)

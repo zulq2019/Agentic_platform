@@ -4,6 +4,17 @@
 **Depends on:** PI-02 complete  
 **Target:** Sprint 9–12 (weeks 17–24)
 
+## Architecture v2 alignment
+
+| Field | Value |
+|-------|-------|
+| **Classification** | Extended |
+| **v2 concept** | Planner + Workflow Framework |
+| **Report** | [ARCHITECTURE_ALIGNMENT_REPORT.md](../../engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) |
+| **Migration note** | Greenfield JSON template remains MVP authority. Workflow Platform Objects deferred (G-09). |
+
+---
+
 ## What This PI Delivers
 
 The Orchestrator is the brain of the platform. It plans, dispatches, enforces human gates, and recovers from failures — but never executes anything itself.

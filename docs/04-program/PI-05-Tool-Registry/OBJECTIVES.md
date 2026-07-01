@@ -1,5 +1,7 @@
 # PI-05-Tool-Registry — Objectives
 
+**Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Tool Registry indexes **`connector` and `rest-api` Providers** (Plugin Framework).
+
 ## O1. Core Functionality Operational
 All services listed in scope are running, passing health checks, and handling their primary event flow.
 **Measure:** Integration test suite 100% passing.

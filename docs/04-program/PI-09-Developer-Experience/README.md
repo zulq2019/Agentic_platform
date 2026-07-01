@@ -5,6 +5,17 @@
 **Target:** Sprint 34–38 (weeks 67–76)  
 **Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Delivers **Platform Builders**, **Object Explorer**, and **Metadata Engine MVP** per [PLATFORM_UX_MODEL.md](../../architecture/PLATFORM_UX_MODEL.md).
 
+## Architecture v2 alignment
+
+| Field | Value |
+|-------|-------|
+| **Classification** | Renamed (conceptual) + Extended |
+| **v2 concept** | Platform UX Framework |
+| **Report** | [ARCHITECTURE_ALIGNMENT_REPORT.md](../../engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) |
+| **Migration note** | Critical path for G-01, G-02, G-05, G-07. Add ME/Builder stories at sprint planning — do not renumber existing stories. |
+
+---
+
 ## What This PI Delivers
 
 - React dashboard with operational views aligned to **Platform Object UX** (Object Inspector tabs)

@@ -1,5 +1,7 @@
 # PI-07-Governance — Objectives
 
+**Architecture baseline:** [ARCHITECTURE_BASELINE_V2.md](../../architecture/ARCHITECTURE_BASELINE_V2.md). Governance by default on all Platform Objects; metadata publish audit hooks at PI-09 boundary.
+
 ## O1. Core Functionality Operational
 All services listed in scope are running, passing health checks, and handling their primary event flow.
 **Measure:** Integration test suite 100% passing.
