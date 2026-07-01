@@ -171,6 +171,8 @@ All names are **kebab-case**, **lowercase**, **descriptive**, and **action-orien
 
 Type `/next` (or `/next PI-02`) to discover the current PI, sprint, story, and the recommended next command. This orchestrator never writes code — it points you to the right skill.
 
+**Cursor skill install:** Skills in `.ai/skills/` are authoritative. Cursor reads `.cursor/skills/` (project) and `~/.claude/skills/skills/` (global). After changing skills, run `powershell -File scripts/sync_ai_skills.ps1` and reload the Cursor window.
+
 ### Step 1 — Find the right command
 
 Open the relevant PI folder. Read `PROMPT_MAPPING.md`. Find the User Story you are working on. It lists the commands for each activity.
