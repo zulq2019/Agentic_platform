@@ -21,9 +21,9 @@ Run this command on stories that involve: event processing pipelines, API endpoi
 
 | Input | Location | Required |
 |-------|----------|----------|
-| Architecture — Scalability section | `docs/artifacts/TECHNICAL_ARCHITECTURE.md` (Section 18) | Mandatory |
-| Architecture — Observability section | `docs/artifacts/TECHNICAL_ARCHITECTURE.md` (Section 16) | Mandatory |
-| Non-functional requirements | `docs/04-program/{PI}/ACCEPTANCE_CRITERIA.md` — NFR section | Mandatory |
+| Architecture — Scalability section | `docs/architecture/REFERENCE_ARCHITECTURE.md` (Section 18) | Mandatory |
+| Architecture — Observability section | `docs/architecture/REFERENCE_ARCHITECTURE.md` (Section 16) | Mandatory |
+| Non-functional requirements | `docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md` — NFR section | Mandatory |
 | Implementation files | `src/{target_folder}/` | Mandatory |
 | Database queries | All `.py` files with ORM or SQL | If story touches data |
 | Kafka producer/consumer code | All Kafka integration files | If story touches event bus |
@@ -33,7 +33,7 @@ Run this command on stories that involve: event processing pipelines, API endpoi
 **Substitutions required:**
 
 ```
-{PI}             = e.g. PI-01-Platform-Spine
+{PI}             = e.g. PI-01-Platform-Core
 {service_name}   = e.g. task-queue-service
 {slo_p99}        = target p99 latency from NFRs, e.g. 200ms
 {slo_throughput} = target throughput, e.g. 1000 events/sec
@@ -53,7 +53,7 @@ Run this command on stories that involve: event processing pipelines, API endpoi
 
 ### Step 1 — Read non-functional requirements
 
-From `docs/04-program/{PI}/ACCEPTANCE_CRITERIA.md`, extract all NFRs for `{story_id}`:
+From `docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md`, extract all NFRs for `{story_id}`:
 
 ```
 Latency SLO:     p99 ≤ {slo_p99} under {expected_load}

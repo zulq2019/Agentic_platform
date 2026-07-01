@@ -14,6 +14,7 @@ These schemas are the **validation authority** for Agent Registry, Tool Registry
 | [memory-schema.schema.json](./memory-schema.schema.json) | Section 9 | Long-term memory entries |
 | [event-envelope.schema.json](./event-envelope.schema.json) | Section 10 | Event Bus message envelope |
 | [common-tool-responses.schema.json](./common-tool-responses.schema.json) | Section 7 | Normalised tool response shapes |
+| [platform-object.schema.json](./platform-object.schema.json) | PLATFORM_PRIMITIVES §3 | Universal Platform Object envelope (v2) |
 
 ## Versioning
 
@@ -53,14 +54,14 @@ python scripts/validate_contract.py agent path/to/agent-registration.json
 - [ARCHITECTURE.md](../ARCHITECTURE.md) — system structure
 - [docs/architecture/ARCHITECTURE_BASELINE_V2.md](../docs/architecture/ARCHITECTURE_BASELINE_V2.md) — implementation baseline
 - [CLAUDE.md](../CLAUDE.md) — implementation rules
-- [DECISIONS.md](../DECISIONS.md) — ADR-003, ADR-007, ADR-020
+- [DECISIONS.md](../../docs/architecture/ADR/DECISIONS.md) — ADR-003, ADR-007, ADR-020
 
 ## Baseline v2 schema roadmap (PI-09)
 
 | Planned schema | Purpose | Gap ID | Target PI |
 |----------------|---------|--------|-----------|
 | `provider-contract.schema.json` | Unified Provider registration (`ai-agent`, `connector`, etc.) | G-02 | PI-09 |
-| `platform-object.schema.json` | Universal Platform Object envelope | G-05 | PI-09 |
+| `platform-object.schema.json` | Universal Platform Object envelope | G-05 | **PI-02 (US-02.01) — implemented** |
 | `execution-profile.schema.json` | Execution Profile metadata | G-04 | PI-09 |
 
 v1 schemas (`agent-contract`, `tool-contract`) remain valid until Provider Contract MINOR maps both kinds. See [ARCHITECTURE_CHANGELOG_V2.md](../docs/architecture/ARCHITECTURE_CHANGELOG_V2.md) migration guidance.

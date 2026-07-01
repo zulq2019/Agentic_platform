@@ -138,7 +138,7 @@ ls workflows/
 cat workflows/*.json
 
 # PI capability map — agent/tool registry context
-cat docs/04-program/{PI}/CAPABILITIES.md
+cat docs/engineering/implementation-roadmap/{PI}/CAPABILITIES.md
 ```
 
 **Stop condition:** If `CONSTITUTION.md` or `ARCHITECTURE.md` or the `contracts/` directory

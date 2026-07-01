@@ -22,8 +22,8 @@ Run this command on every story that touches authentication, secrets, database a
 | Input | Location | Required |
 |-------|----------|----------|
 | Constitution — Security principles | `CONSTITUTION.md` (S-series principles) | Mandatory |
-| Architecture — Security section | `docs/artifacts/TECHNICAL_ARCHITECTURE.md` (Section 14) | Mandatory |
-| Architecture — Multi-tenancy | `docs/artifacts/TECHNICAL_ARCHITECTURE.md` (Section 20) | If story touches data |
+| Architecture — Security section | `docs/architecture/REFERENCE_ARCHITECTURE.md` (Section 14) | Mandatory |
+| Architecture — Multi-tenancy | `docs/architecture/REFERENCE_ARCHITECTURE.md` (Section 20) | If story touches data |
 | AI implementation rules | `CLAUDE.md` (Security Rules section) | Mandatory |
 | ADRs — Security decisions | `DECISIONS.md` | Mandatory |
 | Changed files | `git diff main` | Mandatory |
@@ -109,7 +109,7 @@ For every API endpoint and Kafka consumer in changed files:
 
 ### Step 4 — Network boundary check
 
-Cross-reference changed files against the Network Policy Matrix in `docs/artifacts/TECHNICAL_ARCHITECTURE.md` (Section 10):
+Cross-reference changed files against the Network Policy Matrix in `docs/architecture/REFERENCE_ARCHITECTURE.md` (Section 10):
 
 - [ ] Does the code introduce any direct HTTP calls between services that are marked DENY?
 - [ ] Specifically: does `agent-runtime` call `orchestrator-service` directly?

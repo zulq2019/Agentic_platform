@@ -31,7 +31,7 @@ Trigger when the engineer types `/implement-story` followed by a User Story ID.
 /implement-story US-02.07
 ```
 
-The story ID must exist in `docs/04-program/{PI}/USER_STORIES.md`.
+The story ID must exist in `docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md`.
 
 ---
 
@@ -54,7 +54,7 @@ Before executing, resolve these substitutions from the story ID and context docu
 
 ```
 {story_id}      = the story ID passed by the engineer, e.g. US-02.03
-{PI}            = the PI folder the story belongs to, e.g. PI-02-Agent-Runtime
+{PI}            = the PI folder the story belongs to, e.g. PI-02-Metadata-Engine
 {service_name}  = the service this story implements, e.g. agent-registry-service
 {target_folder} = source path, e.g. src/platform/registry/
 {CAP-XX}        = the capability this story belongs to, e.g. CAP-03
@@ -74,13 +74,13 @@ cat CLAUDE.md
 cat DECISIONS.md
 
 # Target PI
-cat docs/04-program/{PI}/README.md
-cat docs/04-program/{PI}/CAPABILITIES.md
-cat docs/04-program/{PI}/USER_STORIES.md
-cat docs/04-program/{PI}/ACCEPTANCE_CRITERIA.md
-cat docs/04-program/{PI}/IMPLEMENTATION.md
-cat docs/04-program/{PI}/PROMPT_MAPPING.md
-cat docs/04-program/{PI}/DEFINITION_OF_DONE.md
+cat docs/engineering/implementation-roadmap/{PI}/README.md
+cat docs/engineering/implementation-roadmap/{PI}/CAPABILITIES.md
+cat docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md
+cat docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md
+cat docs/engineering/implementation-roadmap/{PI}/IMPLEMENTATION.md
+cat docs/engineering/implementation-roadmap/{PI}/PROMPT_MAPPING.md
+cat docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md
 
 # Contracts
 ls contracts/
@@ -143,7 +143,7 @@ Cross-reference `CAPABILITIES.md` for the capability this story belongs to:
 
 ```bash
 # Verify capability section exists and has content
-rg "^## {CAP-XX}" docs/04-program/{PI}/CAPABILITIES.md
+rg "^## {CAP-XX}" docs/engineering/implementation-roadmap/{PI}/CAPABILITIES.md
 ```
 
 **STOP if the capability section is missing or incomplete.** A story cannot be
@@ -159,7 +159,7 @@ Check each of the following:
 
 ```bash
 # Check sprint plan for story dependencies
-rg "{story_id}" docs/04-program/{PI}/SPRINT_PLAN.md -A 10
+rg "{story_id}" docs/engineering/implementation-roadmap/{PI}/SPRINT_PLAN.md -A 10
 
 # Verify aep-common is importable (PI-02+)
 python -c "import aep_common; print('aep_common OK')" 2>/dev/null || echo "aep_common NOT AVAILABLE"
@@ -192,7 +192,7 @@ required to clear it.
 **Determine the minimum infrastructure required by this story's acceptance criteria.**
 
 Evaluate each component against the story's AC — not against future stories.
-Write the completed table to `docs/04-program/{PI}/INFRASTRUCTURE.md` under a
+Write the completed table to `docs/engineering/implementation-roadmap/{PI}/INFRASTRUCTURE.md` under a
 section headed `## {story_id}`.
 
 | Component | Required for this story | Already Exists | Action |

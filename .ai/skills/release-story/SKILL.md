@@ -78,7 +78,7 @@ Story ID:       {US-XX.XX}  (from PR body)
 PI:             {PI-XX-...} (from PR body or head branch name)
 ```
 
-Parse PR body to extract Story ID (e.g. `US-01.03`) and PI (e.g. `PI-01-Platform-Spine`).
+Parse PR body to extract Story ID (e.g. `US-01.03`) and PI (e.g. `PI-01-Platform-Core`).
 If either is absent, flag as **Major** — PR description does not link to a User Story.
 
 **Parse and report CI status immediately:**
@@ -109,9 +109,9 @@ cat ARCHITECTURE.md
 cat CHANGELOG.md
 
 # PI context (substitute {PI} from Step 1)
-cat docs/04-program/{PI}/DEFINITION_OF_DONE.md
-cat docs/04-program/{PI}/ACCEPTANCE_CRITERIA.md
-cat docs/04-program/{PI}/TESTING.md
+cat docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md
+cat docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md
+cat docs/engineering/implementation-roadmap/{PI}/TESTING.md
 
 # Contract schemas
 ls contracts/
@@ -435,7 +435,7 @@ gh pr diff <NUMBER> | rg "^\+.*os\.environ|^\+.*getenv|^\+.*ENV\[" 2>/dev/null
   (name and purpose — not the value)
 - Every new API endpoint is listed in the changelog entry (method + path)
 - If a new service or major feature was added: `ARCHITECTURE.md` or the relevant
-  `docs/04-program/{PI}/` document has been updated
+  `docs/engineering/implementation-roadmap/{PI}/` document has been updated
 
 **Why it matters:** The changelog is the primary communication channel to other engineers,
 QA, and operations about what shipped in each release. An undocumented breaking change
@@ -584,14 +584,14 @@ Kafka topics, services — must be documented before the story can ship.**
 # Check API spec for new endpoints
 gh pr diff <NUMBER> | rg "^\+.*@router\.(get|post|put|patch|delete)" 2>/dev/null
 # For each new endpoint, verify it appears in API_SPEC.md
-rg "{endpoint_path}" docs/04-program/{PI}/API_SPEC.md 2>/dev/null || echo "Check API_SPEC.md"
+rg "{endpoint_path}" docs/engineering/implementation-roadmap/{PI}/API_SPEC.md 2>/dev/null || echo "Check API_SPEC.md"
 
 # Check .env.example for new environment variables
 gh pr diff <NUMBER> | rg "^\+.*os\.getenv|^\+.*os\.environ\[" | grep -v "test"
 # For each new env var, verify .env.example has it
 rg "{ENV_VAR_NAME}" .env.example 2>/dev/null || echo "Missing from .env.example"
 
-# Check TECHNICAL_ARCHITECTURE.md event catalogue for new topics
+# Check REFERENCE_ARCHITECTURE.md event catalogue for new topics
 gh pr diff <NUMBER> | rg "^\+.*topic.*=|^\+.*TOPIC" 2>/dev/null
 rg "{topic_name}" ARCHITECTURE.md 2>/dev/null || echo "Check event catalogue"
 
@@ -606,7 +606,7 @@ gh pr diff <NUMBER> --name-status | grep -E "^A.*src/platform/[^/]+/__init__" 2>
 
 **Checks:**
 
-- Every new HTTP endpoint documented in `docs/04-program/{PI}/API_SPEC.md` with:
+- Every new HTTP endpoint documented in `docs/engineering/implementation-roadmap/{PI}/API_SPEC.md` with:
   method, path, request body schema, response schema, authentication requirement, status codes
 - Every new environment variable documented in `.env.example` for its service with:
   variable name, example value (not a real credential), and a comment describing its purpose
@@ -638,7 +638,7 @@ restates the method name, deployment notes absent from PR description
 **The DoD is the team's explicit agreement on what "done" means. This lens performs an
 exhaustive pass through every item.**
 
-Read `docs/04-program/{PI}/DEFINITION_OF_DONE.md` in full.
+Read `docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md` in full.
 
 For every item in the **Story-Level Gate** section, determine:
 
@@ -799,7 +799,7 @@ without additional context — the engineer who clicks "Merge" must be able to f
 ### Should be TRUE before merge (MAJOR — resolve or formally defer with TASKS.md entry)
 - [ ] Unit test coverage ≥ 80% on all new code (evidence from CI coverage report)
 - [ ] All new environment variables documented in .env.example
-- [ ] API spec updated for all new endpoints — docs/04-program/{PI}/API_SPEC.md
+- [ ] API spec updated for all new endpoints — docs/engineering/implementation-roadmap/{PI}/API_SPEC.md
 - [ ] All Major findings from any review resolved or formally deferred to TASKS.md
 - [ ] Rollback procedure documented in PR description (if rollback risk is MEDIUM or HIGH)
 - [ ] ARCHITECTURE.md updated if a new service, topic, or service boundary changed

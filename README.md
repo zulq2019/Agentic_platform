@@ -11,9 +11,9 @@ Vendor-neutral, reusable blueprint for multi-agent software engineering — Gree
 ```
 agentic-engineering-platform/
 ├── CONSTITUTION.md          # Immutable principles (NEVER violate)
-├── VISION.md                # Product vision, personas, market, 5-year roadmap
+├── VISION.md                # Stub → docs/product/VISION.md
 ├── ARCHITECTURE.md          # C4 diagrams, contracts, deployment, data flow
-├── ROADMAP.md               # MVP → Alpha → Beta → Enterprise → GA
+├── ROADMAP.md               # Stub → docs/product/ROADMAP.md
 ├── TASKS.md                 # Engineering work breakdown
 ├── CLAUDE.md                # AI-assisted implementation rules
 ├── DECISIONS.md             # Architectural Decision Records (24 ADRs)
@@ -39,12 +39,12 @@ agentic-engineering-platform/
 ## Read Order for New Contributors
 
 1. [CONSTITUTION.md](./CONSTITUTION.md) — what MUST NEVER be violated
-2. [VISION.md](./VISION.md) — why the platform exists
+2. [VISION.md](docs/product/VISION.md) — why the platform exists
 3. [ARCHITECTURE.md](./ARCHITECTURE.md) — how it is structured
-4. [DECISIONS.md](./DECISIONS.md) — why specific choices were made
+4. [DECISIONS.md](docs/architecture/ADR/DECISIONS.md) — why specific choices were made
 5. [contracts/README.md](./contracts/README.md) — contract schemas and validation
 6. [CLAUDE.md](./CLAUDE.md) — how to implement correctly
-7. [ROADMAP.md](./ROADMAP.md) — when things get built
+7. [ROADMAP.md](docs/product/ROADMAP.md) — when things get built
 8. [TASKS.md](./TASKS.md) — what to build next
 
 ---
@@ -55,7 +55,7 @@ agentic-engineering-platform/
 |----------|------|----------|
 | Reference Architecture v1.0 (`.docx`) | Original blueprint | No — reference only |
 | [CONSTITUTION.md](./CONSTITUTION.md) | Immutable engineering philosophy | Only via Decision Record |
-| [DECISIONS.md](./DECISIONS.md) | Recorded architectural decisions | Append-only (supersede, don't edit) |
+| [DECISIONS.md](docs/architecture/ADR/DECISIONS.md) | Recorded architectural decisions | Append-only (supersede, don't edit) |
 | [contracts/](./contracts/) | Machine-readable contract validation | Versioned (semver) |
 | All other documents | Living implementation guidance | Yes |
 
@@ -116,12 +116,12 @@ python scripts/validate_contract.py agent contracts/examples/coding-agent-regist
 | File | Description |
 |------|-------------|
 | [CONSTITUTION.md](./CONSTITUTION.md) | Platform constitution (83 principles) |
-| [VISION.md](./VISION.md) | Product vision, personas, competitive landscape |
+| [VISION.md](docs/product/VISION.md) | Product vision, personas, competitive landscape |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | C4, deployment, event model, security, memory |
-| [ROADMAP.md](./ROADMAP.md) | MVP through GA, milestones, risks |
+| [ROADMAP.md](docs/product/ROADMAP.md) | MVP through GA, milestones, risks |
 | [TASKS.md](./TASKS.md) | 12 epics, ~520 person-days |
 | [CLAUDE.md](./CLAUDE.md) | AI implementation rules, forbidden patterns |
-| [DECISIONS.md](./DECISIONS.md) | 24 ADRs |
+| [DECISIONS.md](docs/architecture/ADR/DECISIONS.md) | 24 ADRs |
 
 ---
 

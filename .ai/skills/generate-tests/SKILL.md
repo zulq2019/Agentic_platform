@@ -53,14 +53,14 @@ cat CONSTITUTION.md
 cat ARCHITECTURE.md
 
 # Resolve the PI from the story ID prefix (e.g. US-01 → PI-01)
-PI_DIR=$(ls docs/04-program/ | grep "PI-$(echo $STORY_ID | cut -d- -f2 | cut -d. -f1)")
+PI_DIR=$(ls docs/engineering/implementation-roadmap/ | grep "PI-$(echo $STORY_ID | cut -d- -f2 | cut -d. -f1)")
 
 # PI planning documents
-cat docs/04-program/${PI_DIR}/ACCEPTANCE_CRITERIA.md
-cat docs/04-program/${PI_DIR}/TESTING.md
-cat docs/04-program/${PI_DIR}/DEFINITION_OF_DONE.md
-cat docs/04-program/${PI_DIR}/IMPLEMENTATION.md
-cat docs/04-program/${PI_DIR}/CAPABILITIES.md
+cat docs/engineering/implementation-roadmap/${PI_DIR}/ACCEPTANCE_CRITERIA.md
+cat docs/engineering/implementation-roadmap/${PI_DIR}/TESTING.md
+cat docs/engineering/implementation-roadmap/${PI_DIR}/DEFINITION_OF_DONE.md
+cat docs/engineering/implementation-roadmap/${PI_DIR}/IMPLEMENTATION.md
+cat docs/engineering/implementation-roadmap/${PI_DIR}/CAPABILITIES.md
 
 # Contracts — validate published events and registrations against these
 cat contracts/event-envelope.schema.json
@@ -179,7 +179,7 @@ test code. Tests must be faithful to the implementation — not aspirational.
 
 ```bash
 # Extract the story from USER_STORIES.md
-rg -A 20 "${STORY_ID}" docs/04-program/${PI_DIR}/USER_STORIES.md | head -30
+rg -A 20 "${STORY_ID}" docs/engineering/implementation-roadmap/${PI_DIR}/USER_STORIES.md | head -30
 ```
 
 Record:
@@ -199,7 +199,7 @@ PI:              {PI_DIR}
 rg "${STORY_ID}" --include="*.py" -l
 
 # Find by capability if story tag not present
-CAPABILITY=$(grep "${STORY_ID}" docs/04-program/${PI_DIR}/CAPABILITIES.md | grep -oP "CAP-\d+")
+CAPABILITY=$(grep "${STORY_ID}" docs/engineering/implementation-roadmap/${PI_DIR}/CAPABILITIES.md | grep -oP "CAP-\d+")
 rg "${CAPABILITY}" --include="*.py" -l
 
 # Discover public surface — classes and functions exported
@@ -258,7 +258,7 @@ without a test. No test without an AC it satisfies.
 
 ```bash
 # Extract AC block from ACCEPTANCE_CRITERIA.md
-rg -A 8 "^## ${STORY_ID}" docs/04-program/${PI_DIR}/ACCEPTANCE_CRITERIA.md
+rg -A 8 "^## ${STORY_ID}" docs/engineering/implementation-roadmap/${PI_DIR}/ACCEPTANCE_CRITERIA.md
 ```
 
 For each criterion, build the **AC–Test Matrix**:

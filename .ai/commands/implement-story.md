@@ -28,19 +28,19 @@ Read every item in this list before doing anything else. Stop and report what is
 | Constitution | `CONSTITUTION.md` | Mandatory |
 | Architecture | `ARCHITECTURE.md` | Mandatory |
 | AI implementation rules | `CLAUDE.md` | Mandatory |
-| PI README | `docs/04-program/{PI}/README.md` | Mandatory |
-| Capabilities | `docs/04-program/{PI}/CAPABILITIES.md` | Mandatory |
-| User Stories | `docs/04-program/{PI}/USER_STORIES.md` | Mandatory |
-| Acceptance Criteria | `docs/04-program/{PI}/ACCEPTANCE_CRITERIA.md` | Mandatory |
-| Implementation Guide | `docs/04-program/{PI}/IMPLEMENTATION.md` | Mandatory |
-| Prompt Mapping | `docs/04-program/{PI}/PROMPT_MAPPING.md` | Mandatory |
+| PI README | `docs/engineering/implementation-roadmap/{PI}/README.md` | Mandatory |
+| Capabilities | `docs/engineering/implementation-roadmap/{PI}/CAPABILITIES.md` | Mandatory |
+| User Stories | `docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md` | Mandatory |
+| Acceptance Criteria | `docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md` | Mandatory |
+| Implementation Guide | `docs/engineering/implementation-roadmap/{PI}/IMPLEMENTATION.md` | Mandatory |
+| Prompt Mapping | `docs/engineering/implementation-roadmap/{PI}/PROMPT_MAPPING.md` | Mandatory |
 | Contract schemas | `contracts/` — schemas relevant to this story | If story produces or consumes events, registers an agent or tool |
 | Existing implementation | `src/{target_folder}/` — code already written for this service | If the service has been started in a prior story |
 
 **Substitutions required before executing:**
 
 ```
-{PI}            = e.g. PI-02-Agent-Runtime
+{PI}            = e.g. PI-02-Metadata-Engine
 {story_id}      = e.g. US-02.03
 {service_name}  = e.g. agent-registry-service
 {target_folder} = e.g. src/platform/registry/
@@ -70,7 +70,7 @@ Acceptance Criteria:
   AC-{n}: ...
 
 Definition of Done:
-  → docs/04-program/{PI}/DEFINITION_OF_DONE.md — Story-Level Gate
+  → docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md — Story-Level Gate
 ```
 
 **Confirm:** Only one User Story is being implemented. If the scope covers more than one story, stop and state which story to implement first.
@@ -81,7 +81,7 @@ Definition of Done:
 
 ## Phase 3 — Infrastructure Assessment
 
-Before writing any code, determine which infrastructure components are required by this story specifically. Write the result to `docs/04-program/{PI}/INFRASTRUCTURE.md` under a section for `{story_id}`.
+Before writing any code, determine which infrastructure components are required by this story specifically. Write the result to `docs/engineering/implementation-roadmap/{PI}/INFRASTRUCTURE.md` under a section for `{story_id}`.
 
 ### Assessment table
 
@@ -224,7 +224,7 @@ If any criterion is NOT SATISFIED, return to Phase 5.
 
 ### Definition of Done — Story-Level Gate
 
-Work through every item in the Story-Level Gate section of `docs/04-program/{PI}/DEFINITION_OF_DONE.md`:
+Work through every item in the Story-Level Gate section of `docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md`:
 
 ```
 [ ] Architecture — no direct HTTP calls between services

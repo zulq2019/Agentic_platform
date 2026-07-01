@@ -696,10 +696,10 @@ Contract schema: [contracts/task-schema.schema.json](./contracts/task-schema.sch
 | [docs/architecture/PLATFORM_GLOSSARY.md](docs/architecture/PLATFORM_GLOSSARY.md) | Official vocabulary |
 | [contracts/](./contracts/) | JSON Schema definitions for all platform contracts |
 | [workflows/](./workflows/) | Versioned workflow state machine templates |
-| [VISION.md](./VISION.md) | Product vision this architecture realises |
-| [ROADMAP.md](./ROADMAP.md) | Phased delivery of architecture components |
+| [VISION.md](docs/product/VISION.md) | Product vision this architecture realises |
+| [ROADMAP.md](docs/product/ROADMAP.md) | Phased delivery of architecture components |
 | [docs/architecture/IMPLEMENTATION_READINESS.md](docs/architecture/IMPLEMENTATION_READINESS.md) | Readiness gate before full v2 realisation |
-| [DECISIONS.md](./DECISIONS.md) | ADRs for architectural decisions |
+| [DECISIONS.md](docs/architecture/ADR/DECISIONS.md) | ADRs for architectural decisions |
 | [CLAUDE.md](./CLAUDE.md) | Implementation rules for AI-assisted development |
 
 ---

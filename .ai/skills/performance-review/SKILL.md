@@ -87,7 +87,7 @@ Deletions:      -{N}
 
 Parse the PR body to identify:
 - Story ID (e.g. `US-01.03`)
-- PI (e.g. `PI-01-Platform-Spine`)
+- PI (e.g. `PI-01-Platform-Core`)
 - Capability (e.g. `CAP-04`)
 
 Then read `ACCEPTANCE_CRITERIA.md` for the story and extract all NFRs:
@@ -125,9 +125,9 @@ cat ARCHITECTURE.md            # Focus: Scalability section, Service boundaries
 cat DECISIONS.md
 
 # PI context (substitute {PI} from Step 1)
-cat docs/04-program/{PI}/ACCEPTANCE_CRITERIA.md   # Primary — SLOs live here
-cat docs/04-program/{PI}/TECHNICAL_ARCHITECTURE.md  # Sections 16 (Observability), 18 (Scalability)
-cat docs/04-program/{PI}/USER_STORIES.md
+cat docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md   # Primary — SLOs live here
+cat docs/engineering/implementation-roadmap/{PI}/REFERENCE_ARCHITECTURE.md  # Sections 16 (Observability), 18 (Scalability)
+cat docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md
 
 # Contracts (relevant to throughput and event volume)
 cat contracts/event-envelope.schema.json

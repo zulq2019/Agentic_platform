@@ -3,7 +3,7 @@
 **Status:** Living document  
 **Version:** 1.0  
 **Last updated:** 27 June 2026  
-**Derived from:** [ROADMAP.md](./ROADMAP.md) · [ARCHITECTURE.md](./ARCHITECTURE.md) · Reference Architecture v1.0
+**Derived from:** [ROADMAP.md](docs/product/ROADMAP.md) · [ARCHITECTURE.md](./ARCHITECTURE.md) · Reference Architecture v1.0
 
 ---
 

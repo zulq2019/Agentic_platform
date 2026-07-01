@@ -10,7 +10,7 @@
 
 A **Product Domain** is a top-level area of the Engineering Platform that delivers **independent customer value**. Domains are organized as **Studios** (product modules) built on a shared **Platform Core**.
 
-Studios are **not** delivery phases. Program Increments (PIs) remain the authoritative implementation sequence in [docs/04-program/](../04-program/).
+Studios are **not** delivery phases. Program Increments (PIs) remain the authoritative implementation sequence in [docs/engineering/implementation-roadmap/](../engineering/implementation-roadmap/).
 
 ---
 
@@ -39,11 +39,11 @@ Each Studio **owns** the product definition for:
 
 | Asset type | Owned by Studio | Implemented via |
 |------------|-----------------|-----------------|
-| **Features** | Studio product backlog | PI features in `docs/04-program/PI-*/FEATURES.md` |
+| **Features** | Studio product backlog | PI features in `docs/engineering/implementation-roadmap/PI-*/FEATURES.md` |
 | **Capabilities** | Studio capability tags / outcomes | Agents, tools, workflows |
-| **Agents** | Studio specialist agents | `agents/` (see [PI-06 README](../04-program/PI-06-Engineering-Agents/README.md)) |
+| **Agents** | Studio specialist agents | `agents/` (see [PI-06 README](../engineering/implementation-roadmap/PI-06-Studio-Framework/README.md)) |
 | **Workflows** | Studio workflow templates | `workflows/` |
-| **UI** | Studio views and consoles | [PI-09](../04-program/PI-09-Developer-Experience/README.md) dashboard views |
+| **UI** | Studio views and consoles | [PI-09](../engineering/implementation-roadmap/PI-09-Platform-UX/README.md) dashboard views |
 | **APIs** | Studio-facing API surfaces | Per-PI `API_SPEC.md`, gateway routes |
 
 Studios **do not** own Platform Core containers directly. They **consume** Core services through contracts and events. See [PLATFORM_CORE.md](./PLATFORM_CORE.md).
@@ -89,9 +89,9 @@ flowchart LR
 | Which PI builds a capability | [PI_TO_DOMAIN_MAPPING.md](./PI_TO_DOMAIN_MAPPING.md) |
 | Studio descriptions and users | [STUDIO_OVERVIEW.md](./STUDIO_OVERVIEW.md) |
 | Container and service design | [ARCHITECTURE.md](../../ARCHITECTURE.md) |
-| Agent list and capability tags | [PI-06 Engineering Agents](../04-program/PI-06-Engineering-Agents/README.md) |
-| Tool integrations | [PI-05 Tool Registry](../04-program/PI-05-Tool-Registry/README.md) |
-| Dashboard / UX | [PI-09 Developer Experience](../04-program/PI-09-Developer-Experience/README.md) |
+| Agent list and capability tags | [PI-06 Engineering Agents](../engineering/implementation-roadmap/PI-06-Studio-Framework/README.md) |
+| Tool integrations | [PI-05 Tool Registry](../engineering/implementation-roadmap/PI-05-Execution-Framework/README.md) |
+| Dashboard / UX | [PI-09 Developer Experience](../engineering/implementation-roadmap/PI-09-Platform-UX/README.md) |
 
 ---
 

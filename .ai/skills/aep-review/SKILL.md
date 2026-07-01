@@ -68,7 +68,7 @@ Deletions:      -{N}
 
 Parse the PR body to identify:
 - Story ID (e.g. `US-01.03`)
-- PI (e.g. `PI-01-Platform-Spine`)
+- PI (e.g. `PI-01-Platform-Core`)
 - Capability (e.g. `CAP-04`)
 
 If any of these are absent from the PR body, flag as **Major** — PR description does not link to a User Story.
@@ -87,11 +87,11 @@ cat DECISIONS.md
 cat CLAUDE.md
 
 # Read PI context (substitute {PI} from Step 1)
-cat docs/04-program/{PI}/CAPABILITIES.md
-cat docs/04-program/{PI}/USER_STORIES.md
-cat docs/04-program/{PI}/ACCEPTANCE_CRITERIA.md
-cat docs/04-program/{PI}/DEFINITION_OF_DONE.md
-cat docs/04-program/{PI}/IMPLEMENTATION.md
+cat docs/engineering/implementation-roadmap/{PI}/CAPABILITIES.md
+cat docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md
+cat docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md
+cat docs/engineering/implementation-roadmap/{PI}/DEFINITION_OF_DONE.md
+cat docs/engineering/implementation-roadmap/{PI}/IMPLEMENTATION.md
 
 # Read contracts
 ls contracts/

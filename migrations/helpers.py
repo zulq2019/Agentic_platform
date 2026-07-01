@@ -10,6 +10,7 @@ PLATFORM_SCHEMAS: tuple[str, ...] = (
     "tools",
     "memory",
     "approval",
+    "metadata",
 )
 
 PLATFORM_TABLES: tuple[tuple[str, str], ...] = (
@@ -19,6 +20,10 @@ PLATFORM_TABLES: tuple[tuple[str, str], ...] = (
     ("tools", "registrations"),
     ("memory", "entries"),
     ("approval", "approval_records"),
+    ("metadata", "platform_objects"),
+    ("metadata", "platform_object_relationships"),
+    ("metadata", "platform_object_audit"),
+    ("metadata", "platform_object_versions"),
 )
 
 

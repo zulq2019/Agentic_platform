@@ -105,7 +105,7 @@ sequenceDiagram
     Test->>EB: AgentCompleted (test report)
 ```
 
-**Core services used:** Workflow Engine, Event Bus, Agent Registry, Gate Enforcer (human approval between states — [PI-03](../04-program/PI-03-Orchestrator/README.md)).
+**Core services used:** Workflow Engine, Event Bus, Agent Registry, Gate Enforcer (human approval between states — [PI-03](../engineering/implementation-roadmap/PI-03-Provider-Framework/README.md)).
 
 ---
 
@@ -115,7 +115,7 @@ Studios invoke external systems **only** by capability tag through Tool Registry
 
 | Studio | Example capability tag | Typical tool |
 |--------|------------------------|--------------|
-| Requirements Studio | `create-issue` | Jira ([PI-05](../04-program/PI-05-Tool-Registry/README.md)) |
+| Requirements Studio | `create-issue` | Jira ([PI-05](../engineering/implementation-roadmap/PI-05-Execution-Framework/README.md)) |
 | Development Studio | `create-pull-request` | GitHub |
 | Testing Studio | `run-automated-suite` | Katalon / CI CD |
 | Security Studio | `scan-repository` | Security scanner |
@@ -159,7 +159,7 @@ sequenceDiagram
     RT-->>Dev: result
 ```
 
-**PI reference:** [PI-02](../04-program/PI-02-Agent-Runtime/README.md) O3; enterprise quotas in [PI-08](../04-program/PI-08-Enterprise/README.md).
+**PI reference:** [PI-02](../engineering/implementation-roadmap/PI-02-Metadata-Engine/README.md) O3; enterprise quotas in [PI-08](../engineering/implementation-roadmap/PI-08-Solution-Packs/README.md).
 
 ---
 
@@ -182,7 +182,7 @@ sequenceDiagram
     PW->>MS: deliberate LTM write (provenance)
 ```
 
-**Constraints:** [PI-04](../04-program/PI-04-Memory/README.md) — agents never write LTM directly (M3, AI3).
+**Constraints:** [PI-04](../engineering/implementation-roadmap/PI-04-Workflow-Framework/README.md) — agents never write LTM directly (M3, AI3).
 
 ---
 
@@ -232,13 +232,13 @@ sequenceDiagram
     end
 ```
 
-**PI reference:** [PI-07 Governance](../04-program/PI-07-Governance/README.md).
+**PI reference:** [PI-07 Governance](../engineering/implementation-roadmap/PI-07-Platform-Services/README.md).
 
 ---
 
 ## Pattern 7 — Observability (Cross-Cutting)
 
-All Studios and Core services emit structured logs and OTEL traces with `task_id`, `workflow_run_id`, and `tenant_id`. The **Observability** product domain packages dashboards ([PI-09](../04-program/PI-09-Developer-Experience/README.md) Metrics Dashboard; [PI-01](../04-program/PI-01-Platform-Spine/README.md) baseline stack).
+All Studios and Core services emit structured logs and OTEL traces with `task_id`, `workflow_run_id`, and `tenant_id`. The **Observability** product domain packages dashboards ([PI-09](../engineering/implementation-roadmap/PI-09-Platform-UX/README.md) Metrics Dashboard; [PI-01](../engineering/implementation-roadmap/PI-01-Platform-Core/README.md) baseline stack).
 
 Studios do not implement bespoke monitoring stacks — they consume Core observability contracts.
 
@@ -263,6 +263,6 @@ Studios do not implement bespoke monitoring stacks — they consume Core observa
 | Container boundaries | [ARCHITECTURE.md](../../ARCHITECTURE.md) |
 | Event types | [contracts/event-envelope.schema.json](../../contracts/event-envelope.schema.json) |
 | Workflow templates | [workflows/](../../workflows/) |
-| PI sequence diagrams | `docs/04-program/PI-*/SEQUENCE_DIAGRAMS.md` |
+| PI sequence diagrams | `docs/engineering/implementation-roadmap/PI-*/SEQUENCE_DIAGRAMS.md` |
 | Studio summaries | [STUDIO_OVERVIEW.md](./STUDIO_OVERVIEW.md) |
 | PI ↔ domain map | [PI_TO_DOMAIN_MAPPING.md](./PI_TO_DOMAIN_MAPPING.md) |

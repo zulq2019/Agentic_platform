@@ -220,4 +220,4 @@ Prompts are version-controlled code. They are reviewed, improved, and deprecated
 | `checklists/` | Reserved — awaiting approval | PI-01 Sprint 1 |
 | `reviewers/` | Reserved — awaiting approval | PI-02 Sprint 5 |
 
-See `docs/04-program/PI-01-Platform-Spine/SPRINT_PLAN.md` for the task that populates the initial command set.
+See `docs/engineering/implementation-roadmap/PI-01-Platform-Core/SPRINT_PLAN.md` for the task that populates the initial command set.

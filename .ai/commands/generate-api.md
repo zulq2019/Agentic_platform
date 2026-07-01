@@ -22,19 +22,19 @@ One execution = one logical API resource (e.g., `/agents`, `/tasks/{id}/approve`
 | Input | Location | Required |
 |-------|----------|----------|
 | Constitution | `CONSTITUTION.md` | Mandatory |
-| Architecture — API Gateway section | `docs/artifacts/TECHNICAL_ARCHITECTURE.md` (Section 15) | Mandatory |
+| Architecture — API Gateway section | `docs/architecture/REFERENCE_ARCHITECTURE.md` (Section 15) | Mandatory |
 | AI implementation rules | `CLAUDE.md` | Mandatory |
-| API Spec | `docs/04-program/{PI}/API_SPEC.md` — target endpoint | Mandatory |
-| User Story | `docs/04-program/{PI}/USER_STORIES.md` — target story | Mandatory |
-| Acceptance Criteria | `docs/04-program/{PI}/ACCEPTANCE_CRITERIA.md` | Mandatory |
-| Implementation Guide | `docs/04-program/{PI}/IMPLEMENTATION.md` | Mandatory |
+| API Spec | `docs/engineering/implementation-roadmap/{PI}/API_SPEC.md` — target endpoint | Mandatory |
+| User Story | `docs/engineering/implementation-roadmap/{PI}/USER_STORIES.md` — target story | Mandatory |
+| Acceptance Criteria | `docs/engineering/implementation-roadmap/{PI}/ACCEPTANCE_CRITERIA.md` | Mandatory |
+| Implementation Guide | `docs/engineering/implementation-roadmap/{PI}/IMPLEMENTATION.md` | Mandatory |
 | Domain service interface | `src/{target_folder}/domain/{service}.py` | Mandatory |
 | Existing auth middleware | `src/platform/gateway/` | Mandatory |
 
 **Substitutions required:**
 
 ```
-{PI}              = e.g. PI-03-Orchestrator
+{PI}              = e.g. PI-03-Provider-Framework
 {story_id}        = e.g. US-PI-03-04
 {resource}        = e.g. workflows
 {http_method}     = GET | POST | PUT | DELETE | PATCH
@@ -49,7 +49,7 @@ One execution = one logical API resource (e.g., `/agents`, `/tasks/{id}/approve`
 
 - [ ] The domain service interface (`domain/{service}.py`) exists
 - [ ] Auth middleware is available in `src/platform/gateway/`
-- [ ] The endpoint is specified in `docs/04-program/{PI}/API_SPEC.md`
+- [ ] The endpoint is specified in `docs/engineering/implementation-roadmap/{PI}/API_SPEC.md`
 - [ ] Request and response schemas are defined in the API spec
 
 ---
@@ -58,7 +58,7 @@ One execution = one logical API resource (e.g., `/agents`, `/tasks/{id}/approve`
 
 ### Step 1 — Read the API spec
 
-Read `docs/04-program/{PI}/API_SPEC.md` for the target endpoint. Extract:
+Read `docs/engineering/implementation-roadmap/{PI}/API_SPEC.md` for the target endpoint. Extract:
 
 ```
 Method:          {http_method}
@@ -201,7 +201,7 @@ Required tests:
 | Route handler | `src/{target_folder}/api/routes/{resource}.py` |
 | Exception handler map | `src/{target_folder}/api/exception_handlers.py` |
 | API integration tests | `src/tests/integration/{service_name}/test_api_{resource}.py` |
-| Updated API spec | `docs/04-program/{PI}/API_SPEC.md` |
+| Updated API spec | `docs/engineering/implementation-roadmap/{PI}/API_SPEC.md` |
 
 ---
 

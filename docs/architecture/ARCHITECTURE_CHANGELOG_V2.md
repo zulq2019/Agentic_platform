@@ -41,7 +41,7 @@ Final architecture stabilisation before implementation resume on `feature/Archit
 |--------|-------|
 | Enterprise principles validation matrix | ARCHITECTURE_BASELINE_V2.md §4 |
 | Lexical mapping v1 → v2 | ARCHITECTURE.md |
-| Execution Profile evolution diagram note | TECHNICAL_ARCHITECTURE.md §24.1 |
+| Execution Profile evolution diagram note | REFERENCE_ARCHITECTURE.md §24.1 |
 | ADR-025–027 accepted | DECISIONS.md |
 | Contract schema roadmap | contracts/README.md |
 | PI surgical updates | PI-02/06/07 OBJECTIVES+README; PROMPT_MAPPING PI-02–04, 06–08, 10 |
@@ -127,10 +127,10 @@ No production code or contract schema files changed in this pass.
 | `ARCHITECTURE.md` | **Updated** — baseline pointer, lexical mapping v1.1 |
 | `VISION.md` | **Updated** — metadata-driven positioning, baseline link |
 | `ROADMAP.md` | **Updated** — baseline v2 milestone, Execution Profile flags |
-| `docs/artifacts/TECHNICAL_ARCHITECTURE.md` | **Updated** — §24.1 Execution Profiles, baseline pointer v1.1 |
+| `docs/architecture/REFERENCE_ARCHITECTURE.md` | **Updated** — §24.1 Execution Profiles, baseline pointer v1.1 |
 | `DECISIONS.md` | **Updated** — ADR-025–027 accepted |
 | `contracts/README.md` | **Updated** — v2 schema roadmap |
-| `docs/04-program/PI-*/` | **Surgical** — objectives, README, prompt context |
+| `docs/engineering/implementation-roadmap/PI-*/` | **Surgical** — objectives, README, prompt context |
 | `contracts/` | **Roadmap only** — gap G-02 schemas documented; implement in PI-09 |
 | `src/` | **No change** — architecture only |
 

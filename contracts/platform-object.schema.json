@@ -1,0 +1,444 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentic-engineering-platform/contracts/platform-object.schema.json",
+  "title": "Platform Object Contract",
+  "description": "Universal envelope for all Platform Primitives. Reference: PLATFORM_PRIMITIVES.md §3, PLATFORM_CONTRACTS.md §4.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "primitive_type",
+    "identity",
+    "metadata",
+    "configuration",
+    "lifecycle",
+    "dependencies",
+    "relationships",
+    "security",
+    "observability",
+    "governance",
+    "versioning",
+    "extensions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "const": "1.0.0"
+    },
+    "primitive_type": {
+      "$ref": "#/$defs/primitive_type"
+    },
+    "identity": {
+      "$ref": "#/$defs/identity"
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "configuration": {
+      "$ref": "#/$defs/configuration"
+    },
+    "lifecycle": {
+      "$ref": "#/$defs/lifecycle"
+    },
+    "dependencies": {
+      "$ref": "#/$defs/dependencies"
+    },
+    "relationships": {
+      "$ref": "#/$defs/relationships"
+    },
+    "security": {
+      "$ref": "#/$defs/security"
+    },
+    "observability": {
+      "$ref": "#/$defs/observability"
+    },
+    "governance": {
+      "$ref": "#/$defs/governance"
+    },
+    "versioning": {
+      "$ref": "#/$defs/versioning"
+    },
+    "extensions": {
+      "$ref": "#/$defs/extensions"
+    }
+  },
+  "$defs": {
+    "kebab_case": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "principal_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "primitive_type": {
+      "type": "string",
+      "enum": [
+        "studio",
+        "capability",
+        "workflow",
+        "provider",
+        "execution-profile",
+        "policy",
+        "context",
+        "resource",
+        "artifact",
+        "plugin",
+        "solution-pack",
+        "commercial-pack",
+        "entitlement"
+      ]
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Review",
+        "Approved",
+        "Published",
+        "Active",
+        "Deprecated",
+        "Archived",
+        "Retired"
+      ]
+    },
+    "identity": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "display_name",
+        "description",
+        "version",
+        "namespace",
+        "tenant_id",
+        "owner",
+        "created_by",
+        "created_at",
+        "modified_at",
+        "status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "$ref": "#/$defs/kebab_case" },
+        "display_name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "version": { "$ref": "#/$defs/semver" },
+        "namespace": { "$ref": "#/$defs/kebab_case" },
+        "tenant_id": { "$ref": "#/$defs/kebab_case" },
+        "owner": { "$ref": "#/$defs/principal_ref" },
+        "created_by": { "$ref": "#/$defs/principal_ref" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "modified_at": { "type": "string", "format": "date-time" },
+        "status": { "$ref": "#/$defs/lifecycle_state" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "category": { "type": "string" }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["business", "technical"],
+      "additionalProperties": false,
+      "properties": {
+        "business": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "technical": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "custom": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "classification": { "type": "string" },
+        "documentation_links": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" }
+        },
+        "examples": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "defaults": { "type": "object", "additionalProperties": true },
+        "customer_overrides": { "type": "object", "additionalProperties": true },
+        "environment_overrides": { "type": "object", "additionalProperties": true },
+        "validation_schema_ref": { "type": "string" },
+        "templates": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["recorded_at", "snapshot"],
+            "properties": {
+              "recorded_at": { "type": "string", "format": "date-time" },
+              "snapshot": { "type": "object" }
+            }
+          }
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "required": ["state", "transition_history"],
+      "additionalProperties": false,
+      "properties": {
+        "state": { "$ref": "#/$defs/lifecycle_state" },
+        "transition_history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from_state", "to_state", "actor", "recorded_at"],
+            "properties": {
+              "from_state": { "$ref": "#/$defs/lifecycle_state" },
+              "to_state": { "$ref": "#/$defs/lifecycle_state" },
+              "actor": { "$ref": "#/$defs/principal_ref" },
+              "recorded_at": { "type": "string", "format": "date-time" },
+              "reason": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "dependency_ref": {
+      "type": "object",
+      "required": ["target_id", "primitive_type", "version_constraint"],
+      "properties": {
+        "target_id": { "type": "string", "format": "uuid" },
+        "primitive_type": { "$ref": "#/$defs/primitive_type" },
+        "version_constraint": { "type": "string" },
+        "optional": { "type": "boolean", "default": false },
+        "runtime_required": { "type": "boolean", "default": true }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "depends_on": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/dependency_ref" }
+        },
+        "required_by": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/dependency_ref" }
+        },
+        "optional": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/dependency_ref" }
+        }
+      }
+    },
+    "relationship_edge": {
+      "type": "object",
+      "required": ["type", "target_id", "target_primitive_type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "parent",
+            "child",
+            "association",
+            "composition",
+            "inheritance",
+            "reference",
+            "linked"
+          ]
+        },
+        "target_id": { "type": "string", "format": "uuid" },
+        "target_primitive_type": { "$ref": "#/$defs/primitive_type" },
+        "version_constraint": { "type": "string" },
+        "pin": { "$ref": "#/$defs/semver" }
+      }
+    },
+    "relationships": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "parent_id": { "type": "string", "format": "uuid" },
+        "edges": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/relationship_edge" }
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "visibility": {
+          "type": "string",
+          "enum": ["tenant", "namespace", "restricted"]
+        },
+        "classification": {
+          "type": "string",
+          "enum": ["public", "internal", "confidential", "restricted"]
+        },
+        "rbac_bindings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["role", "principal"],
+            "properties": {
+              "role": { "type": "string" },
+              "principal": { "$ref": "#/$defs/principal_ref" }
+            }
+          }
+        },
+        "secret_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "approval_requirements": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "observability": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "health": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["healthy", "degraded", "unhealthy", "unknown"]
+            },
+            "last_checked_at": { "type": "string", "format": "date-time" },
+            "dependency_health": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["dependency_id", "status"],
+                "properties": {
+                  "dependency_id": { "type": "string", "format": "uuid" },
+                  "status": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "invocation_count": { "type": "integer", "minimum": 0 },
+            "error_count": { "type": "integer", "minimum": 0 },
+            "last_invoked_at": { "type": "string", "format": "date-time" }
+          }
+        },
+        "audit_ref_ids": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" }
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "risk_level": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "business_owner": { "$ref": "#/$defs/principal_ref" },
+        "technical_owner": { "$ref": "#/$defs/principal_ref" },
+        "compliance_tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "retention_policy_ref": { "type": "string" }
+      }
+    },
+    "versioning": {
+      "type": "object",
+      "required": ["semantic_version", "published_versions"],
+      "additionalProperties": false,
+      "properties": {
+        "semantic_version": { "$ref": "#/$defs/semver" },
+        "draft_version": { "$ref": "#/$defs/semver" },
+        "published_versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["version", "published_at"],
+            "properties": {
+              "version": { "$ref": "#/$defs/semver" },
+              "published_at": { "type": "string", "format": "date-time" },
+              "changelog": { "type": "string" }
+            }
+          }
+        },
+        "compatibility_matrix": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "migration_rules": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "plugin_refs": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" }
+        },
+        "hook_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "event_subscriptions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "callback_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "policy_refs": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" }
+        },
+        "custom_actions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "custom_metadata_schema_ref": { "type": "string" }
+      }
+    }
+  }
+}

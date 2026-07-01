@@ -74,7 +74,7 @@ The repository is **ready to resume implementation** against **Architecture Base
 
 **Strengths**
 
-- `contracts/`, `workflows/`, `docs/04-program/`, `docs/05-blueprints/`, `docs/architecture/`
+- `contracts/`, `workflows/`, `docs/engineering/implementation-roadmap/`, `docs/reference/blueprints/`, `docs/architecture/`
 - `src/` platform services scaffold (PI-01)
 - `.ai/commands/` and `.ai/skills/` for AI-assisted development
 - `observability/` stack artifacts

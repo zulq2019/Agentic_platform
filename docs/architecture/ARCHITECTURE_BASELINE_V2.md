@@ -374,7 +374,7 @@ Detail: [PLATFORM_PRIMITIVES.md](./PLATFORM_PRIMITIVES.md) §6.13; [PLATFORM_CON
 
 ## 19. Platform Services
 
-Baseline v2 maps to deployment containers/services ([ARCHITECTURE.md](../../ARCHITECTURE.md), [TECHNICAL_ARCHITECTURE.md](../artifacts/TECHNICAL_ARCHITECTURE.md)):
+Baseline v2 maps to deployment containers/services ([ARCHITECTURE.md](../../ARCHITECTURE.md), [REFERENCE_ARCHITECTURE.md](./REFERENCE_ARCHITECTURE.md)):
 
 | Service / container | Baseline v2 role |
 |---------------------|------------------|
@@ -506,9 +506,9 @@ sequenceDiagram
 
 ## 29. Deployment view
 
-Sixteen microservices, event bus, data tier — see [TECHNICAL_ARCHITECTURE.md](../artifacts/TECHNICAL_ARCHITECTURE.md). Baseline v2 does not change deployment topology; adds **Metadata Engine** service as future container when implemented.
+Sixteen microservices, event bus, data tier — see [REFERENCE_ARCHITECTURE.md](./REFERENCE_ARCHITECTURE.md). Baseline v2 does not change deployment topology; adds **Metadata Engine** service as future container when implemented.
 
-Kubernetes/Terraform: [docs/05-blueprints/](../05-blueprints/).
+Kubernetes/Terraform: [docs/reference/blueprints/](../reference/blueprints/).
 
 ---
 
@@ -553,7 +553,7 @@ Detail: [PLATFORM_META_MODEL.md](./PLATFORM_META_MODEL.md) §13.
 7. [PLATFORM_UX_MODEL.md](./PLATFORM_UX_MODEL.md)
 8. **This document** (implementation baseline)
 9. [ARCHITECTURE.md](../../ARCHITECTURE.md) (containers)
-10. [TECHNICAL_ARCHITECTURE.md](../artifacts/TECHNICAL_ARCHITECTURE.md) (diagrams)
+10. [REFERENCE_ARCHITECTURE.md](./REFERENCE_ARCHITECTURE.md) (diagrams)
 
 ### PI alignment
 
@@ -570,7 +570,7 @@ Detail: [PLATFORM_META_MODEL.md](./PLATFORM_META_MODEL.md) §13.
 | PI-09 | Builders, Object Explorer, Developer Experience |
 | PI-10 | GA, partner ecosystem |
 
-**Engineering roadmap alignment:** [ARCHITECTURE_ALIGNMENT_REPORT.md](../engineering/ARCHITECTURE_ALIGNMENT_REPORT.md) — PI classifications, story impacts, implementation order.
+**Engineering roadmap alignment:** [ARCHITECTURE_ALIGNMENT_REPORT.md](../engineering/architecture-alignment/ARCHITECTURE_ALIGNMENT_REPORT.md) — PI classifications, story impacts, implementation order.
 
 ---
 
