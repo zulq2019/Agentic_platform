@@ -9,11 +9,24 @@
 **Capability:** Platform Object Framework (Metadata Engine foundation)  
 **Sprint:** 5  
 **Status:** Complete  
-**Acceptance:** See `ACCEPTANCE_CRITERIA.md` � US-02.01 and `STATUS.md`.
+**Acceptance:** See `ACCEPTANCE_CRITERIA.md` — US-02.01 and `STATUS.md`.
 
 ---
 
-## US-PI-02-Metadata-Engine-01 � Core Functionality
+## US-02.02 — Postgres Platform Object Repository
+
+**As a** platform engineer,  
+**I want** Platform Objects persisted in PostgreSQL with tenant RLS enforced,  
+**so that** metadata survives service restarts and cross-tenant reads are impossible at the database layer.
+
+**Capability:** Platform Object Persistence (Metadata Engine)  
+**Sprint:** 5  
+**Status:** Complete  
+**Acceptance:** See `ACCEPTANCE_CRITERIA.md` — US-02.02 and `STATUS.md`.
+
+---
+
+## US-PI-02-Metadata-Engine-01 — Core Functionality
 **As a** platform engineer,
 **I want** Agent Runtime to be operational,
 **so that** downstream PIs can build on it.

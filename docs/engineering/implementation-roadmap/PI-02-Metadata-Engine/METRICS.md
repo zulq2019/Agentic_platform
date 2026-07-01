@@ -1,13 +1,15 @@
 # PI-02 — Metadata Engine — METRICS
 
-**Snapshot:** US-02.01 complete (1 July 2026)
+**Snapshot:** US-02.02 complete (1 July 2026)
 
 | Metric | Value |
 |--------|-------|
 | Unit tests (US-02.01) | 13 |
 | Integration tests (US-02.01) | 4 |
-| Total tests (US-02.01) | 17 |
-| CI job | `story_us_02_01` in `lint-and-test` |
+| Unit tests (US-02.02) | 4 |
+| DB integration tests (US-02.02) | 4 |
+| Total tests (US-02.01 + US-02.02) | 25 |
+| CI jobs | `story_us_02_01`, `story_us_02_02` |
 | Test pass rate | 100% |
 | `aep_meta` line coverage | 95% |
 | `aep_meta` modules | 12 |

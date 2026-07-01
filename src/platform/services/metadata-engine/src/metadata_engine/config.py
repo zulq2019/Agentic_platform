@@ -1,3 +1,4 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,7 +10,10 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8110
     log_level: str = "INFO"
-    postgres_dsn: str = ""
+    postgres_dsn: str = Field(default="", validation_alias="POSTGRES_DSN")
+    aep_app_postgres_dsn: str = Field(
+        default="", validation_alias="AEP_APP_POSTGRES_DSN"
+    )
     kafka_bootstrap_servers: str = "kafka:9092"
     redis_url: str = "redis://redis:6379/0"
     otel_exporter_otlp_endpoint: str = "http://otel-collector:4317"

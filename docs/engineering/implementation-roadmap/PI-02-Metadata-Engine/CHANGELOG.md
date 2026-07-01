@@ -16,3 +16,12 @@
 
 - Postgres repository adapter deferred to next story; in-memory repository used at runtime
 - PI README still references legacy Agent Runtime scope — rename tracked separately
+
+## [0.2.0] — 2026-07-01
+
+### Added (US-02.02)
+
+- `PostgresPlatformObjectRepository` — persist Platform Objects to `metadata.platform_objects` with RLS
+- `metadata-engine` selects Postgres adapter when `AEP_APP_POSTGRES_DSN` / `POSTGRES_DSN` is configured
+- DB integration tests for persistence, repository tenancy, and RLS isolation
+- CI: `story_us_02_02` unit job and database-integration job
